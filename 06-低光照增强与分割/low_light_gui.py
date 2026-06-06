@@ -374,8 +374,18 @@ class LowLightApp(QMainWindow):
         else:
             self.load_image(path)
 
+    def imread_unicode(self, path):
+        """支持中文路径的图片读取"""
+        return cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_COLOR)
+
+    def imwrite_unicode(self, path, img):
+        """支持中文路径的图片保存"""
+        ext = Path(path).suffix
+        _, buf = cv2.imencode(ext, img)
+        buf.tofile(path)
+
     def load_image(self, path):
-        img = cv2.imread(path)
+        img = self.imread_unicode(path)
         if img is None:
             QMessageBox.warning(self, "错误", f"无法读取图片:\n{path}")
             return
@@ -439,7 +449,7 @@ class LowLightApp(QMainWindow):
         p = Path(self.current_path)
         method_short = self.cmb_method.currentText().split("（")[0][:8]
         save_path = p.parent / f"{p.stem}_{method_short}_enhanced{p.suffix}"
-        cv2.imwrite(str(save_path), self.result_img)
+        self.imwrite_unicode(str(save_path), self.result_img)
         self.log(f"💾 已保存: {save_path.name}")
         self.statusBar().showMessage(f"已保存: {save_path.name}")
 
@@ -458,7 +468,7 @@ class LowLightApp(QMainWindow):
             "JPEG (*.jpg);;PNG (*.png);;BMP (*.bmp);;所有文件 (*)"
         )
         if path:
-            cv2.imwrite(path, self.result_img)
+            self.imwrite_unicode(path, self.result_img)
             self.log(f"💾 已保存: {Path(path).name}")
             self.statusBar().showMessage(f"已保存: {Path(path).name}")
 
