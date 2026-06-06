@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 580" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#555"/></marker>
+  </defs>
+  <text x="410" y="35" text-anchor="middle" font-size="18" font-weight="bold" fill="#2C3E50">六种低光照增强方法架构总览</text>
+  <line x1="120" y1="45" x2="700" y2="45" stroke="#E65100" stroke-width="2" opacity="0.4"/>
+
+  <!-- === Zero-DCE === -->
+  <rect x="30" y="65" width="360" height="195" rx="10" ry="10" fill="#FFF3E0" stroke="#FF9800" stroke-width="1.5"/>
+  <text x="210" y="90" text-anchor="middle" font-size="13" font-weight="bold" fill="#E65100">Zero-DCE（零参考曲线估计）</text>
+  <text x="210" y="108" text-anchor="middle" font-size="10" fill="#888">CVPR 2020 | Guo et al.</text>
+
+  <rect x="50" y="120" width="130" height="35" rx="6" fill="#FFF8E1" stroke="#FFD600" stroke-width="1"/>
+  <text x="115" y="143" text-anchor="middle" font-size="11" fill="#F57F17">输入低光照图像</text>
+  <line x1="180" y1="137" x2="200" y2="137" stroke="#FF9800" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="205" y="118" width="80" height="40" rx="6" fill="#E8F5E9" stroke="#4CAF50" stroke-width="1"/>
+  <text x="245" y="134" text-anchor="middle" font-size="10" fill="#2E7D32">DCE-Net</text>
+  <text x="245" y="148" text-anchor="middle" font-size="8" fill="#666">7层Conv</text>
+  <line x1="285" y1="137" x2="305" y2="137" stroke="#4CAF50" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="310" y="118" width="60" height="40" rx="6" fill="#E3F2FD" stroke="#2196F3" stroke-width="1"/>
+  <text x="340" y="134" text-anchor="middle" font-size="10" fill="#1565C0">曲线</text>
+  <text x="340" y="148" text-anchor="middle" font-size="8" fill="#666">拟合</text>
+
+  <line x1="370" y1="137" x2="380" y2="137" stroke="#2196F3" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="310" y="170" width="60" height="35" rx="6" fill="#C8E6C9" stroke="#66BB6A" stroke-width="1"/>
+  <text x="340" y="192" text-anchor="middle" font-size="10" fill="#2E7D32">增强</text>
+  <text x="340" y="202" text-anchor="middle" font-size="8" fill="#666">结果</text>
+
+  <text x="60" y="240" font-size="9" fill="#888">损失函数：曝光损失 + 色彩损失 + 光照平滑度 + 空间一致性</text>
+  <text x="60" y="254" font-size="9" fill="#888">特点：无需成对数据，零参考训练，轻量级（~80K参数）</text>
+
+  <!-- === KinD === -->
+  <rect x="420" y="65" width="370" height="195" rx="10" ry="10" fill="#E3F2FD" stroke="#2196F3" stroke-width="1.5"/>
+  <text x="605" y="90" text-anchor="middle" font-size="13" font-weight="bold" fill="#1565C0">KinD（Kindling the Darkness）</text>
+  <text x="605" y="108" text-anchor="middle" font-size="10" fill="#888">ACM MM 2019 | Zhang et al.</text>
+
+  <rect x="440" y="120" width="150" height="35" rx="6" fill="#E3F2FD" stroke="#64B5F6" stroke-width="1"/>
+  <text x="515" y="140" text-anchor="middle" font-size="10" fill="#1565C0">Retinex分解层</text>
+  <text x="515" y="152" text-anchor="middle" font-size="8" fill="#666">图像 → 光照图 + 反射图</text>
+  <line x1="590" y1="137" x2="610" y2="137" stroke="#5C6BC0" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="440" y="165" width="70" height="35" rx="6" fill="#FFF9C4" stroke="#FFD600" stroke-width="1"/>
+  <text x="475" y="182" text-anchor="middle" font-size="10" fill="#F57F17">光照</text>
+  <text x="475" y="194" text-anchor="middle" font-size="8" fill="#666">调整模块</text>
+  <line x1="510" y1="182" x2="530" y2="182" stroke="#5C6BC0" stroke-width="1"/>
+
+  <rect x="530" y="165" width="70" height="35" rx="6" fill="#C8E6C9" stroke="#66BB6A" stroke-width="1"/>
+  <text x="565" y="182" text-anchor="middle" font-size="10" fill="#2E7D32">反射</text>
+  <text x="565" y="194" text-anchor="middle" font-size="8" fill="#666">去噪模块</text>
+
+  <rect x="620" y="165" width="80" height="35" rx="6" fill="#C8E6C9" stroke="#66BB6A" stroke-width="1"/>
+  <text x="660" y="185" text-anchor="middle" font-size="10" fill="#2E7D32">增强</text>
+  <text x="660" y="195" text-anchor="middle" font-size="8" fill="#666">结果</text>
+
+  <line x1="510" y1="182" x2="530" y2="182" stroke="#5C6BC0" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="600" y1="182" x2="615" y2="182" stroke="#66BB6A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <text x="440" y="240" font-size="9" fill="#888">特点：基于Retinex理论分解-调整-重建，3个子网络协同</text>
+  <text x="440" y="254" font-size="9" fill="#888">优势：同时处理光照不均匀 + 噪声去除</text>
+
+  <!-- ===== 第二行 ===== -->
+
+  <!-- GLADNet -->
+  <rect x="30" y="285" width="240" height="135" rx="10" ry="10" fill="#FCE4EC" stroke="#E91E63" stroke-width="1.5"/>
+  <text x="150" y="310" text-anchor="middle" font-size="12" font-weight="bold" fill="#C62828">GLADNet</text>
+  <text x="150" y="328" text-anchor="middle" font-size="9" fill="#888">FG 2018 | Wang et al.</text>
+  <rect x="45" y="340" width="210" height="28" rx="5" fill="#FCE4EC" stroke="#F48FB1" stroke-width="1"/>
+  <text x="150" y="359" text-anchor="middle" font-size="10" fill="#AD1457">全局光照估计 + 细节重建</text>
+  <text x="50" y="380" font-size="9" fill="#888">Enc-Dec架构 → 光照调整 → 细节融合</text>
+  <text x="50" y="394" font-size="9" fill="#888">G=乘除计算量小</text>
+
+  <!-- TBEFN -->
+  <rect x="290" y="285" width="240" height="135" rx="10" ry="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="1.5"/>
+  <text x="410" y="310" text-anchor="middle" font-size="12" font-weight="bold" fill="#2E7D32">TBEFN</text>
+  <text x="410" y="328" text-anchor="middle" font-size="9" fill="#888">IEEE TMM 2020 | Lu & Zhang</text>
+  <rect x="305" y="340" width="210" height="28" rx="5" fill="#C8E6C9" stroke="#81C784" stroke-width="1"/>
+  <text x="410" y="359" text-anchor="middle" font-size="10" fill="#2E7D32">双分支曝光融合网络</text>
+  <text x="310" y="380" font-size="9" fill="#888">Branch1: 曝光校正 | Branch2: 细节增强</text>
+  <text x="310" y="394" font-size="9" fill="#888">双分支特征融合 → 输出增强图像</text>
+
+  <!-- LLFormer -->
+  <rect x="550" y="285" width="240" height="135" rx="10" ry="10" fill="#F3E5F5" stroke="#9C27B0" stroke-width="1.5"/>
+  <text x="670" y="310" text-anchor="middle" font-size="12" font-weight="bold" fill="#6A1B9A">LLFormer</text>
+  <text x="670" y="328" text-anchor="middle" font-size="9" fill="#888">AAAI 2023 | Wang et al.</text>
+  <rect x="565" y="340" width="210" height="28" rx="5" fill="#E1BEE7" stroke="#CE93D8" stroke-width="1"/>
+  <text x="670" y="359" text-anchor="middle" font-size="10" fill="#6A1B9A">Transformer-based增强</text>
+  <text x="570" y="380" font-size="9" fill="#888">轴注意力 (Axial Attention) 机制</text>
+  <text x="570" y="394" font-size="9" fill="#888">G=适用超高清低光照图像</text>
+
+  <!-- EnlightenGAN 单独 -->
+  <rect x="150" y="440" width="240" height="80" rx="10" ry="10" fill="#FFF8E1" stroke="#FFD600" stroke-width="1.5"/>
+  <text x="270" y="465" text-anchor="middle" font-size="12" font-weight="bold" fill="#F57F17">EnlightenGAN</text>
+  <text x="270" y="483" text-anchor="middle" font-size="9" fill="#888">IEEE TIP 2021 | Jiang et al.</text>
+  <text x="170" y="505" font-size="9" fill="#888">GAN架构: U-Net生成器 + 全局-局部判别器</text>
+  <text x="170" y="518" font-size="9" fill="#888">自注意力 + 无配对训练</text>
+
+  <!-- 空白 + 检测 -->
+  <rect x="440" y="450" width="200" height="60" rx="10" ry="10" fill="#F5F5F5" stroke="#CCC" stroke-width="1.5"/>
+  <text x="540" y="475" text-anchor="middle" font-size="12" font-weight="bold" fill="#555">🧪 统一评估框架</text>
+  <text x="540" y="497" text-anchor="middle" font-size="10" fill="#777">增强图像 → YOLOv8n-seg → 检测指标</text>
+
+  <line x1="390" y1="480" x2="435" y2="480" stroke="#CCC" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- 结果总结 -->
+  <rect x="180" y="535" width="460" height="40" rx="10" ry="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="410" y="555" text-anchor="middle" font-size="12" font-weight="bold" fill="#2E7D32">论文结论：KinD 综合效果最优 → LLFormer → TBEFN → Zero-DCE → EnlightenGAN → GLADNet</text>
+  <text x="410" y="570" text-anchor="middle" font-size="10" fill="#388E3C">（按图像质量 + 人员检测精度排序）</text>
+</svg>

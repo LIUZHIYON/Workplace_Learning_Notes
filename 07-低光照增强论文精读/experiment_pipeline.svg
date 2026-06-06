@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#555"/></marker>
+  </defs>
+  <text x="350" y="35" text-anchor="middle" font-size="18" font-weight="bold" fill="#2C3E50">论文实验流程设计</text>
+  <line x1="120" y1="45" x2="580" y2="45" stroke="#1565C0" stroke-width="2" opacity="0.4"/>
+
+  <!-- 步骤1 -->
+  <rect x="180" y="65" width="340" height="45" rx="10" ry="10" fill="#E3F2FD" stroke="#2196F3" stroke-width="2"/>
+  <text x="350" y="90" text-anchor="middle" font-size="13" font-weight="bold" fill="#1565C0">① 低光照巡邏图像采集</text>
+  <text x="350" y="104" text-anchor="middle" font-size="10" fill="#37474F">室内夜间环境 < 10 lux</text>
+
+  <!-- 箭头 -->
+  <line x1="350" y1="110" x2="350" y2="125" stroke="#2196F3" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 步骤2 -->
+  <rect x="50" y="130" width="600" height="55" rx="10" ry="10" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+  <text x="350" y="155" text-anchor="middle" font-size="13" font-weight="bold" fill="#E65100">② 低光照图像增强（6种方法分别处理）</text>
+  <text x="350" y="175" text-anchor="middle" font-size="10" fill="#6D4C41">GLADNet ｜ KinD ｜ TBEFN ｜ LLFormer ｜ EnlightenGAN ｜ Zero-DCE</text>
+
+  <!-- 分别处理 -->
+  <line x1="350" y1="185" x2="350" y2="195" stroke="#FF9800" stroke-width="1.5"/>
+  <rect x="90" y="200" width="80" height="25" rx="5" fill="#FFF8E1" stroke="#FFD600" stroke-width="1"/>
+  <text x="130" y="217" text-anchor="middle" font-size="9" fill="#F57F17">GLADNet</text>
+  <rect x="185" y="200" width="80" height="25" rx="5" fill="#FFF8E1" stroke="#FFD600" stroke-width="1"/>
+  <text x="225" y="217" text-anchor="middle" font-size="9" fill="#F57F17">KinD</text>
+  <rect x="280" y="200" width="80" height="25" rx="5" fill="#FFF8E1" stroke="#FFD600" stroke-width="1"/>
+  <text x="320" y="217" text-anchor="middle" font-size="9" fill="#F57F17">TBEFN</text>
+  <rect x="375" y="200" width="80" height="25" rx="5" fill="#FFF8E1" stroke="#FFD600" stroke-width="1"/>
+  <text x="415" y="217" text-anchor="middle" font-size="9" fill="#F57F17">LLFormer</text>
+  <rect x="470" y="200" width="80" height="25" rx="5" fill="#FFF8E1" stroke="#FFD600" stroke-width="1"/>
+  <text x="510" y="217" text-anchor="middle" font-size="9" fill="#F57F17">EnlightenGAN</text>
+  <rect x="560" y="200" width="80" height="25" rx="5" fill="#FFF8E1" stroke="#FFD600" stroke-width="1"/>
+  <text x="600" y="217" text-anchor="middle" font-size="9" fill="#F57F17">Zero-DCE</text>
+
+  <!-- 汇合 -->
+  <line x1="130" y1="225" x2="130" y2="250" stroke="#FF9800" stroke-width="1"/>
+  <line x1="225" y1="225" x2="225" y2="250" stroke="#FF9800" stroke-width="1"/>
+  <line x1="320" y1="225" x2="320" y2="250" stroke="#FF9800" stroke-width="1"/>
+  <line x1="415" y1="225" x2="415" y2="250" stroke="#FF9800" stroke-width="1"/>
+  <line x1="510" y1="225" x2="510" y2="250" stroke="#FF9800" stroke-width="1"/>
+  <line x1="600" y1="225" x2="600" y2="250" stroke="#FF9800" stroke-width="1"/>
+  <line x1="130" y1="250" x2="600" y2="250" stroke="#FF9800" stroke-width="1"/>
+  <line x1="350" y1="250" x2="350" y2="260" stroke="#FF9800" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- 步骤3 -->
+  <rect x="150" y="265" width="400" height="45" rx="10" ry="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="350" y="290" text-anchor="middle" font-size="13" font-weight="bold" fill="#2E7D32">③ 图像质量评价</text>
+  <text x="350" y="304" text-anchor="middle" font-size="10" fill="#388E3C">PSNR ｜ SSIM ｜ NIQE (无参考质量)</text>
+
+  <line x1="350" y1="310" x2="350" y2="320" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 步骤4 -->
+  <rect x="150" y="325" width="400" height="45" rx="10" ry="10" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2"/>
+  <text x="350" y="350" text-anchor="middle" font-size="13" font-weight="bold" fill="#6A1B9A">④ 人员检测：YOLOv8n-seg</text>
+  <text x="350" y="364" text-anchor="middle" font-size="10" fill="#7B1FA2">mAP50 ｜ Precision ｜ Recall</text>
+
+  <line x1="350" y1="370" x2="350" y2="380" stroke="#9C27B0" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 步骤5 -->
+  <rect x="200" y="385" width="300" height="45" rx="10" ry="10" fill="#FCE4EC" stroke="#E91E63" stroke-width="2"/>
+  <text x="350" y="408" text-anchor="middle" font-size="13" font-weight="bold" fill="#C62828">⑤ 结果分析与结论</text>
+  <text x="350" y="424" text-anchor="middle" font-size="10" fill="#AD1457">KinD 综合效果最优 🏆</text>
+
+  <!-- 图例 -->
+  <rect x="30" y="450" width="640" height="25" rx="5" fill="#F5F5F5" stroke="#DDD" stroke-width="1"/>
+  <text x="60" y="467" font-size="10" fill="#555">检测模型：YOLOv8n-seg (Ultralytics) ｜ 数据集：夜间室内巡逻图像 ｜ 硬件：Jetson? / GPU</text>
+</svg>
