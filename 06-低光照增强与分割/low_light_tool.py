@@ -134,10 +134,13 @@ SEGMENT_METHODS = {
 }
 
 
-def process_frame(frame, method="clahe", segment=None, segment_invert=False, visualize=False):
+def process_frame(frame, method="clahe", segment=None, segment_invert=False, visualize=False, method_fn=None):
     """处理单帧图像"""
-    # 增强
-    enhancer = ENHANCE_METHODS.get(method, enhance_clahe)
+    # 增强：优先用传入的函数，否则按名称查找
+    if method_fn is not None:
+        enhancer = method_fn
+    else:
+        enhancer = ENHANCE_METHODS.get(method, enhance_clahe)
     enhanced = enhancer(frame)
 
     if segment:
@@ -168,7 +171,8 @@ def process_frame(frame, method="clahe", segment=None, segment_invert=False, vis
 # ===================== 图片处理 =====================
 
 def process_image(input_path, output_path, method="clahe",
-                  segment=None, segment_invert=False, visualize=False):
+                  segment=None, segment_invert=False, visualize=False,
+                  method_fn=None):
     img = cv2.imread(str(input_path))
     if img is None:
         print(f"❌ 无法读取图片: {input_path}")
@@ -181,7 +185,7 @@ def process_image(input_path, output_path, method="clahe",
     print()
 
     t0 = time.time()
-    result, mask, enhanced = process_frame(img, method, segment, segment_invert, visualize)
+    result, mask, enhanced = process_frame(img, method, segment, segment_invert, visualize, method_fn)
     t = (time.time() - t0) * 1000
 
     print(f"⏱️  耗时: {t:.1f}ms")
@@ -201,7 +205,7 @@ def process_image(input_path, output_path, method="clahe",
 
 def process_video(input_path, output_path, method="clahe",
                   segment=None, segment_invert=False, visualize=False,
-                  max_frames=None, show=False):
+                  max_frames=None, show=False, method_fn=None):
     cap = cv2.VideoCapture(str(input_path))
     if not cap.isOpened():
         print(f"❌ 无法读取视频: {input_path}")
@@ -230,7 +234,7 @@ def process_video(input_path, output_path, method="clahe",
             break
 
         t0 = time.time()
-        result, mask, _ = process_frame(frame, method, segment, segment_invert, visualize)
+        result, mask, _ = process_frame(frame, method, segment, segment_invert, visualize, method_fn)
         times.append((time.time() - t0) * 1000)
 
         out.write(result)
@@ -262,7 +266,8 @@ def process_video(input_path, output_path, method="clahe",
 # ===================== 摄像头实时 =====================
 
 def process_camera(method="clahe", segment=None, segment_invert=False,
-                   visualize=False, camera_id=0, width=320, height=240):
+                   visualize=False, camera_id=0, width=320, height=240,
+                   method_fn=None):
     cap = cv2.VideoCapture(camera_id)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
@@ -286,7 +291,7 @@ def process_camera(method="clahe", segment=None, segment_invert=False,
             break
 
         t0 = time.time()
-        result, mask, _ = process_frame(frame, method, segment, segment_invert, visualize)
+        result, mask, _ = process_frame(frame, method, segment, segment_invert, visualize, method_fn)
         times.append((time.time() - t0) * 1000)
 
         # 显示信息
@@ -381,15 +386,13 @@ def main():
 
     args = parser.parse_args()
 
-    # 统一传入 gamma 给需要的方法
-    if args.method in ("gamma", "gamma_clahe"):
-        # 重新绑定带参数的增强函数
-        global ENHANCE_METHODS
-        gamma_val = getattr(args, "gamma", 0.5)
-        if args.method == "gamma":
-            ENHANCE_METHODS["gamma"] = lambda img, g=gamma_val: enhance_gamma(img, g)
-        else:
-            ENHANCE_METHODS["gamma_clahe"] = lambda img, g=gamma_val: enhance_gamma_clahe(img, g)
+    # gamma 参数通过 lambda 闭包传入
+    method_fn = ENHANCE_METHODS.get(args.method, enhance_clahe)
+    gamma_val = getattr(args, "gamma", 0.5)
+    if args.method == "gamma":
+        method_fn = lambda img, g=gamma_val: enhance_gamma(img, g)
+    elif args.method == "gamma_clahe":
+        method_fn = lambda img, g=gamma_val: enhance_gamma_clahe(img, g)
 
     if args.mode == "image":
         inp = Path(args.input)
@@ -397,7 +400,7 @@ def main():
             out = inp.parent / f"{inp.stem}_{args.method}{inp.suffix}"
         else:
             out = Path(args.output)
-        process_image(inp, out, args.method, args.segment, args.invert, args.visualize)
+        process_image(inp, out, args.method, args.segment, args.invert, args.visualize, method_fn)
 
     elif args.mode == "video":
         inp = Path(args.input)
@@ -406,11 +409,11 @@ def main():
         else:
             out = Path(args.output)
         process_video(inp, out, args.method, args.segment, args.invert,
-                      args.visualize, args.max_frames, args.show)
+                      args.visualize, args.max_frames, args.show, method_fn)
 
     elif args.mode == "camera":
         process_camera(args.method, args.segment, args.invert,
-                       args.visualize, args.camera_id, args.width, args.height)
+                       args.visualize, args.camera_id, args.width, args.height, method_fn)
 
 
 if __name__ == "__main__":
