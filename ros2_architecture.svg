@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 580" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+    </marker>
+  </defs>
+  <text x="410" y="38" text-anchor="middle" font-size="20" font-weight="bold" fill="#2C3E50">ROS2 整体架构</text>
+  <line x1="200" y1="48" x2="620" y2="48" stroke="#E91E63" stroke-width="2" opacity="0.4"/>
+
+  <!-- === 应用层 === -->
+  <rect x="40" y="70" width="740" height="65" rx="10" ry="10" fill="#FCE4EC" stroke="#E91E63" stroke-width="2"/>
+  <text x="410" y="98" text-anchor="middle" font-size="15" font-weight="bold" fill="#C62828">📱 应用层 Application Layer</text>
+  <text x="410" y="122" text-anchor="middle" font-size="12" fill="#6D4C41">你的 ROS2 程序：机器人控制、SLAM、导航、感知等节点</text>
+
+  <!-- 箭头 -->
+  <line x1="410" y1="135" x2="410" y2="155" stroke="#E91E63" stroke-width="1.5"/>
+
+  <!-- === ROS 客户端库层 === -->
+  <rect x="40" y="158" width="740" height="65" rx="10" ry="10" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+  <text x="410" y="186" text-anchor="middle" font-size="15" font-weight="bold" fill="#E65100">📚 ROS 客户端库 Client Library</text>
+  <text x="410" y="210" text-anchor="middle" font-size="12" fill="#6D4C41">rclcpp (C++) ｜ rclpy (Python) ｜ rcljava ｜ rclnodejs</text>
+
+  <!-- 箭头 -->
+  <line x1="410" y1="223" x2="410" y2="243" stroke="#FF9800" stroke-width="1.5"/>
+
+  <!-- === ROS 中间件层 === -->
+  <rect x="40" y="246" width="740" height="65" rx="10" ry="10" fill="#FFF8E1" stroke="#FFD600" stroke-width="2"/>
+  <text x="410" y="274" text-anchor="middle" font-size="15" font-weight="bold" fill="#F57F17">🔗 ROS 中间件层 ROS Middleware (rmw)</text>
+  <text x="410" y="298" text-anchor="middle" font-size="12" fill="#6D4C41">抽象层：提供统一的接口，对接不同 DDS 实现</text>
+
+  <!-- 箭头 -->
+  <line x1="410" y1="311" x2="410" y2="331" stroke="#FFD600" stroke-width="1.5"/>
+
+  <!-- === DDS 层 === -->
+  <rect x="40" y="334" width="740" height="65" rx="10" ry="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="410" y="362" text-anchor="middle" font-size="15" font-weight="bold" fill="#2E7D32">🌐 DDS 通信层 Data Distribution Service</text>
+  <text x="410" y="386" text-anchor="middle" font-size="12" fill="#388E3C">FastDDS ｜ CycloneDDS ｜ RTI Connext ｜ GurumDDS</text>
+
+  <!-- DDS 子项 -->
+  <rect x="60" y="405" width="165" height="30" rx="6" fill="#C8E6C9"/>
+  <text x="142" y="425" text-anchor="middle" font-size="11" fill="#2E7D32">发现 Discovery</text>
+  <rect x="240" y="405" width="165" height="30" rx="6" fill="#C8E6C9"/>
+  <text x="322" y="425" text-anchor="middle" font-size="11" fill="#2E7D32">发布/订阅 Pub/Sub</text>
+  <rect x="420" y="405" width="165" height="30" rx="6" fill="#C8E6C9"/>
+  <text x="502" y="425" text-anchor="middle" font-size="11" fill="#2E7D32">服务质量 QoS</text>
+  <rect x="600" y="405" width="165" height="30" rx="6" fill="#C8E6C9"/>
+  <text x="682" y="425" text-anchor="middle" font-size="11" fill="#2E7D32">序列化 Serialization</text>
+
+  <!-- === 传输层 === -->
+  <rect x="40" y="460" width="740" height="50" rx="10" ry="10" fill="#E3F2FD" stroke="#2196F3" stroke-width="2"/>
+  <text x="410" y="483" text-anchor="middle" font-size="15" font-weight="bold" fill="#1565C0">📡 传输层 Transport</text>
+  <text x="410" y="500" text-anchor="middle" font-size="12" fill="#37474F">UDP ｜ TCP ｜ 共享内存 (Shared Memory) ｜ 实时网络</text>
+
+  <!-- === 操作系统 === -->
+  <rect x="200" y="530" width="420" height="40" rx="10" ry="10" fill="#ECEFF1" stroke="#607D8B" stroke-width="2"/>
+  <text x="410" y="555" text-anchor="middle" font-size="14" font-weight="bold" fill="#37474F">💻 操作系统：Linux (Ubuntu) / Windows / macOS / RTOS</text>
+</svg>

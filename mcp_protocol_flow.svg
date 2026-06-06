@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#7B1FA2"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="35" text-anchor="middle" font-size="20" font-weight="bold" fill="#2C3E50">MCP 生命周期交互流程</text>
+  <line x1="150" y1="45" x2="570" y2="45" stroke="#7B1FA2" stroke-width="2" opacity="0.4"/>
+
+  <!-- ============ 时间线 ============ -->
+
+  <!-- 步骤1 -->
+  <rect x="30" y="75" width="660" height="44" rx="8" ry="8" fill="#F3E5F5" stroke="#CE93D8" stroke-width="1.5"/>
+  <circle cx="55" cy="97" r="14" fill="#7B1FA2"/>
+  <text x="55" y="102" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">1</text>
+  <text x="80" y="93" font-size="13" fill="#4A148C"><tspan font-weight="bold">初始化连接</tspan> — Client 与 Server 建立传输通道（stdio / SSE）</text>
+  <text x="80" y="111" font-size="11" fill="#7B1FA2">Host → Client → Server：创建 MCP 会话</text>
+
+  <!-- 箭头 -->
+  <line x1="360" y1="119" x2="360" y2="133" stroke="#7B1FA2" stroke-width="2"/>
+
+  <!-- 步骤2 -->
+  <rect x="30" y="135" width="660" height="44" rx="8" ry="8" fill="#E8F5E9" stroke="#A5D6A7" stroke-width="1.5"/>
+  <circle cx="55" cy="157" r="14" fill="#43A047"/>
+  <text x="55" y="162" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">2</text>
+  <text x="80" y="153" font-size="13" fill="#2E7D32"><tspan font-weight="bold">能力协商</tspan> — 双方交换协议版本和支持的能力列表</text>
+  <text x="80" y="171" font-size="11" fill="#388E3C">Server 声明：可用资源、工具、提示词；Client 声明自身能力</text>
+
+  <!-- 箭头 -->
+  <line x1="360" y1="179" x2="360" y2="193" stroke="#7B1FA2" stroke-width="2"/>
+
+  <!-- 步骤3 -->
+  <rect x="30" y="195" width="660" height="44" rx="8" ry="8" fill="#FFF3E0" stroke="#FFCC80" stroke-width="1.5"/>
+  <circle cx="55" cy="217" r="14" fill="#FF9800"/>
+  <text x="55" y="222" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">3</text>
+  <text x="80" y="213" font-size="13" fill="#E65100"><tspan font-weight="bold">运行时交互</tspan> — LLM 按需调用资源/工具/提示词</text>
+  <text x="80" y="231" font-size="11" fill="#6D4C41">Host → Client → Server：列出资源 / 读取资源 / 调用工具 / 获取提示词</text>
+
+  <!-- 箭头 -->
+  <line x1="360" y1="239" x2="360" y2="253" stroke="#7B1FA2" stroke-width="2"/>
+
+  <!-- 步骤4 -->
+  <rect x="30" y="255" width="660" height="60" rx="8" ry="8" fill="#E3F2FD" stroke="#90CAF9" stroke-width="1.5"/>
+  <circle cx="55" cy="277" r="14" fill="#1976D2"/>
+  <text x="55" y="282" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">4</text>
+  <text x="80" y="273" font-size="13" fill="#1565C0"><tspan font-weight="bold">通知 & 推送</tspan> — 资源变更时 Server 主动推送</text>
+  <text x="80" y="293" font-size="11" fill="#37474F">Server → Client → Host："我的资源列表已更新" → Host 可选择重新获取</text>
+  <text x="80" y="308" font-size="11" fill="#37474F">适用于文件监控、数据库变更等动态场景</text>
+
+  <!-- 箭头 -->
+  <line x1="360" y1="315" x2="360" y2="329" stroke="#7B1FA2" stroke-width="2"/>
+
+  <!-- 步骤5 -->
+  <rect x="30" y="331" width="660" height="44" rx="8" ry="8" fill="#FCE4EC" stroke="#F48FB1" stroke-width="1.5"/>
+  <circle cx="55" cy="353" r="14" fill="#C62828"/>
+  <text x="55" y="358" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">5</text>
+  <text x="80" y="349" font-size="13" fill="#C62828"><tspan font-weight="bold">关闭连接</tspan> — 会话结束，释放资源</text>
+  <text x="80" y="367" font-size="11" fill="#AD1457">Client 或 Server 任一方发起关闭，传输层断开</text>
+
+  <!-- 右侧说明框 -->
+  <rect x="445" y="400" width="245" height="105" rx="10" ry="10" fill="#FAFAFA" stroke="#DDD" stroke-width="1"/>
+  <text x="567" y="425" text-anchor="middle" font-size="13" font-weight="bold" fill="#555">JSON-RPC 消息格式</text>
+  <text x="455" y="445" font-size="11" fill="#777">请求：</text>
+  <text x="455" y="460" font-size="10" fill="#999" font-family="monospace">{ "jsonrpc": "2.0",</text>
+  <text x="455" y="474" font-size="10" fill="#999" font-family="monospace">  "method": "...",</text>
+  <text x="455" y="488" font-size="10" fill="#999" font-family="monospace">  "params": {...}, "id": 1 }</text>
+
+  <text x="360" y="530" text-anchor="middle" font-size="11" fill="#888">所有 MCP 通信均基于 JSON-RPC 2.0 协议</text>
+</svg>

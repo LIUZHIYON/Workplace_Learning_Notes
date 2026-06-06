@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 620" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+    </marker>
+    <marker id="arrow-g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2E7D32"/>
+    </marker>
+  </defs>
+  <text x="410" y="35" text-anchor="middle" font-size="20" font-weight="bold" fill="#2C3E50">Nav2 导航系统架构</text>
+  <line x1="180" y1="45" x2="640" y2="45" stroke="#1565C0" stroke-width="2" opacity="0.4"/>
+
+  <!-- === 输入层 === -->
+  <rect x="160" y="65" width="500" height="55" rx="10" ry="10" fill="#E3F2FD" stroke="#2196F3" stroke-width="2"/>
+  <text x="410" y="90" text-anchor="middle" font-size="14" font-weight="bold" fill="#1565C0">📥 输入：导航目标 (Goal Pose) + 地图</text>
+  <text x="410" y="110" text-anchor="middle" font-size="11" fill="#37474F">来自用户/上层应用的行为树</text>
+
+  <line x1="410" y1="120" x2="410" y2="140" stroke="#2196F3" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- === BT Navigator === -->
+  <rect x="260" y="143" width="300" height="55" rx="10" ry="10" fill="#FFF3E0" stroke="#FF9800" stroke-width="2.5"/>
+  <text x="410" y="168" text-anchor="middle" font-size="15" font-weight="bold" fill="#E65100">🌳 BT Navigator (行为树)</text>
+  <text x="410" y="188" text-anchor="middle" font-size="11" fill="#6D4C41">导航大脑：状态机 + 行为树调度</text>
+
+  <!-- 从BT向下分三条线 -->
+  <line x1="180" y1="198" x2="180" y2="240" stroke="#FF9800" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="410" y1="198" x2="410" y2="240" stroke="#FF9800" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="640" y1="198" x2="640" y2="240" stroke="#FF9800" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- === 三大核心模块 === -->
+  <!-- Planner -->
+  <rect x="50" y="245" width="260" height="90" rx="10" ry="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="180" y="273" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E7D32">🗺️ Global Planner</text>
+  <text x="180" y="293" text-anchor="middle" font-size="11" fill="#388E3C">全局路径规划</text>
+  <text x="180" y="310" text-anchor="middle" font-size="10" fill="#666">NavFn / A* / Smac Planner</text>
+  <text x="180" y="325" text-anchor="middle" font-size="10" fill="#666">生成起点→终点的全局路径</text>
+
+  <!-- Controller -->
+  <rect x="310" y="245" width="260" height="90" rx="10" ry="10" fill="#FFF8E1" stroke="#FFD600" stroke-width="2"/>
+  <text x="440" y="273" text-anchor="middle" font-size="14" font-weight="bold" fill="#F57F17">🎮 Local Planner / Controller</text>
+  <text x="440" y="293" text-anchor="middle" font-size="11" fill="#6D4C41">局部路径规划与控制</text>
+  <text x="440" y="310" text-anchor="middle" font-size="10" fill="#666">DWB / TEB / MPPI</text>
+  <text x="440" y="325" text-anchor="middle" font-size="10" fill="#666">计算速度指令，避开障碍物</text>
+
+  <!-- Recovery -->
+  <rect x="570" y="245" width="200" height="90" rx="10" ry="10" fill="#FCE4EC" stroke="#E91E63" stroke-width="2"/>
+  <text x="670" y="273" text-anchor="middle" font-size="14" font-weight="bold" fill="#C62828">🔄 Recovery</text>
+  <text x="670" y="293" text-anchor="middle" font-size="11" fill="#AD1457">故障恢复</text>
+  <text x="670" y="310" text-anchor="middle" font-size="10" fill="#666">旋转/后退/清除</text>
+  <text x="670" y="325" text-anchor="middle" font-size="10" fill="#666">卡住时尝试恢复</text>
+
+  <!-- === 中间感知融合层 === -->
+  <rect x="110" y="380" width="600" height="50" rx="10" ry="10" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2"/>
+  <text x="410" y="405" text-anchor="middle" font-size="14" font-weight="bold" fill="#6A1B9A">🧩 感知与融合层 Perception & Fusion</text>
+  <text x="410" y="422" text-anchor="middle" font-size="11" fill="#7B1FA2">Costmap 代价地图 | 传感器融合 | 位姿估计</text>
+
+  <!-- 箭头 三大模块→感知层 -->
+  <line x1="180" y1="335" x2="220" y2="380" stroke="#9C27B0" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="440" y1="335" x2="410" y2="380" stroke="#9C27B0" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="670" y1="335" x2="600" y2="380" stroke="#9C27B0" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+  <!-- === 底层 === -->
+  <rect x="110" y="470" width="600" height="55" rx="10" ry="10" fill="#ECEFF1" stroke="#607D8B" stroke-width="2"/>
+  <text x="410" y="495" text-anchor="middle" font-size="14" font-weight="bold" fill="#37474F">🔄 硬件接口</text>
+  <text x="410" y="515" text-anchor="middle" font-size="11" fill="#546E7A">里程计 Odometry ｜ IMU ｜ 激光雷达 LiDAR ｜ 深度相机 ｜ 电机驱动</text>
+
+  <line x1="410" y1="430" x2="410" y2="470" stroke="#607D8B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- === Costmap 侧边标注 === -->
+  <rect x="30" y="475" width="70" height="50" rx="8" ry="8" fill="#E3F2FD" stroke="#2196F3" stroke-width="1"/>
+  <text x="65" y="497" text-anchor="middle" font-size="10" font-weight="bold" fill="#1565C0">Global</text>
+  <text x="65" y="513" text-anchor="middle" font-size="10" font-weight="bold" fill="#1565C0">Costmap</text>
+  <rect x="720" y="475" width="70" height="50" rx="8" ry="8" fill="#E3F2FD" stroke="#2196F3" stroke-width="1"/>
+  <text x="755" y="497" text-anchor="middle" font-size="10" font-weight="bold" fill="#1565C0">Local</text>
+  <text x="755" y="513" text-anchor="middle" font-size="10" font-weight="bold" fill="#1565C0">Costmap</text>
+
+  <line x1="100" y1="500" x2="110" y2="500" stroke="#2196F3" stroke-width="1.5"/>
+  <line x1="710" y1="500" x2="720" y2="500" stroke="#2196F3" stroke-width="1.5"/>
+
+  <text x="410" y="565" text-anchor="middle" font-size="11" fill="#888">LifecycleNode: 所有模块都是受生命周期管理的组件</text>
+  <text x="410" y="582" text-anchor="middle" font-size="11" fill="#888">Unconfigured → Inactive → Active → Finalized</text>
+</svg>

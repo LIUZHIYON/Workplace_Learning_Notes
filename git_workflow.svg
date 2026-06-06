@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#E65100"/>
+    </marker>
+  </defs>
+  <text x="410" y="35" text-anchor="middle" font-size="20" font-weight="bold" fill="#2C3E50">Git 核心工作流与区域</text>
+  <line x1="200" y1="45" x2="620" y2="45" stroke="#E65100" stroke-width="2" opacity="0.4"/>
+
+  <!-- 工作区 -->
+  <rect x="40" y="80" width="220" height="100" rx="10" ry="10" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+  <text x="150" y="112" text-anchor="middle" font-size="16" font-weight="bold" fill="#E65100">📁 工作区</text>
+  <text x="150" y="135" text-anchor="middle" font-size="12" fill="#6D4C41">Working Directory</text>
+  <text x="150" y="155" text-anchor="middle" font-size="11" fill="#888">你实际编辑文件的地方</text>
+
+  <!-- 箭头 工作区→暂存区 -->
+  <line x1="260" y1="130" x2="310" y2="130" stroke="#FF9800" stroke-width="2.5" marker-end="url(#arrow-orange)"/>
+  <text x="285" y="120" text-anchor="middle" font-size="11" fill="#E65100">git add</text>
+
+  <!-- 暂存区 -->
+  <rect x="320" y="80" width="220" height="100" rx="10" ry="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="430" y="112" text-anchor="middle" font-size="16" font-weight="bold" fill="#2E7D32">📦 暂存区</text>
+  <text x="430" y="135" text-anchor="middle" font-size="12" fill="#388E3C">Staging Area / Index</text>
+  <text x="430" y="155" text-anchor="middle" font-size="11" fill="#888">下次提交的快照准备区</text>
+
+  <!-- 箭头 暂存区→本地仓库 -->
+  <line x1="540" y1="130" x2="590" y2="130" stroke="#4CAF50" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="565" y="120" text-anchor="middle" font-size="11" fill="#2E7D32">git commit</text>
+
+  <!-- 本地仓库 -->
+  <rect x="600" y="80" width="180" height="100" rx="10" ry="10" fill="#E3F2FD" stroke="#2196F3" stroke-width="2"/>
+  <text x="690" y="112" text-anchor="middle" font-size="16" font-weight="bold" fill="#1565C0">💾 本地仓库</text>
+  <text x="690" y="135" text-anchor="middle" font-size="12" fill="#37474F">Local Repository</text>
+  <text x="690" y="155" text-anchor="middle" font-size="11" fill="#888">.git 目录，提交历史</text>
+
+  <!-- 远程仓库 -->
+  <rect x="250" y="280" width="320" height="100" rx="10" ry="10" fill="#FCE4EC" stroke="#E91E63" stroke-width="2"/>
+  <text x="410" y="312" text-anchor="middle" font-size="16" font-weight="bold" fill="#C62828">☁️ 远程仓库</text>
+  <text x="410" y="335" text-anchor="middle" font-size="12" fill="#AD1457">Remote Repository</text>
+  <text x="410" y="355" text-anchor="middle" font-size="11" fill="#888">GitHub / GitLab / Gitee / 自建服务器</text>
+
+  <!-- 箭头 本地→远程 -->
+  <line x1="690" y1="180" x2="530" y2="280" stroke="#E91E63" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="640" y="225" text-anchor="middle" font-size="11" fill="#C62828">git push</text>
+
+  <!-- 箭头 远程→本地 -->
+  <line x1="290" y1="280" x2="430" y2="180" stroke="#2196F3" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="340" y="225" text-anchor="middle" font-size="11" fill="#1565C0">git pull</text>
+
+  <!-- 底部其他状态 -->
+  <rect x="40" y="430" width="740" height="75" rx="10" ry="10" fill="#F5F5F5" stroke="#CCC" stroke-width="1"/>
+  <text x="410" y="456" text-anchor="middle" font-size="13" font-weight="bold" fill="#555">文件状态流转</text>
+  
+  <rect x="60" y="468" width="100" height="26" rx="5" ry="5" fill="#FFF3E0" stroke="#FF9800" stroke-width="1"/>
+  <text x="110" y="485" text-anchor="middle" font-size="11" fill="#E65100">🟢 Untracked</text>
+  <text x="175" y="485" text-anchor="middle" font-size="14" fill="#999">→</text>
+  <rect x="190" y="468" width="100" height="26" rx="5" ry="5" fill="#E8F5E9" stroke="#4CAF50" stroke-width="1"/>
+  <text x="240" y="485" text-anchor="middle" font-size="11" fill="#2E7D32">🟡 Staged</text>
+  <text x="305" y="485" text-anchor="middle" font-size="14" fill="#999">→</text>
+  <rect x="320" y="468" width="100" height="26" rx="5" ry="5" fill="#E3F2FD" stroke="#2196F3" stroke-width="1"/>
+  <text x="370" y="485" text-anchor="middle" font-size="11" fill="#1565C0">🔵 Committed</text>
+  <text x="435" y="485" text-anchor="middle" font-size="14" fill="#999">→</text>
+  <rect x="450" y="468" width="100" height="26" rx="5" ry="5" fill="#FCE4EC" stroke="#E91E63" stroke-width="1"/>
+  <text x="500" y="485" text-anchor="middle" font-size="11" fill="#C62828">🔴 Modified</text>
+  <text x="565" y="485" text-anchor="middle" font-size="14" fill="#999">→</text>
+  <rect x="580" y="468" width="120" height="26" rx="5" ry="5" fill="#E8F5E9" stroke="#4CAF50" stroke-width="1"/>
+  <text x="640" y="485" text-anchor="middle" font-size="11" fill="#2E7D32">🟡 Staged again</text>
+</svg>
