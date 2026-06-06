@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 380" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#555"/></marker>
+  </defs>
+  <text x="350" y="35" text-anchor="middle" font-size="18" font-weight="bold" fill="#2C3E50">CLAHE 原理示意</text>
+  <line x1="120" y1="45" x2="580" y2="45" stroke="#E65100" stroke-width="2" opacity="0.4"/>
+
+  <!-- 原始直方图 -->
+  <text x="140" y="78" text-anchor="middle" font-size="12" font-weight="bold" fill="#555">原始图像</text>
+  <rect x="30" y="90" width="120" height="80" rx="5" fill="#EEE"/>
+  <rect x="35" y="160" width="8" height="10" fill="#999"/>
+  <text x="60" y="170" font-size="8" fill="#999">暗像素集中</text>
+  <rect x="120" y="100" width="8" height="70" fill="#999"/>
+  <rect x="55" y="120" width="8" height="50" fill="#999"/>
+  <rect x="70" y="140" width="8" height="30" fill="#999"/>
+  <text x="90" y="170" font-size="8" fill="#999">少量亮像素</text>
+
+  <!-- CLAHE 处理 -->
+  <line x1="150" y1="130" x2="180" y2="130" stroke="#E65100" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="165" y="120" text-anchor="middle" font-size="9" fill="#E65100">CLAHE</text>
+
+  <!-- 分块处理 -->
+  <rect x="185" y="88" width="130" height="90" rx="5" fill="#FFF3E0" stroke="#FF9800" stroke-width="1.5"/>
+  <text x="250" y="115" text-anchor="middle" font-size="10" font-weight="bold" fill="#E65100">图像分块</text>
+  <text x="250" y="133" text-anchor="middle" font-size="9" fill="#6D4C41">Tile 1 Tile 2</text>
+  <text x="250" y="147" text-anchor="middle" font-size="9" fill="#6D4C41">Tile 3 Tile 4</text>
+  <text x="250" y="165" text-anchor="middle" font-size="8" fill="#999">每块单独直方图均衡</text>
+
+  <line x1="315" y1="133" x2="335" y2="133" stroke="#E65100" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 裁剪限制 -->
+  <rect x="340" y="88" width="120" height="90" rx="5" fill="#E8F5E9" stroke="#4CAF50" stroke-width="1.5"/>
+  <text x="400" y="115" text-anchor="middle" font-size="10" font-weight="bold" fill="#2E7D32">Clip Limit</text>
+  <text x="400" y="133" text-anchor="middle" font-size="9" fill="#388E3C">裁剪过高的直方图</text>
+  <text x="400" y="147" text-anchor="middle" font-size="9" fill="#388E3C">均匀分布到各灰度</text>
+  <text x="400" y="165" text-anchor="middle" font-size="8" fill="#999">防止噪声放大</text>
+
+  <line x1="460" y1="133" x2="480" y2="133" stroke="#E65100" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 双线性插值 -->
+  <rect x="485" y="88" width="120" height="90" rx="5" fill="#E3F2FD" stroke="#2196F3" stroke-width="1.5"/>
+  <text x="545" y="115" text-anchor="middle" font-size="10" font-weight="bold" fill="#1565C0">插值融合</text>
+  <text x="545" y="133" text-anchor="middle" font-size="9" fill="#37474F">双线性插值</text>
+  <text x="545" y="147" text-anchor="middle" font-size="9" fill="#37474F">消除块间边界</text>
+  <text x="545" y="165" text-anchor="middle" font-size="8" fill="#999">平滑过渡</text>
+
+  <!-- 结果 -->
+  <line x1="605" y1="133" x2="625" y2="133" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="630" y="90" width="55" height="55" rx="5" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="658" y="118" text-anchor="middle" font-size="9" font-weight="bold" fill="#2E7D32">增强</text>
+  <text x="658" y="133" text-anchor="middle" font-size="9" font-weight="bold" fill="#2E7D32">结果</text>
+
+  <!-- 增强后直方图 -->
+  <rect x="630" y="150" width="55" height="30" rx="3" fill="#FFF"/>
+  <rect x="635" y="155" width="6" height="25" fill="#4CAF50"/>
+  <rect x="645" y="160" width="6" height="20" fill="#4CAF50"/>
+  <rect x="655" y="165" width="6" height="15" fill="#4CAF50"/>
+  <rect x="665" y="165" width="6" height="15" fill="#4CAF50"/>
+  <rect x="675" y="160" width="6" height="20" fill="#4CAF50"/>
+
+  <!-- 参数推荐 -->
+  <rect x="30" y="210" width="640" height="75" rx="10" ry="10" fill="#F5F5F5" stroke="#CCC" stroke-width="1"/>
+  <text x="350" y="235" text-anchor="middle" font-size="12" font-weight="bold" fill="#555">参数推荐（低光照地板/墙壁场景）</text>
+  <text x="50" y="258" font-size="11" fill="#555">clip_limit=2.0~4.0  ｜  tile_grid_size=(8,8)  ｜  先转 LAB/YUV 只增强 L/Y 通道</text>
+  <text x="50" y="276" font-size="11" fill="#888">Tips：配合 Gaussian Blur(3x3) 降噪后增强效果更佳，避免放大传感器噪声</text>
+
+  <!-- 效果对比 -->
+  <rect x="30" y="300" width="640" height="70" rx="10" ry="10" fill="#FAFAFA" stroke="#EEE" stroke-width="1"/>
+  <text x="350" y="322" text-anchor="middle" font-size="11" font-weight="bold" fill="#555">OpenCV 实现代码片段</text>
+  <text x="50" y="345" font-size="10" fill="#777" font-family="monospace">import cv2</text>
+  <text x="50" y="360" font-size="10" fill="#777" font-family="monospace">clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))</text>
+  <text x="50" y="375" font-size="10" fill="#777" font-family="monospace">enhanced = clahe.apply(gray_frame)</text>
+</svg>

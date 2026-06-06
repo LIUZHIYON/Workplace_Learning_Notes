@@ -1,6 +1,6 @@
 # 📚 Workplace Learning Notes
 
-> 工作中积累的技术学习笔记，涵盖 AI、机器人、版本控制等领域。
+> 工作中积累的技术学习笔记，涵盖 AI、机器人、版本控制、计算机视觉等领域。
 
 ---
 
@@ -13,6 +13,7 @@
 | 3 | 📚 | **[Git 学习笔记](./03-Git/Git%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)** | Git 工作流、分支模型、常用命令、协作流程 | 🖼️ 2 张 |
 | 4 | 🤖 | **[ROS2 学习笔记](./04-ROS2/ROS2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)** | ROS2 架构、通信模型、开发实践 | 🖼️ 2 张 |
 | 5 | 🗺️ | **[Nav2 学习笔记](./05-Nav2/Nav2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)** | Nav2 导航架构、行为树、配置调参 | 🖼️ 2 张 |
+| 6 | 🌙 | **[低光照增强与分割](./06-低光照增强与分割/低光照增强与分割方案汇总.md)** | 低光照地板/墙壁分割四大方案汇总 | 🖼️ 2 张 |
 
 ---
 
@@ -41,10 +42,15 @@
 │   ├── ros2_architecture.svg        # 整体架构图
 │   └── ros2_communication.svg       # 通信模型图
 │
-└── 📁 05-Nav2/                      # 🗺️ Nav2 导航
-    ├── Nav2学习笔记.md
-    ├── nav2_architecture.svg        # 导航架构图
-    └── nav2_bt.svg                  # 行为树图
+├── 📁 05-Nav2/                      # 🗺️ Nav2 导航
+│   ├── Nav2学习笔记.md
+│   ├── nav2_architecture.svg        # 导航架构图
+│   └── nav2_bt.svg                  # 行为树图
+│
+└── 📁 06-低光照增强与分割/          # 🌙 低光照增强与分割
+    ├── 低光照增强与分割方案汇总.md
+    ├── overview_pipeline.svg        # 整体方案分类图
+    └── clahe_diagram.svg            # CLAHE 原理图
 ```
 
 ---
@@ -68,7 +74,7 @@
 
 ```
 四大区域 → 分支模型（Git Flow / GitHub Flow）→ 命令速查 → 
-Merge vs Rebase → 协作流程 → .gitignore → 进阶技巧（bisect / hooks）
+Merge vs Rebase → 协作流程 → .gitignore → 进阶技巧
 ```
 
 ### 04 — 🤖 ROS2
@@ -83,6 +89,13 @@ ROS1 vs ROS2 → 分层架构 → 核心概念（Node/Topic/Service/Action）→
 ```
 系统架构 → BT Navigator → 代价地图 → 规划器 → 控制器 → 
 行为树详解 → 配置调参 → 常见问题排查
+```
+
+### 06 — 🌙 低光照增强与分割
+
+```
+四大方案（传统/深度学习/端到端/多模态）→ CLAHE → Zero-DCE → SCI → 
+RGB-D 融合 → 效果对比 → 按硬件条件推荐方案
 ```
 
 ---

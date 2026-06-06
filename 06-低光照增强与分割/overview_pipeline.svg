@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 480" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#555"/></marker>
+  </defs>
+  <text x="410" y="35" text-anchor="middle" font-size="18" font-weight="bold" fill="#2C3E50">低光照增强 + 分割 整体方案分类</text>
+  <line x1="140" y1="45" x2="680" y2="45" stroke="#E65100" stroke-width="2" opacity="0.4"/>
+
+  <!-- 输入 -->
+  <rect x="310" y="65" width="200" height="45" rx="10" ry="10" fill="#FCE4EC" stroke="#E91E63" stroke-width="2"/>
+  <text x="410" y="93" text-anchor="middle" font-size="14" font-weight="bold" fill="#C62828">🌙 低光照输入视频</text>
+
+  <!-- 三条路径 -->
+  <line x1="410" y1="110" x2="410" y2="130" stroke="#E91E63" stroke-width="2"/>
+  <line x1="140" y1="130" x2="680" y2="130" stroke="#CCC" stroke-width="1"/>
+
+  <!-- === 方案 A === -->
+  <rect x="30" y="140" width="230" height="50" rx="10" ry="10" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+  <text x="145" y="166" text-anchor="middle" font-size="13" font-weight="bold" fill="#E65100">A. 传统图像处理增强</text>
+  <text x="145" y="183" text-anchor="middle" font-size="10" fill="#888">预处理后输入分割网络</text>
+
+  <!-- 方案 B -->
+  <rect x="295" y="140" width="230" height="50" rx="10" ry="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="410" y="166" text-anchor="middle" font-size="13" font-weight="bold" fill="#2E7D32">B. 深度学习增强</text>
+  <text x="410" y="183" text-anchor="middle" font-size="10" fill="#888">增强网络 + 分割网络串联</text>
+
+  <!-- 方案 C -->
+  <rect x="560" y="140" width="230" height="50" rx="10" ry="10" fill="#E3F2FD" stroke="#2196F3" stroke-width="2"/>
+  <text x="675" y="166" text-anchor="middle" font-size="13" font-weight="bold" fill="#1565C0">C. 端到端暗光分割</text>
+  <text x="675" y="183" text-anchor="middle" font-size="10" fill="#888">直接在低光数据上训练</text>
+
+  <!-- A 子项 -->
+  <line x1="145" y1="190" x2="145" y2="200" stroke="#FF9800" stroke-width="1.5"/>
+  <rect x="30" y="205" width="230" height="28" rx="6" ry="6" fill="#FFF8E1" stroke="#FFD600" stroke-width="1"/>
+  <text x="145" y="224" text-anchor="middle" font-size="11" fill="#F57F17">CLAHE 自适应直方图均衡</text>
+  <rect x="30" y="238" width="230" height="28" rx="6" ry="6" fill="#FFF8E1" stroke="#FFD600" stroke-width="1"/>
+  <text x="145" y="257" text-anchor="middle" font-size="11" fill="#F57F17">Gamma / 对数变换</text>
+  <rect x="30" y="271" width="230" height="28" rx="6" ry="6" fill="#FFF8E1" stroke="#FFD600" stroke-width="1"/>
+  <text x="145" y="290" text-anchor="middle" font-size="11" fill="#F57F17">Retinex (SSR/MSR)</text>
+
+  <!-- B 子项 -->
+  <line x1="410" y1="190" x2="410" y2="200" stroke="#4CAF50" stroke-width="1.5"/>
+  <rect x="295" y="205" width="230" height="28" rx="6" ry="6" fill="#C8E6C9" stroke="#66BB6A" stroke-width="1"/>
+  <text x="410" y="224" text-anchor="middle" font-size="11" fill="#2E7D32">Zero-DCE (零参考曲线)</text>
+  <rect x="295" y="238" width="230" height="28" rx="6" ry="6" fill="#C8E6C9" stroke="#66BB6A" stroke-width="1"/>
+  <text x="410" y="257" text-anchor="middle" font-size="11" fill="#2E7D32">SCI (轻量级级联)</text>
+  <rect x="295" y="271" width="230" height="28" rx="6" ry="6" fill="#C8E6C9" stroke="#66BB6A" stroke-width="1"/>
+  <text x="410" y="290" text-anchor="middle" font-size="11" fill="#2E7D32">RetinexNet / MIRNet</text>
+
+  <!-- C 子项 -->
+  <line x1="675" y1="190" x2="675" y2="200" stroke="#2196F3" stroke-width="1.5"/>
+  <rect x="560" y="205" width="230" height="28" rx="6" ry="6" fill="#BBDEFB" stroke="#64B5F6" stroke-width="1"/>
+  <text x="675" y="224" text-anchor="middle" font-size="11" fill="#1565C0">NightLab (夜间分割)</text>
+  <rect x="560" y="238" width="230" height="28" rx="6" ry="6" fill="#BBDEFB" stroke="#64B5F6" stroke-width="1"/>
+  <text x="675" y="257" text-anchor="middle" font-size="11" fill="#1565C0">DarkSeg / 多模态融合</text>
+  <rect x="560" y="271" width="230" height="28" rx="6" ry="6" fill="#BBDEFB" stroke="#64B5F6" stroke-width="1"/>
+  <text x="675" y="290" text-anchor="middle" font-size="11" fill="#1565C0">事件相机 + RGB 融合</text>
+
+  <!-- 汇合到分割 -->
+  <line x1="145" y1="299" x2="145" y2="330" stroke="#FF9800" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="410" y1="299" x2="410" y2="330" stroke="#4CAF50" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="675" y1="299" x2="675" y2="330" stroke="#2196F3" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- 分割网络 -->
+  <rect x="280" y="335" width="260" height="50" rx="10" ry="10" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2"/>
+  <text x="410" y="358" text-anchor="middle" font-size="14" font-weight="bold" fill="#6A1B9A">🧩 分割网络 (Segmentation)</text>
+  <text x="410" y="376" text-anchor="middle" font-size="10" fill="#7B1FA2">U-Net / DeepLabV3 / SegFormer / Mask2Former</text>
+
+  <line x1="410" y1="385" x2="410" y2="400" stroke="#9C27B0" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 输出 -->
+  <rect x="310" y="405" width="200" height="45" rx="10" ry="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="410" y="428" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E7D32">✅ 地板 / 墙壁分割</text>
+  <text x="410" y="445" text-anchor="middle" font-size="10" fill="#388E3C">二值 mask 输出</text>
+</svg>
