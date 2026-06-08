@@ -252,7 +252,10 @@ def method_full_pipeline(img):
 def make_comparison_grid(original, methods_dict, title, filename):
     """生成单方法对比网格图"""
     n = len(methods_dict)
-    fig, axes = plt.subplots(2, (n + 1) // 2 + 1, figsize=(5 * ((n + 1) // 2 + 1), 8))
+    cols = (n + 1) // 2 + 1
+    fig, axes = plt.subplots(2, cols,
+                             figsize=(5 * cols, 11),
+                             gridspec_kw={'hspace': 0.35, 'wspace': 0.1})
     axes = axes.flatten()
 
     axes[0].imshow(cv2.cvtColor(original, cv2.COLOR_BGR2RGB))
@@ -268,8 +271,8 @@ def make_comparison_grid(original, methods_dict, title, filename):
     for j in range(len(methods_dict) + 1, len(axes)):
         axes[j].axis('off')
 
-    plt.suptitle(title, fontsize=14, fontweight='bold')
-    plt.tight_layout()
+    plt.suptitle(title, fontsize=14, fontweight='bold', y=1.02)
+    plt.subplots_adjust(top=0.92)
     path = f"{OUTPUT_DIR}\\{filename}"
     plt.savefig(path, dpi=150, bbox_inches='tight')
     plt.close()
@@ -279,7 +282,10 @@ def make_comparison_grid(original, methods_dict, title, filename):
 def make_combined_comparison(original, combined_dict, title, filename):
     """生成组合方法对比图"""
     n = len(combined_dict)
-    fig, axes = plt.subplots(2, (n + 1) // 2 + 1, figsize=(5 * ((n + 1) // 2 + 1), 8))
+    cols = (n + 1) // 2 + 1
+    fig, axes = plt.subplots(2, cols,
+                             figsize=(5 * cols, 11),
+                             gridspec_kw={'hspace': 0.40, 'wspace': 0.1})
     axes = axes.flatten()
 
     axes[0].imshow(cv2.cvtColor(original, cv2.COLOR_BGR2RGB))
@@ -295,8 +301,8 @@ def make_combined_comparison(original, combined_dict, title, filename):
     for j in range(len(combined_dict) + 1, len(axes)):
         axes[j].axis('off')
 
-    plt.suptitle(title, fontsize=14, fontweight='bold')
-    plt.tight_layout()
+    plt.suptitle(title, fontsize=14, fontweight='bold', y=1.02)
+    plt.subplots_adjust(top=0.92)
     path = f"{OUTPUT_DIR}\\{filename}"
     plt.savefig(path, dpi=150, bbox_inches='tight')
     plt.close()
