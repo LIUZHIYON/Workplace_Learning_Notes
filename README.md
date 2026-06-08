@@ -14,6 +14,8 @@
 | 4 | 🤖 | **[ROS2 学习笔记](./04-ROS2/ROS2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)** | ROS2 架构、通信模型、开发实践 | 🖼️ 2 张 |
 | 5 | 🗺️ | **[Nav2 学习笔记](./05-Nav2/Nav2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)** | Nav2 导航架构、行为树、配置调参 | 🖼️ 2 张 |
 | 6 | 🔬 | **[低光照处理专题](./06-低光照处理专题/README.md)** | 低光照图像处理全链路：增强、降噪、论文、分割预处理 | 🖼️ 多张 |
+| 7 | 🖼️ | **[OpenCV 完整学习笔记](./07-OpenCV学习笔记/README.md)** | OpenCV 全模块指南：20个专题+流行度排行+配图 | 🖼️ 11 张 |
+| 7 | 🖼️ | **[OpenCV 完整学习笔记](./07-OpenCV学习笔记/README.md)** | OpenCV 全模块指南：20个专题+流行度排行+配图 | 🖼️ 11 张 |
 
 ---
 
@@ -48,6 +50,21 @@
 │   └── nav2_bt.svg                  # 行为树图
 │
 └── 📁 06-低光照处理专题/            # 🔬 低光照处理全链路
+│
+└── 📁 07-OpenCV学习笔记/              # 🖼️ OpenCV 完整指南
+    ├── README.md                       # 20个专题完整笔记
+    ├── gen_figures.py                  # 配图生成脚本
+    ├── fig_filter.png                  # 滤波对比图
+    ├── fig_edge.png                    # 边缘检测
+    ├── fig_threshold.png               # 阈值处理
+    ├── fig_morph.png                   # 形态学操作
+    ├── fig_hist.png                    # 直方图对比
+    ├── fig_contour.png                 # 轮廓检测
+    ├── fig_colorspace.png              # 色彩空间
+    ├── fig_geo.png                     # 几何变换
+    ├── fig_pyramid.png                 # 金字塔
+    ├── fig_lowlight.png                # 低光照增强
+    └── fig_dnn.png                     # DNN 流程
     ├── README.md                    # 专题总览
     │
     ├── 📁 01-低光照增强与分割方案汇总/   # 🌙 方案汇总
@@ -126,6 +143,8 @@ ROS1 vs ROS2 → 分层架构 → 核心概念（Node/Topic/Service/Action）→
 ├─ 02 低光照增强论文精读（KSCE 2025 论文精读 + 6种方法评估）
 ├─ 03 OpenCV低光照处理方法（8种OpenCV方法对比 + 组合管线 + 效果图）
 └─ 04 低光照降噪与分割预处理（6种降噪方法 + 增强管线 + RK3576性能估算）
+│
+└─ 07 OpenCV 完整学习笔记（全部20个模块 + 流行度排序 + 配图）
 ```
 
 ---
