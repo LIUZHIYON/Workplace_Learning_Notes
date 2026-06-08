@@ -7,9 +7,18 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 
-# 设置中文字体
-plt.rcParams['font.sans-serif'] = ['SimHei']
+# 设置中文字体 — 使用绝对路径确保生效
+import matplotlib.font_manager as fm
+_font_path = r'C:\Windows\Fonts\simhei.ttf'
+fm.fontManager.addfont(_font_path)
+_cn_font = {'fontfamily': 'SimHei'}
+plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'DengXian', 'sans-serif']
 plt.rcParams['axes.unicode_minus'] = False
+
+# 辅助函数：获取 FontProperties 对象
+from matplotlib.font_manager import FontProperties
+def get_cn_font(size=12, bold=False):
+    return FontProperties(fname=_font_path, size=size, weight='bold' if bold else 'normal')
 
 OUT = r"C:\Users\29503\Desktop\AI学习笔记\08-NLP学习笔记"
 
@@ -20,33 +29,38 @@ def fig_timeline():
     ax.set_ylim(0, 1)
     ax.axhline(0.5, color='gray', linewidth=2, linestyle='-', alpha=0.5)
     ax.axis('off')
-    ax.set_title("NLP 技术演进时间线", fontsize=14, fontweight='bold')
+    ax.set_title('NLP Technology Evolution Timeline', fontproperties=get_cn_font(14, bold=True))
 
     milestones = [
-        (1993, "Statistical\nNLP", '#B0B0B0'),
-        (2003, "Word2Vec\nNNLM", '#87CEEB'),
-        (2013, "Word2Vec\n(Mikolov)", '#4CAF50'),
-        (2014, "Seq2Seq\n+Attention", '#FF9800'),
-        (2017, "Transformer\n(Vaswani)", '#F44336'),
-        (2018, "BERT/GPT\n(Pre-train)", '#9C27B0'),
-        (2020, "GPT-3\n(175B)", '#E91E63'),
-        (2022, "ChatGPT\nInstructGPT", '#FF5722'),
-        (2023, "LLaMA/GPT-4\nOpen-source LLMs", '#2196F3'),
-        (2024, "RAG/Agents\nMultimodal", '#00BCD4'),
-        (2025, "Reasoning\nDeepSeek-R1", '#009688'),
+        (1993, 'Statistical\nNLP', '#B0B0B0'),
+        (2003, 'NNLM\n(Bengio)', '#87CEEB'),
+        (2013, 'Word2Vec\n(Mikolov)', '#4CAF50'),
+        (2014, 'Seq2Seq\n+Attention', '#FF9800'),
+        (2017, 'Transformer\n(Vaswani)', '#F44336'),
+        (2018, 'BERT/GPT\n(Pre-train)', '#9C27B0'),
+        (2020, 'GPT-3\n(175B)', '#E91E63'),
+        (2022, 'ChatGPT\nInstructGPT', '#FF5722'),
+        (2023, 'LLaMA/GPT-4\nOpen-source LLMs', '#2196F3'),
+        (2024, 'RAG/Agents\nMultimodal', '#00BCD4'),
+        (2025, 'Reasoning\nDeepSeek-R1', '#009688'),
     ]
 
-    for year, label, color in milestones:
+    for i, (year, label, color) in enumerate(milestones):
         x = year
         y = 0.5
         ax.plot(x, y, 'o', markersize=18, color=color, zorder=5)
         ax.plot(x, y, 'o', markersize=14, color='white', zorder=6)
         ax.plot(x, y, 'o', markersize=10, color=color, zorder=7)
-        va = 'bottom' if milestones.index((year, label, color)) % 2 == 0 else 'top'
+        va = 'bottom' if i % 2 == 0 else 'top'
         offset = 0.08 if va == 'bottom' else -0.08
         ax.text(x, y + offset, label, ha='center', va=va, fontsize=8,
                 fontweight='bold', color=color,
                 bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor=color, alpha=0.8))
+
+    # English legend
+    ax.text(0.5, -0.1,
+            'NLP has evolved from statistical methods to deep learning and now large language models',
+            ha='center', transform=ax.transAxes, fontsize=9, color='gray', style='italic')
 
     plt.tight_layout()
     plt.savefig(f"{OUT}\\fig_timeline.png", dpi=150, bbox_inches='tight')
