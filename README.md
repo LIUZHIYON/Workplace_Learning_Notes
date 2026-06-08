@@ -15,7 +15,9 @@
 | 5 | 🗺️ | **[Nav2 学习笔记](./05-Nav2/Nav2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)** | Nav2 导航架构、行为树、配置调参 | 🖼️ 2 张 |
 | 6 | 🔬 | **[低光照处理专题](./06-低光照处理专题/README.md)** | 低光照图像处理全链路：增强、降噪、论文、分割预处理 | 🖼️ 多张 |
 | 7 | 🖼️ | **[OpenCV 完整学习笔记](./07-OpenCV学习笔记/README.md)** | OpenCV 全模块指南：20个专题+流行度排行+配图 | 🖼️ 11 张 |
+| 8 | 📝 | **[NLP 完整学习笔记](./08-NLP学习笔记/README.md)** | NLP全栈：传统方法→BERT/GPT→LLM→RAG→Agent→多模态 | 🖼️ 8 张 |
 | 7 | 🖼️ | **[OpenCV 完整学习笔记](./07-OpenCV学习笔记/README.md)** | OpenCV 全模块指南：20个专题+流行度排行+配图 | 🖼️ 11 张 |
+| 8 | 📝 | **[NLP 完整学习笔记](./08-NLP学习笔记/README.md)** | NLP全栈：传统方法→BERT/GPT→LLM→RAG→Agent→多模态 | 🖼️ 8 张 |
 
 ---
 
@@ -52,6 +54,18 @@
 └── 📁 06-低光照处理专题/            # 🔬 低光照处理全链路
 │
 └── 📁 07-OpenCV学习笔记/              # 🖼️ OpenCV 完整指南
+│
+└── 📁 08-NLP学习笔记/                  # 📝 NLP 完整指南
+    ├── README.md                       # 19个专题完整笔记
+    ├── gen_figures.py                  # 配图生成脚本
+    ├── fig_timeline.png                # NLP技术演进时间线
+    ├── fig_transformer.png             # Transformer架构图
+    ├── fig_model_size.png              # 模型参数规模对比
+    ├── fig_frameworks.png              # 框架流行度排行
+    ├── fig_rag.png                     # RAG架构图
+    ├── fig_tasks.png                   # NLP任务流行度
+    ├── fig_paradigms.png               # 微调范式对比
+    └── fig_embedding.png               # 词嵌入可视化
     ├── README.md                       # 20个专题完整笔记
     ├── gen_figures.py                  # 配图生成脚本
     ├── fig_filter.png                  # 滤波对比图
