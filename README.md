@@ -15,6 +15,7 @@
 | 5 | 🗺️ | **[Nav2 学习笔记](./05-Nav2/Nav2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)** | Nav2 导航架构、行为树、配置调参 | 🖼️ 2 张 |
 | 6 | 🌙 | **[低光照增强与分割](./06-低光照增强与分割/低光照增强与分割方案汇总.md)** | 低光照地板/墙壁分割四大方案汇总 | 🖼️ 2 张 |
 | 7 | 📄 | **[低光照增强论文精读](./07-低光照增强论文精读/低光照增强论文精读_KSCE2025.md)** | KSCE 2025 论文精读：6种增强方法评估 | 🖼️ 2 张 |
+| 8 | 🖼️ | **[OpenCV 低光照处理方法](./08-OpenCV低光照处理方法/README.md)** | OpenCV 低光照增强：8种方法对比 + 组合方法 + 效果图 | 🖼️ 7 张 |
 
 ---
 
@@ -57,6 +58,15 @@
     ├── 低光照增强论文精读_KSCE2025.md
     ├── experiment_pipeline.svg      # 实验流程设计
     └── methods_overview.svg         # 六种方法架构总览图
+│
+└── 📁 08-OpenCV低光照处理方法/      # 🖼️ OpenCV 低光照处理
+    ├── README.md                    # 完整笔记含代码与效果图
+    ├── generate_comparison.py       # 对比图生成脚本
+    ├── comparison_single_scene.png  # 单方法对比（场景）
+    ├── comparison_single_portrait.png # 单方法对比（人像）
+    ├── comparison_combined_scene.png  # 组合方法对比（场景）
+    ├── comparison_combined_portrait.png # 组合方法对比（人像）
+    └── histogram_comparison.png     # 直方图变化对比
 ```
 
 ---
