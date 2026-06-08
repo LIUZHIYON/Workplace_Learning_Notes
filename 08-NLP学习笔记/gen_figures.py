@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 
+# 设置中文字体
+plt.rcParams['font.sans-serif'] = ['SimHei']
+plt.rcParams['axes.unicode_minus'] = False
+
 OUT = r"C:\Users\29503\Desktop\AI学习笔记\08-NLP学习笔记"
 
 # ─── 1. NLP 技术演进时间线 ───
