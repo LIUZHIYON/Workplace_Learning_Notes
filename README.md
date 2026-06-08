@@ -13,10 +13,7 @@
 | 3 | 📚 | **[Git 学习笔记](./03-Git/Git%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)** | Git 工作流、分支模型、常用命令、协作流程 | 🖼️ 2 张 |
 | 4 | 🤖 | **[ROS2 学习笔记](./04-ROS2/ROS2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)** | ROS2 架构、通信模型、开发实践 | 🖼️ 2 张 |
 | 5 | 🗺️ | **[Nav2 学习笔记](./05-Nav2/Nav2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)** | Nav2 导航架构、行为树、配置调参 | 🖼️ 2 张 |
-| 6 | 🌙 | **[低光照增强与分割](./06-低光照增强与分割/低光照增强与分割方案汇总.md)** | 低光照地板/墙壁分割四大方案汇总 | 🖼️ 2 张 |
-| 7 | 📄 | **[低光照增强论文精读](./07-低光照增强论文精读/低光照增强论文精读_KSCE2025.md)** | KSCE 2025 论文精读：6种增强方法评估 | 🖼️ 2 张 |
-| 8 | 🖼️ | **[OpenCV 低光照处理方法](./08-OpenCV低光照处理方法/README.md)** | OpenCV 低光照增强：8种方法对比 + 组合方法 + 效果图 | 🖼️ 7 张 |
-| 9 | 🧹 | **[低光照降噪与分割预处理](./09-低光照降噪与分割预处理/README.md)** | OpenCV 降噪+增强管线：6种方法+RK3576性能估算+分割优化 | 🖼️ 5 张 |
+| 6 | 🔬 | **[低光照处理专题](./06-低光照处理专题/README.md)** | 低光照图像处理全链路：增强、降噪、论文、分割预处理 | 🖼️ 多张 |
 
 ---
 
@@ -50,33 +47,38 @@
 │   ├── nav2_architecture.svg        # 导航架构图
 │   └── nav2_bt.svg                  # 行为树图
 │
-└── 📁 06-低光照增强与分割/          # 🌙 低光照增强与分割
-    ├── 低光照增强与分割方案汇总.md
-    ├── overview_pipeline.svg        # 整体方案分类图
-    └── clahe_diagram.svg            # CLAHE 原理图
-│
-└── 📁 07-低光照增强论文精读/          # 📄 KSCE 2025 论文精读
-    ├── 低光照增强论文精读_KSCE2025.md
-    ├── experiment_pipeline.svg      # 实验流程设计
-    └── methods_overview.svg         # 六种方法架构总览图
-│
-└── 📁 08-OpenCV低光照处理方法/      # 🖼️ OpenCV 低光照处理
-    ├── README.md                    # 完整笔记含代码与效果图
-    ├── generate_comparison.py       # 对比图生成脚本
-    ├── comparison_single_scene.png  # 单方法对比（场景）
-    ├── comparison_single_portrait.png # 单方法对比（人像）
-    ├── comparison_combined_scene.png  # 组合方法对比（场景）
-    ├── comparison_combined_portrait.png # 组合方法对比（人像）
-    └── histogram_comparison.png     # 直方图变化对比
-│
-└── 📁 09-低光照降噪与分割预处理/   # 🧹 降噪+增强+分割预处理
-    ├── README.md                    # 完整笔记含原理、RK3576性能、代码
-    ├── generate_comparison.py       # 对比图生成脚本
-    ├── test_noisy_lowlight.png      # 合成暗光噪声测试图
-    ├── comparison_denoise_only.png  # 降噪方法对比
-    ├── comparison_edge_preservation.png # 边缘保留放大对比
-    ├── comparison_pipeline.png      # 降噪+增强管线对比
-    └── comparison_segmentation_preview.png # 分割模拟对比
+└── 📁 06-低光照处理专题/            # 🔬 低光照处理全链路
+    ├── README.md                    # 专题总览
+    │
+    ├── 📁 01-低光照增强与分割方案汇总/   # 🌙 方案汇总
+    │   ├── 低光照增强与分割方案汇总.md
+    │   ├── overview_pipeline.svg
+    │   ├── clahe_diagram.svg
+    │   ├── low_light_tool.py
+    │   └── low_light_gui.py
+    │
+    ├── 📁 02-低光照增强论文精读/        # 📄 论文精读
+    │   ├── 低光照增强论文精读_KSCE2025.md
+    │   ├── experiment_pipeline.svg
+    │   └── methods_overview.svg
+    │
+    ├── 📁 03-OpenCV低光照处理方法/      # 🖼️ OpenCV 方法
+    │   ├── README.md
+    │   ├── generate_comparison.py
+    │   ├── comparison_single_scene.png
+    │   ├── comparison_single_portrait.png
+    │   ├── comparison_combined_scene.png
+    │   ├── comparison_combined_portrait.png
+    │   └── histogram_comparison.png
+    │
+    └── 📁 04-低光照降噪与分割预处理/    # 🧹 降噪+分割预处理
+        ├── README.md
+        ├── generate_comparison.py
+        ├── test_noisy_lowlight.png
+        ├── comparison_denoise_only.png
+        ├── comparison_edge_preservation.png
+        ├── comparison_pipeline.png
+        └── comparison_segmentation_preview.png
 ```
 
 ---
@@ -117,25 +119,20 @@ ROS1 vs ROS2 → 分层架构 → 核心概念（Node/Topic/Service/Action）→
 行为树详解 → 配置调参 → 常见问题排查
 ```
 
-### 06 — 🌙 低光照增强与分割
+### 06 — 🔬 低光照处理专题
 
 ```
-四大方案（传统/深度学习/端到端/多模态）→ CLAHE → Zero-DCE → SCI → 
-RGB-D 融合 → 效果对比 → 按硬件条件推荐方案
-```
-
-### 09 — 🧹 低光照降噪与分割预处理
-
-```
-降噪方法（6种OpenCV）→ 边缘保留对比 → 降噪+CLAHE管线 → 
-RK3576性能估算 → Canny分割模拟 → 推荐管线 → 完整代码
+┌─ 01 低光照增强与分割方案汇总（传统/深度学习/端到端/多模态方案）
+├─ 02 低光照增强论文精读（KSCE 2025 论文精读 + 6种方法评估）
+├─ 03 OpenCV低光照处理方法（8种OpenCV方法对比 + 组合管线 + 效果图）
+└─ 04 低光照降噪与分割预处理（6种降噪方法 + 增强管线 + RK3576性能估算）
 ```
 
 ---
 
 ## 📝 说明
 
-- 笔记使用 **Markdown** 编写，内含 **SVG 架构图/流程图**
+- 笔记使用 **Markdown** 编写，内含 **SVG 架构图/流程图/对比图**
 - 推荐用 **Typora**、**VS Code**、**Obsidian** 等支持图片渲染的编辑器打开
 - 各笔记末尾附有学习心得
 - 持续更新中 🚧
