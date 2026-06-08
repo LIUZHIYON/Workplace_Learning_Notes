@@ -16,8 +16,10 @@
 | 6 | 🔬 | **[低光照处理专题](./06-低光照处理专题/README.md)** | 低光照图像处理全链路：增强、降噪、论文、分割预处理 | 🖼️ 多张 |
 | 7 | 🖼️ | **[OpenCV 完整学习笔记](./07-OpenCV学习笔记/README.md)** | OpenCV 全模块指南：20个专题+流行度排行+配图 | 🖼️ 11 张 |
 | 8 | 📝 | **[NLP 完整学习笔记](./08-NLP学习笔记/README.md)** | NLP全栈：传统方法→BERT/GPT→LLM→RAG→Agent→多模态 | 🖼️ 8 张 |
+| 9 | 🎯 | **[Roboflow 学习笔记](./09-Roboflow学习笔记/README.md)** | Roboflow全指南：数据集→标注→增强→合并→训练→部署 | 🖼️ 4 张 |
 | 7 | 🖼️ | **[OpenCV 完整学习笔记](./07-OpenCV学习笔记/README.md)** | OpenCV 全模块指南：20个专题+流行度排行+配图 | 🖼️ 11 张 |
 | 8 | 📝 | **[NLP 完整学习笔记](./08-NLP学习笔记/README.md)** | NLP全栈：传统方法→BERT/GPT→LLM→RAG→Agent→多模态 | 🖼️ 8 张 |
+| 9 | 🎯 | **[Roboflow 学习笔记](./09-Roboflow学习笔记/README.md)** | Roboflow全指南：数据集→标注→增强→合并→训练→部署 | 🖼️ 4 张 |
 
 ---
 
@@ -56,6 +58,14 @@
 └── 📁 07-OpenCV学习笔记/              # 🖼️ OpenCV 完整指南
 │
 └── 📁 08-NLP学习笔记/                  # 📝 NLP 完整指南
+│
+└── 📁 09-Roboflow学习笔记/              # 🎯 Roboflow 完整指南
+    ├── README.md                       # 17个专题完整笔记
+    ├── gen_figures.py                  # 配图生成脚本
+    ├── fig_pipeline.png                # 完整工作流图
+    ├── fig_merge.png                   # 数据集合并示意
+    ├── fig_formats.png                 # 标注格式对比
+    └── fig_deploy.png                  # 部署选项对比
     ├── README.md                       # 19个专题完整笔记
     ├── gen_figures.py                  # 配图生成脚本
     ├── fig_timeline.png                # NLP技术演进时间线
@@ -159,6 +169,8 @@ ROS1 vs ROS2 → 分层架构 → 核心概念（Node/Topic/Service/Action）→
 └─ 04 低光照降噪与分割预处理（6种降噪方法 + 增强管线 + RK3576性能估算）
 │
 └─ 07 OpenCV 完整学习笔记（全部20个模块 + 流行度排序 + 配图）
+│
+└─ 08 NLP 完整学习笔记（NLP全栈：传统→BERT/GPT→LLM→RAG→Agent→多模态）
 ```
 
 ---
