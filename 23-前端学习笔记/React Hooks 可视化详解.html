@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Hooks - 可视化详解</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 30px;
+}
+h1 {
+  text-align:center;
+  font-size:28px;
+  margin-bottom: 4px;
+  background: linear-gradient(135deg, #61dafb, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.subtitle {
+  text-align:center;
+  color:#64748b;
+  margin-bottom: 30px;
+  font-size: 13px;
+}
+
+/* 卡片 */
+.card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+.card h2 {
+  font-size: 17px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #334155;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card h2 .badge {
+  font-size: 11px;
+  background: #334155;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-weight:400;
+  -webkit-text-fill-color: #94a3b8;
+}
+
+/* 格子布局 */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 750px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* 代码块 */
+.code {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  overflow-x: auto;
+}
+.code .cm { color: #5a7a8a; } /* 注释 */
+.code .kw { color: #c678dd; } /* 关键字 */
+.code .fn { color: #61afef; } /* 函数名 */
+.code .s { color: #98c379; }  /* 字符串 */
+.code .num { color: #d19a66; } /* 数字 */
+.code .vl { color: #e06c75; } /* 变量 */
+.code .op { color: #56b6c2; }
+
+/* HOOK 演示卡片 */
+.hook-demo {
+  background: #0f172a;
+  border-radius: 10px;
+  padding: 18px;
+  border: 1px solid #1e293b;
+}
+.hook-demo h3 {
+  font-size: 14px;
+  color: #61dafb;
+  margin-bottom: 10px;
+}
+
+/* 流程图容器 */
+.flow-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 0;
+}
+.flow-box {
+  background: #0f172a;
+  border: 2px solid #334155;
+  border-radius: 8px;
+  padding: 12px 18px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 80px;
+}
+.flow-box.pink { border-color: #e06c75; background: #1e1820; }
+.flow-box.blue { border-color: #61afef; background: #0f1a2e; }
+.flow-box.green { border-color: #98c379; background: #0f1a12; }
+.flow-box.purple { border-color: #c678dd; background: #1a1025; }
+.flow-box.orange { border-color: #d19a66; background: #1e180f; }
+.flow-arrow {
+  color: #4a5568;
+  font-size: 20px;
+}
+
+/* 对比表 */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.compare-table th {
+  background: #0f172a;
+  padding: 10px 14px;
+  text-align: left;
+  color: #94a3b8;
+  border-bottom: 2px solid #334155;
+}
+.compare-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #1e293b;
+}
+.compare-table tr:hover td {
+  background: rgba(255,255,255,0.02);
+}
+
+/* 规则 */
+.rules {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.rule-card {
+  flex: 1;
+  min-width: 200px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+}
+.rule-card .num {
+  display: inline-block;
+  width: 28px; height: 28px;
+  line-height: 28px;
+  background: #61dafb;
+  color: #0f172a;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* Note */
+.note {
+  background: #0f1a2e;
+  border-left: 4px solid #61dafb;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  margin: 12px 0;
+  color: #94a3b8;
+}
+.note strong { color: #e2e8f0; }
+.note.green { border-color: #98c379; background: #0f1a12; }
+.note.orange { border-color: #d19a66; background: #1e180f; }
+
+/* 闭包标注 */
+.closure-hint {
+  position: relative;
+}
+.closure-hint::after {
+  content: "🔒 闭包";
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 11px;
+  background: #c678dd;
+  color: #fff;
+  border-radius: 4px;
+  padding: 0 6px;
+  opacity: 0.8;
+}
+
+.mermaid-box {
+  background: #0f172a;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 10px 0;
+  text-align: center;
+}
+
+/* 沙漏动画 */
+.timeline-demo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 0;
+  flex-wrap: wrap;
+}
+.tl-box {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-family: monospace;
+}
+.tl-arrow { color: #4a5568; font-size: 14px; }
+.tl-highlight {
+  background: #c678dd33;
+  border-color: #c678dd;
+  position: relative;
+}
+</style>
+</head>
+<body>
+
+<h1>⚛️ React Hooks 可视化详解</h1>
+<p class="subtitle">useState · useEffect · useRef · 规则 · 闭包 · Class vs Hooks</p>
+
+<!-- ====================== 第1节：Hooks 解决了什么问题 ====================== -->
+<div class="card">
+  <h2>① Hooks 解决了什么问题 <span class="badge">Why Hooks?</span></h2>
+
+  <div class="grid-2">
+    <div class="hook-demo">
+      <h3>❌ 以前：Class 组件</h3>
+      <div class="code">
+<span class="cm">// this 满天飞，逻辑散落在各个生命周期</span><br>
+<span class="kw">class</span> <span class="fn">Counter</span> <span class="kw">extends</span> React.<span class="fn">Component</span> {<br>
+&nbsp;&nbsp;<span class="fn">constructor</span>(props) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">super</span>(props)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">this</span>.<span class="vl">state</span> = { <span class="vl">count</span>: <span class="num">0</span> }<br>
+&nbsp;&nbsp;}<br><br>
+&nbsp;&nbsp;<span class="fn">componentDidMount</span>() { <span class="cm">/* 初始化 */</span> }<br>
+&nbsp;&nbsp;<span class="fn">componentDidUpdate</span>() { <span class="cm">/* 更新 */</span> }<br>
+&nbsp;&nbsp;<span class="fn">componentWillUnmount</span>() { <span class="cm">/* 清理 */</span> }<br><br>
+&nbsp;&nbsp;<span class="fn">render</span>() {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="op">&lt;</span>button onClick<span class="op">=</span>{<span class="kw">this</span>.<span class="fn">handleClick</span>}<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<span class="kw">this</span>.<span class="vl">state</span>.count}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/button<span class="op">&gt;</span><br>
+&nbsp;&nbsp;}<br>
+}
+      </div>
+    </div>
+
+    <div class="hook-demo">
+      <h3>✅ 现在：Hooks 函数组件</h3>
+      <div class="code">
+<span class="cm">// 没有 this，没有 class，只有函数 + Hook</span><br>
+<span class="kw">function</span> <span class="fn">Counter</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> [<span class="vl">count</span>, <span class="vl">setCount</span>] = <span class="fn">useState</span>(<span class="num">0</span>)<br><br>
+&nbsp;&nbsp;<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">document</span>.<span class="vl">title</span> = <span class="s">`点了 ${count} 次`</span><br>
+&nbsp;&nbsp;})<br><br>
+&nbsp;&nbsp;<span class="kw">return</span> <span class="op">&lt;</span>button onClick<span class="op">=</span>{() <span class="op">=&gt;</span> <span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)}<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;{count}<br>
+&nbsp;&nbsp;<span class="op">&lt;</span>/button<span class="op">&gt;</span><br>
+}
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>🎯 Hooks 的目标：</strong>让函数组件也能用 state 和生命周期，消灭 <code>this</code>，让逻辑复用从"套娃"变"函数调用"。
+  </div>
+</div>
+
+<!-- ====================== 第2节：useState ====================== -->
+<div class="card">
+  <h2>② useState — 让函数有"记忆" <span class="badge">核心</span></h2>
+
+  <div class="grid-2">
+    <div>
+      <div class="code">
+<span class="kw">function</span> <span class="fn">Counter</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> [<span class="vl">count</span>, <span class="vl">setCount</span>] = <span class="fn">useState</span>(<span class="num">0</span>)<br>
+&nbsp;&nbsp;<span class="cm">//    ↑ 当前值   ↑ 修改函数        ↑ 初始值</span><br><br>
+&nbsp;&nbsp;<span class="kw">return</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>div<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>p<span class="op">&gt;</span>你点了 {<span class="vl">count</span>} 次<span class="op">&lt;</span>/p<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>button onClick<span class="op">=</span>{() <span class="op">=&gt;</span> <span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)}<span class="op">&gt;</span><span class="op">+</span><span class="num">1</span><span class="op">&lt;</span>/button<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/div<span class="op">&gt;</span><br>
+&nbsp;&nbsp;)<br>
+}
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; justify-content:center;">
+      <div class="flow-wrap">
+        <div class="flow-box pink">第一次渲染<br><span style="font-weight:400;font-size:11px;color:#94a3b8;">count=0</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box blue">点按钮<br><span style="font-weight:400;font-size:11px;color:#94a3b8;">setCount(1)</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box green">重新渲染<br><span style="font-weight:400;font-size:11px;color:#94a3b8;">count=1</span></div>
+      </div>
+      <div class="note" style="margin:6px 0;">
+        🔒 <strong>闭包机制：</strong>每次渲染，<code>count</code> 都是该次渲染的<strong>快照</strong>。
+        <code>setCount</code> 更新后触发重新渲染，新闭包捕获新值。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== 第3节：useEffect ====================== -->
+<div class="card">
+  <h2>③ useEffect — 处理副作用 <span class="badge">生命周期终结者</span></h2>
+
+  <div class="code" style="margin-bottom:16px;">
+<span class="cm">// 组件挂载时或 userId 变化时执行</span><br>
+<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="fn">fetch</span>(<span class="s">`/api/user/${userId}`</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;.<span class="fn">then</span>(res <span class="op">=&gt;</span> res.<span class="fn">json</span>())<br>
+&nbsp;&nbsp;&nbsp;&nbsp;.<span class="fn">then</span>(data <span class="op">=&gt;</span> <span class="fn">setUser</span>(data))<br><br>
+&nbsp;&nbsp;<span class="cm">// 返回"清理函数"</span><br>
+&nbsp;&nbsp;<span class="kw">return</span> () <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">console</span>.<span class="fn">log</span>(<span class="s">'清理，比如取消订阅'</span>)<br>
+&nbsp;&nbsp;}<br>
+}, [<span class="vl">userId</span>])  <span class="cm">// ← 依赖数组</span>
+  </div>
+
+  <!-- 四种模式 -->
+  <div class="grid-3">
+    <div class="hook-demo">
+      <h3>🔄 每次都执行</h3>
+      <div class="code">
+<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="cm">// 每次渲染后都执行</span><br>
+})
+      </div>
+    </div>
+
+    <div class="hook-demo">
+      <h3>🚀 只挂载一次</h3>
+      <div class="code">
+<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="cm">// 组件挂载时执行一次</span><br>
+}, [])
+      </div>
+      <div class="note" style="margin-top:8px;">
+        空数组 = 没有依赖，永远不会重新执行
+      </div>
+    </div>
+
+    <div class="hook-demo">
+      <h3>🎯 依赖变化才执行</h3>
+      <div class="code">
+<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="cm">// userId 变了才执行</span><br>
+}, [<span class="vl">userId</span>])
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;">
+    <div class="hook-demo">
+      <h3>🧹 带清理的版本</h3>
+      <div class="code">
+<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="kw">const</span> handler = () <span class="op">=&gt;</span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="s">'resize'</span>)<br>
+&nbsp;&nbsp;<span class="fn">window</span>.<span class="fn">addEventListener</span>(<span class="s">'resize'</span>, handler)<br><br>
+&nbsp;&nbsp;<span class="kw">return</span> () <span class="op">=&gt;</span> {<span class="cm">// 清理函数</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">window</span>.<span class="fn">removeEventListener</span>(<span class="s">'resize'</span>, handler)<br>
+&nbsp;&nbsp;}<br>
+}, [])
+      </div>
+      <div class="note green" style="margin-top:8px;">
+        <strong>清理函数何时执行？</strong><br>
+        ① 组件卸载时 ② 下次 effect 执行前（清理旧的，再跑新的）
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== 第4节：useRef ====================== -->
+<div class="card">
+  <h2>④ useRef — 可变容器，不改不渲染 <span class="badge">引用</span></h2>
+
+  <div class="grid-2">
+    <div>
+      <div class="code">
+<span class="kw">function</span> <span class="fn">Timer</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> <span class="vl">timerRef</span> = <span class="fn">useRef</span>(<span class="kw">null</span>)<br><br>
+&nbsp;&nbsp;<span class="kw">const</span> <span class="fn">start</span> = () <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="vl">timerRef</span>.<span class="vl">current</span> = <span class="fn">setInterval</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">console</span>.<span class="fn">log</span>(<span class="s">'tick'</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}, <span class="num">1000</span>)<br>
+&nbsp;&nbsp;}<br><br>
+&nbsp;&nbsp;<span class="kw">return</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>div<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>button onClick<span class="op">=</span>{<span class="vl">start</span>}<span class="op">&gt;</span>开始<span class="op">&lt;</span>/button<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>button onClick<span class="op">=</span>{<span class="vl">stop</span>}<span class="op">&gt;</span>停止<span class="op">&lt;</span>/button<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/div<span class="op">&gt;</span><br>
+&nbsp;&nbsp;)<br>
+}
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; justify-content:center;">
+      <div class="note green">
+        <strong>useState vs useRef</strong><br><br>
+        <table style="width:100%; font-size:13px; border-collapse:collapse;">
+          <tr><td style="padding:4px 0; color:#94a3b8;">改值触发重新渲染</td><td style="padding:4px 0; text-align:right;">useState ✅</td></tr>
+          <tr><td style="padding:4px 0; color:#94a3b8;">改值<strong>不</strong>触发重新渲染</td><td style="padding:4px 0; text-align:right;">useRef ✅</td></tr>
+          <tr><td style="padding:4px 0; color:#94a3b8;">存定时器 ID</td><td style="padding:4px 0; text-align:right;">useRef ✅</td></tr>
+          <tr><td style="padding:4px 0; color:#94a3b8;">获取 DOM 节点</td><td style="padding:4px 0; text-align:right;">useRef ✅</td></tr>
+        </table>
+      </div>
+      <div style="margin-top:10px; display:flex; gap:10px; justify-content:center;">
+        <div class="flow-box purple" style="min-width:100px;">
+          useState<br>
+          <span style="font-size:11px;font-weight:400;color:#94a3b8;">值变 → 重新渲染</span>
+        </div>
+        <div class="flow-arrow" style="font-size:28px;">vs</div>
+        <div class="flow-box orange" style="min-width:100px;">
+          useRef<br>
+          <span style="font-size:11px;font-weight:400;color:#94a3b8;">值变 → 不渲染</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== 第5节：自定义 Hook ====================== -->
+<div class="card">
+  <h2>⑤ 自定义 Hook — 逻辑复用的终极方案 <span class="badge">Reusable</span></h2>
+
+  <div class="grid-2">
+    <div class="hook-demo">
+      <h3>📦 定义：把逻辑打成包</h3>
+      <div class="code">
+<span class="cm">// 这是一个自定义 Hook（函数名以 use 开头）</span><br>
+<span class="kw">function</span> <span class="fn">useWindowWidth</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> [<span class="vl">width</span>, <span class="vl">setWidth</span>] = <span class="fn">useState</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">window</span>.<span class="vl">innerWidth</span><br>
+&nbsp;&nbsp;)<br><br>
+&nbsp;&nbsp;<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">const</span> handler = () <span class="op">=&gt;</span> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">setWidth</span>(<span class="fn">window</span>.<span class="vl">innerWidth</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">window</span>.<span class="fn">addEventListener</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">'resize'</span>, handler<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> () <span class="op">=&gt;</span> <span class="fn">window</span>.<span class="fn">removeEventListener</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">'resize'</span>, handler<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+&nbsp;&nbsp;}, [])<br><br>
+&nbsp;&nbsp;<span class="kw">return</span> <span class="vl">width</span><br>
+}
+      </div>
+    </div>
+
+    <div class="hook-demo">
+      <h3>🔌 使用：哪里需要哪里拿</h3>
+      <div class="code">
+<span class="cm">// 任意组件直接使用，不需要 class/HOC</span><br>
+<span class="kw">function</span> <span class="fn">MyComponent</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> <span class="vl">width</span> = <span class="fn">useWindowWidth</span>()<br><br>
+&nbsp;&nbsp;<span class="kw">return</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>p<span class="op">&gt;</span>窗口宽度：{<span class="vl">width</span>}px<span class="op">&lt;</span>/p<span class="op">&gt;</span><br>
+&nbsp;&nbsp;)<br>
+}<br><br>
+<span class="cm">// 另一个组件也能用</span><br>
+<span class="kw">function</span> <span class="fn">Sidebar</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> <span class="vl">width</span> = <span class="fn">useWindowWidth</span>()<br>
+&nbsp;&nbsp;<span class="kw">const</span> <span class="vl">collapsed</span> = <span class="vl">width</span> <span class="op">&lt;</span> <span class="num">768</span><br>
+&nbsp;&nbsp;<span class="cm">// ...</span><br>
+}
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>🧠 本质：</strong>自定义 Hook 就是一个函数，内部可以调用其他 Hook（useState、useEffect 等）。
+    它和普通函数的区别仅在于<strong>名字以 <code>use</code> 开头</strong>——React 靠这个约定来检查 Hook 规则。
+  </div>
+</div>
+
+<!-- ====================== 第6节：Class vs Hooks 对比 ====================== -->
+<div class="card">
+  <h2>⑥ Class vs Hooks 全面对比 <span class="badge">Cheat Sheet</span></h2>
+
+  <table class="compare-table">
+    <tr>
+      <th style="width:20%">场景</th>
+      <th style="width:40%">以前 Class</th>
+      <th style="width:40%">现在 Hooks</th>
+    </tr>
+    <tr>
+      <td style="font-weight:600;">定义状态</td>
+      <td><code>this.state = {count: 0}</code></td>
+      <td><code>const [count, setCount] = useState(0)</code></td>
+    </tr>
+    <tr>
+      <td style="font-weight:600;">更新状态</td>
+      <td><code>this.setState({count: 1})</code></td>
+      <td><code>setCount(1)</code></td>
+    </tr>
+    <tr>
+      <td style="font-weight:600;">挂载时</td>
+      <td><code>componentDidMount()</code></td>
+      <td><code>useEffect(() =&gt; {...}, [])</code></td>
+    </tr>
+    <tr>
+      <td style="font-weight:600;">更新时</td>
+      <td><code>componentDidUpdate()</code></td>
+      <td><code>useEffect(() =&gt; {...}, [dep])</code></td>
+    </tr>
+    <tr>
+      <td style="font-weight:600;">卸载时清理</td>
+      <td><code>componentWillUnmount()</code></td>
+      <td><code>useEffect(() =&gt; { return () =&gt; {...} }, [])</code></td>
+    </tr>
+    <tr>
+      <td style="font-weight:600;">引用 DOM</td>
+      <td><code>React.createRef()</code></td>
+      <td><code>useRef(null)</code></td>
+    </tr>
+    <tr>
+      <td style="font-weight:600;">复用逻辑</td>
+      <td>HOC / Render Props（套娃）</td>
+      <td>自定义 Hook（就是个函数）</td>
+    </tr>
+    <tr>
+      <td style="font-weight:600;">this 问题</td>
+      <td>经常绑错 <code>this</code></td>
+      <td>没有 <code>this</code></td>
+    </tr>
+  </table>
+</div>
+
+<!-- ====================== 第7节：Hooks 规则 ====================== -->
+<div class="card">
+  <h2>⑦ Hooks 的两条铁律 <span class="badge">Rules</span></h2>
+
+  <div class="rules">
+    <div class="rule-card">
+      <div class="num">1</div>
+      <div style="font-weight:600;margin-bottom:6px;">只在最顶层调用</div>
+      <div style="font-size:12px;color:#94a3b8;line-height:1.6;">
+        不要在条件、循环、嵌套函数里用 Hook。<br>
+        React 靠<strong>调用顺序</strong>匹配每次渲染的 Hook。
+      </div>
+    </div>
+    <div class="rule-card">
+      <div class="num">2</div>
+      <div style="font-weight:600;margin-bottom:6px;">只在 React 函数里调用</div>
+      <div style="font-size:12px;color:#94a3b8;line-height:1.6;">
+        普通 JS 函数不能用 Hook。<br>
+        只能在<strong>函数组件</strong>或<strong>自定义 Hook</strong> 里调用。
+      </div>
+    </div>
+  </div>
+
+  <div class="note orange" style="margin-top:14px;">
+    <strong>❌ 错误写法：</strong>
+    <div class="code" style="margin-top:8px;">
+<span class="kw">if</span> (isLoading) {<br>
+&nbsp;&nbsp;<span class="kw">const</span> [data] = <span class="fn">useState</span>(<span class="kw">null</span>)&nbsp;&nbsp;<span class="cm">// ❌ 条件里不能调用 Hook</span><br>
+}
+    </div>
+    <div style="margin-top:8px;"><strong>✅ 正确写法：</strong>始终在最顶层调用，条件判断放里面</div>
+  </div>
+</div>
+
+<!-- ====================== 第8节：闭包与 Hooks ====================== -->
+<div class="card">
+  <h2>⑧ 闭包 × Hooks — 底层原理 <span class="badge">Under The Hood</span></h2>
+
+  <div class="note green">
+    <strong>💡 Hooks 底层大量依赖闭包。</strong><br>
+    每次渲染都是一个<strong>独立的闭包</strong>，<code>useEffect</code> 捕获的是"那一次"渲染的变量值。
+  </div>
+
+  <div class="grid-2" style="margin-top:12px;">
+    <div class="hook-demo">
+      <h3>🔒 每次渲染 = 新的闭包</h3>
+      <div class="code">
+<span class="kw">function</span> <span class="fn">Counter</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> [<span class="vl">count</span>, <span class="vl">setCount</span>] = <span class="fn">useState</span>(<span class="num">0</span>)<br><br>
+&nbsp;&nbsp;<span class="kw">const</span> <span class="fn">handleClick</span> = () <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">setTimeout</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">alert</span>(count)&nbsp;&nbsp;<span class="cm">// ← 这个 count 是点击时的快照</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;}, <span class="num">3000</span>)<br>
+&nbsp;&nbsp;}<br><br>
+&nbsp;&nbsp;<span class="kw">return</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>button onClick<span class="op">=</span>{<span class="vl">handleClick</span>}<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{count}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/button<span class="op">&gt;</span><br>
+&nbsp;&nbsp;)<br>
+}
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; justify-content:center;">
+      <div class="flow-wrap" style="flex-direction:column;align-items:flex-start;">
+        <div><span style="color:#94a3b8;">渲染 #1:</span> count=0, handleClick 闭包捕获 0</div>
+        <div style="color:#4a5568;padding-left:20px;">↓ 点击按钮 → setTimeout(3秒)</div>
+        <div><span style="color:#94a3b8;">渲染 #2:</span> count=1（setCount 触发了重渲染）</div>
+        <div style="color:#4a5568;padding-left:20px;">↓ 3秒到</div>
+        <div><span style="color:#e06c75;">alert(0)</span> ← 弹出的是渲染#1捕获的值，不是当前值</div>
+      </div>
+      <div class="note" style="margin-top:10px;">
+        <strong>闭包陷阱：</strong>setTimeout 的回调捕获了"那一次"渲染的 count。
+        为了解决这个问题，<code>setCount</code> 可以传函数：<code>setCount(prev =&gt; prev + 1)</code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== 第9节：流程图总览 ====================== -->
+<div class="card">
+  <h2>⑨ 完整流程总览 <span class="badge">Timeline</span></h2>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;">
+    <div class="timeline-demo">
+      <div class="tl-box tl-highlight">📦 函数组件<br><span style="font-size:10px;color:#94a3b8;">首次渲染</span></div>
+      <div class="tl-arrow">→</div>
+      <div class="tl-box">🏗️ 执行 useState<br><span style="font-size:10px;color:#94a3b8;">初始化 state</span></div>
+      <div class="tl-arrow">→</div>
+      <div class="tl-box">🔗 执行 useEffect<br><span style="font-size:10px;color:#94a3b8;">注册副作用</span></div>
+      <div class="tl-arrow">→</div>
+      <div class="tl-box">🖼️ 渲染 DOM<br><span style="font-size:10px;color:#94a3b8;">return JSX</span></div>
+      <div class="tl-arrow">→</div>
+      <div class="tl-box tl-highlight">⚡ 副作用执行<br><span style="font-size:10px;color:#94a3b8;">请求 / 订阅</span></div>
+    </div>
+
+    <div style="color:#4a5568;font-size:12px;padding:6px 0;">┄┄┄┄┄ 用户交互触发的更新 ┄┄┄┄┄</div>
+
+    <div class="timeline-demo">
+      <div class="tl-box">👆 setState()<br><span style="font-size:10px;color:#94a3b8;">用户点击</span></div>
+      <div class="tl-arrow">→</div>
+      <div class="tl-box tl-highlight">🔄 重新渲染<br><span style="font-size:10px;color:#94a3b8;">新闭包</span></div>
+      <div class="tl-arrow">→</div>
+      <div class="tl-box">🧹 清理旧 effect<br><span style="font-size:10px;color:#94a3b8;">卸载回调</span></div>
+      <div class="tl-arrow">→</div>
+      <div class="tl-box">🔗 执行新 effect<br><span style="font-size:10px;color:#94a3b8;">新依赖值</span></div>
+      <div class="tl-arrow">→</div>
+      <div class="tl-box">🖼️ 更新 DOM<br><span style="font-size:10px;color:#94a3b8;">diff 更新</span></div>
+    </div>
+
+    <div style="color:#4a5568;font-size:12px;padding:6px 0;">┄┄┄┄┄ 组件卸载 ┄┄┄┄┄</div>
+
+    <div class="timeline-demo">
+      <div class="tl-box tl-highlight">🗑️ 组件卸载</div>
+      <div class="tl-arrow">→</div>
+      <div class="tl-box">🧹 执行所有清理<br><span style="font-size:10px;color:#94a3b8;">取消订阅 / 清除定时器</span></div>
+      <div class="tl-arrow">→</div>
+      <div class="tl-box">✅ 释放内存</div>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:12px;">
+    <strong>🎯 一句话总结：</strong><br>
+    <strong>Hooks</strong> 让函数组件也能用 state 和生命周期。<br>
+    <strong>底层闭包</strong> 让每次渲染都有独立快照。<br>
+    <strong>自定义 Hook</strong> 让逻辑复用从套娃变成函数调用。
+  </div>
+</div>
+
+<div style="text-align:center;color:#4a5568;font-size:12px;padding:10px 0;">
+React Hooks 可视化学习 · 交互图解
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React 完整学习指南 - 从入门到熟练</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #0b1120;
+  color: #e2e8f0;
+  padding: 30px;
+}
+a { color: #61dafb; text-decoration:none; }
+h1 {
+  text-align:center;
+  font-size: 30px;
+  margin-bottom: 4px;
+  background: linear-gradient(135deg, #61dafb, #a78bfa, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.subtitle {
+  text-align:center;
+  color: #64748b;
+  margin-bottom: 30px;
+  font-size:13px;
+}
+
+/* 导航锚点 */
+.toc {
+  background: #1e293b;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 30px;
+  border:1px solid #334155;
+}
+.toc h3 { font-size:15px; margin-bottom:12px; color:#94a3b8; }
+.toc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 6px;
+}
+.toc-grid a {
+  display:block;
+  padding: 6px 10px;
+  border-radius:4px;
+  font-size:13px;
+  color: #94a3b8;
+  transition: all 0.2s;
+}
+.toc-grid a:hover { background:#334155; color:#61dafb; }
+.toc-grid a .num { color:#4a5568; margin-right:4px; }
+
+/* 卡片 */
+.card {
+  background: #1e293b;
+  border:1px solid #334155;
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+.card h2 {
+  font-size:17px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom:2px solid #334155;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.card h2 .badge {
+  font-size:11px;
+  background:#334155;
+  border-radius:4px;
+  padding:2px 8px;
+  font-weight:400;
+  color:#94a3b8;
+}
+.card h3 {
+  font-size:14px;
+  color:#61dafb;
+  margin: 14px 0 8px;
+}
+.card h4 {
+  font-size:13px;
+  color:#a78bfa;
+  margin: 10px 0 6px;
+}
+
+/* 代码 */
+.code {
+  background: #0f172a;
+  border:1px solid #1e293b;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-family: 'Fira Code','Cascadia Code','Consolas',monospace;
+  font-size:13px;
+  line-height:1.8;
+  overflow-x:auto;
+  margin:8px 0;
+}
+.code .cm { color:#5a7a8a; }
+.code .kw { color:#c678dd; }
+.code .fn { color:#61afef; }
+.code .s  { color:#98c379; }
+.code .num { color:#d19a66; }
+.code .vl { color:#e06c75; }
+.code .op { color:#56b6c2; }
+.code .tag { color:#e06c75; }
+.code .atr { color:#d19a66; }
+
+/* 网格 */
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+@media (max-width:750px) {
+  .grid-2, .grid-3 { grid-template-columns:1fr; }
+}
+
+/* 流程图 */
+.flow { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px; padding:14px 0; }
+.fb {
+  background:#0f172a;
+  border:2px solid #334155;
+  border-radius:8px;
+  padding:10px 16px;
+  text-align:center;
+  font-size:13px;
+  font-weight:600;
+  min-width:70px;
+}
+.fb.blue  { border-color:#61afef; background:#0f1a2e; }
+.fb.green { border-color:#98c379; background:#0f1a12; }
+.fb.pink  { border-color:#e06c75; background:#1e1820; }
+.fb.purple{ border-color:#c678dd; background:#1a1025; }
+.fb.orange{ border-color:#d19a66; background:#1e180f; }
+.fb.cyan  { border-color:#56b6c2; background:#0f1c20; }
+.f-arrow { color:#4a5568; font-size:18px; }
+
+/* 笔记条 */
+.note {
+  background:#0f1a2e;
+  border-left:4px solid #61dafb;
+  padding:12px 16px;
+  border-radius:4px;
+  font-size:13px;
+  margin:12px 0;
+  color:#94a3b8;
+  line-height:1.6;
+}
+.note strong { color:#e2e8f0; }
+.note.green { border-color:#98c379; background:#0f1a12; }
+.note.orange { border-color:#d19a66; background:#1e180f; }
+.note.pink { border-color:#e06c75; background:#1e1820; }
+
+/* 对比表 */
+.tbl { width:100%; border-collapse:collapse; font-size:13px; margin:10px 0; }
+.tbl th {
+  background:#0f172a;
+  padding:8px 12px;
+  text-align:left;
+  color:#94a3b8;
+  border-bottom:2px solid #334155;
+}
+.tbl td { padding:8px 12px; border-bottom:1px solid #1e293b; }
+.tbl tr:hover td { background:rgba(255,255,255,0.02); }
+
+/* 小标签 */
+.lbl {
+  display:inline-block;
+  font-size:11px;
+  padding:1px 7px;
+  border-radius:3px;
+  margin:0 3px;
+}
+.lbl.blue  { background:#61afef33; color:#61afef; }
+.lbl.green { background:#98c37933; color:#98c379; }
+.lbl.pink  { background:#e06c7533; color:#e06c75; }
+
+/* 层级缩进 */
+.indent { padding-left:20px; border-left:2px solid #334155; margin:8px 0; }
+
+/* 进度条 */
+.progress-wrap { display:flex; gap:6px; margin:16px 0; flex-wrap:wrap; }
+.prog-item {
+  flex:1; min-width:60px;
+  background:#0f172a;
+  border:1px solid #334155;
+  border-radius:6px;
+  padding:8px;
+  text-align:center;
+  font-size:11px;
+  color:#64748b;
+}
+.prog-item.active { border-color:#61dafb; background:#0f1a2e; }
+.prog-item .dot { display:block; width:8px; height:8px; border-radius:50%; background:#334155; margin:0 auto 4px; }
+.prog-item .dot.on { background:#61dafb; }
+</style>
+</head>
+<body>
+
+<h1>⚛️ React 完整学习指南</h1>
+<p class="subtitle">从入门到熟练 · 所有常用知识点一站式整理</p>
+
+<!-- ========== 目录导航 ========== -->
+<div class="toc">
+<h3>📑 目录</h3>
+<div class="toc-grid">
+  <a href="#s1"><span class="num">01</span> 什么是 React</a>
+  <a href="#s2"><span class="num">02</span> JSX 语法</a>
+  <a href="#s3"><span class="num">03</span> 组件</a>
+  <a href="#s4"><span class="num">04</span> Props</a>
+  <a href="#s5"><span class="num">05</span> State & 事件</a>
+  <a href="#s6"><span class="num">06</span> 条件 & 列表</a>
+  <a href="#s7"><span class="num">07</span> 组件通信</a>
+  <a href="#s8"><span class="num">08</span> 表单处理</a>
+  <a href="#s9"><span class="num">09</span> Hooks 核心</a>
+  <a href="#s10"><span class="num">10</span> Hooks 进阶</a>
+  <a href="#s11"><span class="num">11</span> Context</a>
+  <a href="#s12"><span class="num">12</span> useReducer</a>
+  <a href="#s13"><span class="num">13</span> 自定义 Hook</a>
+  <a href="#s14"><span class="num">14</span> 性能优化</a>
+  <a href="#s15"><span class="num">15</span> React Router</a>
+  <a href="#s16"><span class="num">16</span> 状态管理</a>
+  <a href="#s17"><span class="num">17</span> 项目架构</a>
+  <a href="#s18"><span class="num">18</span> 常见陷阱</a>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s1">
+<h2>① 什么是 React <span class="badge">Core</span></h2>
+
+<div class="grid-2">
+  <div>
+    <h3>一句话定义</h3>
+    <p style="font-size:14px;line-height:1.8;">React 是一个用于构建<strong>用户界面</strong>的 JavaScript 库。</p>
+    <ul style="font-size:13px;line-height:2;padding-left:18px;margin:8px 0;">
+      <li>✅ <strong>声明式</strong> — 描述"界面长什么样"，React 负责更新</li>
+      <li>✅ <strong>组件化</strong> — 把 UI 拆成独立、可复用的零件</li>
+      <li>✅ <strong>跨平台</strong> — Web (React DOM) / 移动端 (React Native)</li>
+    </ul>
+    <div class="note" style="margin:6px 0;">
+      <strong>React 不是框架，是个库。</strong>它只关心"怎么渲染 UI"，路由、状态管理、HTTP 请求这些需要你自己选工具。
+    </div>
+  </div>
+
+  <div>
+    <h3>核心思想：声明式 vs 命令式</h3>
+    <div class="code">
+<span class="cm">// ❌ 命令式（jQuery 风格）—— 手把手教浏览器做事</span><br>
+<span class="kw">const</span> btn = <span class="fn">document</span>.<span class="fn">getElementById</span>(<span class="s">'btn'</span>)<br>
+btn.<span class="fn">addEventListener</span>(<span class="s">'click'</span>, () <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="kw">const</span> div = <span class="fn">document</span>.<span class="fn">getElementById</span>(<span class="s">'root'</span>)<br>
+&nbsp;&nbsp;div.<span class="vl">innerHTML</span> = <span class="s">'点了'</span><br>
+})<br><br>
+<span class="cm">// ✅ 声明式（React 风格）—— 描述结果，React 搞定过程</span><br>
+&lt;button onClick={<span class="op">=</span>&gt; <span class="fn">setClicked</span>(<span class="kw">true</span>)}&gt;<br>
+&nbsp;&nbsp;{clicked <span class="op">?</span> <span class="s">'点了'</span> : <span class="s">'点我'</span>}<br>
+&lt;/button&gt;
+    </div>
+  </div>
+</div>
+
+<h3>Virtual DOM — React 快的秘密</h3>
+<div class="flow">
+  <div class="fb pink">状态变化</div>
+  <div class="f-arrow">→</div>
+  <div class="fb blue">生成新 VDOM</div>
+  <div class="f-arrow">→</div>
+  <div class="fb purple">Diff 对比</div>
+  <div class="f-arrow">→</div>
+  <div class="fb green">只更新<br>有变化的部分</div>
+  <div class="f-arrow">→</div>
+  <div class="fb">真实 DOM</div>
+</div>
+<div class="note green">
+  <strong>Virtual DOM = 内存中的"轻量 DOM"。</strong>每次状态变，React 先在 VDOM 上算出最小更新范围，再批量打到真实 DOM，比直接操作真实 DOM 快很多。
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s2">
+<h2>② JSX 语法 <span class="badge">写 UI 的语法糖</span></h2>
+
+<div class="grid-2">
+  <div>
+    <h3>JSX 是什么？</h3>
+    <p style="font-size:13px;line-height:1.7;">JSX = JavaScript + XML。让你在 JS 里直接写 HTML 标签。</p>
+    <div class="code">
+<span class="kw">const</span> element = <span class="op">&lt;</span>h1<span class="op">&gt;</span>你好，React<span class="op">&lt;</span>/h1<span class="op">&gt;</span>
+    </div>
+    <p style="font-size:13px;color:#94a3b8;margin:6px 0;">最终会被编译成 <code>React.createElement()</code> 调用。</p>
+  </div>
+
+  <div>
+    <h3>JSX 规则速览</h3>
+    <div class="code">
+<span class="cm">/* 1. 只能有一个根元素 */</span><br>
+<span class="op">&lt;</span>div<span class="op">&gt;</span>
+&nbsp;&nbsp;<span class="op">&lt;</span>h1<span class="op">&gt;</span>标题<span class="op">&lt;</span>/h1<span class="op">&gt;</span>
+&nbsp;&nbsp;<span class="op">&lt;</span>p<span class="op">&gt;</span>内容<span class="op">&lt;</span>/p<span class="op">&gt;</span>
+<span class="op">&lt;</span>/div<span class="op">&gt;</span>
+<span class="cm">/* ↑ 或者用 &lt;&gt;&lt;/&gt; (Fragment) */</span><br><br>
+<span class="cm">/* 2. {} 嵌入 JS 表达式 */</span><br>
+<span class="op">&lt;</span>p<span class="op">&gt;</span>结果：{<span class="num">1</span> <span class="op">+</span> <span class="num">2</span>}，{<span class="vl">user</span>.<span class="vl">name</span>}<span class="op">&lt;</span>/p<span class="op">&gt;</span><br><br>
+<span class="cm">/* 3. class → className */</span><br>
+<span class="op">&lt;</span>div className=<span class="s">"container"</span><span class="op">&gt;</span><br><br>
+<span class="cm">/* 4. 标签必须闭合 */</span><br>
+<span class="op">&lt;</span>br /<span class="op">&gt;</span> &nbsp;&nbsp;<span class="op">&lt;</span>img src=<span class="s">"..."</span> /<span class="op">&gt;</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s3">
+<h2>③ 组件 <span class="badge">Component</span></h2>
+
+<div class="grid-2">
+  <div class="hook-demo">
+    <h3>✅ 函数组件（现代写法）</h3>
+    <div class="code">
+<span class="kw">function</span> <span class="fn">Welcome</span>({ <span class="vl">name</span> }) {<br>
+&nbsp;&nbsp;<span class="kw">return</span> <span class="op">&lt;</span>h1<span class="op">&gt;</span>你好，{<span class="vl">name</span>}<span class="op">&lt;</span>/h1<span class="op">&gt;</span><br>
+}<br><br>
+<span class="cm">// 使用</span><br>
+<span class="op">&lt;</span>Welcome name=<span class="s">"小明"</span> /<span class="op">&gt;</span>
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>❌ Class 组件（旧的，了解即可）</h3>
+    <div class="code">
+<span class="kw">class</span> <span class="fn">Welcome</span> <span class="kw">extends</span> React.<span class="fn">Component</span> {<br>
+&nbsp;&nbsp;<span class="fn">render</span>() {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="op">&lt;</span>h1<span class="op">&gt;</span>你好，{<span class="kw">this</span>.<span class="vl">props</span>.<span class="vl">name</span>}<span class="op">&lt;</span>/h1<span class="op">&gt;</span><br>
+&nbsp;&nbsp;}<br>
+}
+    </div>
+  </div>
+</div>
+
+<h3>组件命名规则</h3>
+<p style="font-size:13px;line-height:1.7;">
+<strong style="color:#e06c75;">大写字母开头</strong> — React 区分组件和普通 HTML 标签的唯一方式。<br>
+<code>&lt;div&gt;</code> → HTML div 标签 <code>&lt;Welcome /&gt;</code> → Welcome 组件
+</p>
+
+<h3>组件嵌套</h3>
+<div class="flow">
+  <div class="fb blue">App<br><span style="font-size:11px;font-weight:400;">根组件</span></div>
+  <div class="f-arrow">→</div>
+  <div class="fb green">Header<br><span style="font-size:11px;font-weight:400;">头部</span></div>
+  <div class="fb green">Sidebar<br><span style="font-size:11px;font-weight:400;">侧栏</span></div>
+  <div class="fb green">Main<br><span style="font-size:11px;font-weight:400;">主区域</span></div>
+  <div class="fb green">Footer<br><span style="font-size:11px;font-weight:400;">底部</span></div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s4">
+<h2>④ Props — 父组件传数据给子组件 <span class="badge">单向数据流</span></h2>
+
+<div class="grid-2">
+  <div>
+    <div class="code">
+<span class="cm">// 父组件</span><br>
+<span class="kw">function</span> <span class="fn">App</span>() {<br>
+&nbsp;&nbsp;<span class="kw">return</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>UserCard<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="atr">name</span>=<span class="s">"小明"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="atr">age</span>={<span class="num">25</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="atr">hobbies</span>={[<span class="s">'游泳'</span>, <span class="s">'编程'</span>]}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;/<span class="op">&gt;</span><br>
+&nbsp;&nbsp;)<br>
+}
+    </div>
+  </div>
+
+  <div>
+    <div class="code">
+<span class="cm">// 子组件 — 通过参数接收 props</span><br>
+<span class="kw">function</span> <span class="fn">UserCard</span>({ <span class="vl">name</span>, <span class="vl">age</span>, <span class="vl">hobbies</span> }) {<br>
+&nbsp;&nbsp;<span class="kw">return</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>div<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>h3<span class="op">&gt;</span>{<span class="vl">name</span>}<span class="op">&lt;</span>/h3<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>p<span class="op">&gt;</span>年龄：{<span class="vl">age</span>}<span class="op">&lt;</span>/p<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>ul<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<span class="vl">hobbies</span>.<span class="fn">map</span>(h <span class="op">=&gt;</span> <span class="op">&lt;</span>li<span class="op">&gt;</span>{h}<span class="op">&lt;</span>/li<span class="op">&gt;</span>)}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/ul<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/div<span class="op">&gt;</span><br>
+&nbsp;&nbsp;)<br>
+}
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <strong>📐 Props 规则：</strong>
+  <ul style="margin:4px 0 0 16px;line-height:1.8;">
+    <li>只读的 — 子组件<strong>不能修改</strong> props，改了也是父组件改</li>
+    <li>可以传任意类型 — 字符串、数字、数组、对象、函数、甚至组件</li>
+    <li><code>children</code> — 特殊 prop，表示标签里的子元素</li>
+  </ul>
+</div>
+
+<div class="code" style="margin:8px 0;">
+<span class="cm">// children 示例</span><br>
+<span class="kw">function</span> <span class="fn">Card</span>({ <span class="vl">children</span> }) {<br>
+&nbsp;&nbsp;<span class="kw">return</span> <span class="op">&lt;</span>div className=<span class="s">"card"</span><span class="op">&gt;</span>{<span class="vl">children</span>}<span class="op">&lt;</span>/div<span class="op">&gt;</span><br>
+}<br><br>
+<span class="cm">// 使用</span><br>
+<span class="op">&lt;</span>Card<span class="op">&gt;</span><br>
+&nbsp;&nbsp;<span class="op">&lt;</span>h2<span class="op">&gt;</span>卡片标题<span class="op">&lt;</span>/h2<span class="op">&gt;</span><br>
+&nbsp;&nbsp;<span class="op">&lt;</span>p<span class="op">&gt;</span>这是卡片内容<span class="op">&lt;</span>/p<span class="op">&gt;</span><br>
+<span class="op">&lt;</span>/Card<span class="op">&gt;</span>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s5">
+<h2>⑤ State & 事件处理 <span class="badge">让组件"动"起来</span></h2>
+
+<div class="grid-2">
+  <div>
+    <h3>useState 基础</h3>
+    <div class="code">
+<span class="kw">import</span> { <span class="fn">useState</span> } <span class="kw">from</span> <span class="s">'react'</span><br><br>
+<span class="kw">function</span> <span class="fn">Counter</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> [<span class="vl">count</span>, <span class="vl">setCount</span>] = <span class="fn">useState</span>(<span class="num">0</span>)<br>
+&nbsp;&nbsp;<span class="cm">//       ↑ 当前值   ↑ 更新函数        ↑ 初始值</span><br><br>
+&nbsp;&nbsp;<span class="kw">return</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>button onClick={<span class="op">=</span>&gt; <span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)}<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;点了 {count} 次<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/button<span class="op">&gt;</span><br>
+&nbsp;&nbsp;)<br>
+}
+    </div>
+  </div>
+
+  <div>
+    <h3>setState 的两种用法</h3>
+    <div class="code">
+<span class="cm">// 方式1：直接传新值</span><br>
+<span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)<br><br>
+<span class="cm">// 方式2：传函数（基于前一个值计算）</span><br>
+<span class="fn">setCount</span>(prev <span class="op">=&gt;</span> prev <span class="op">+</span> <span class="num">1</span>)<br>
+<span class="cm">// ↑ 多次调用时用这个，避免闭包陷阱</span><br><br>
+<span class="cm">// 示例：想一次加3</span><br>
+<span class="kw">const</span> <span class="fn">handleClick</span> = () <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="fn">setCount</span>(prev <span class="op">=&gt;</span> prev <span class="op">+</span> <span class="num">1</span>)<br>
+&nbsp;&nbsp;<span class="fn">setCount</span>(prev <span class="op">=&gt;</span> prev <span class="op">+</span> <span class="num">1</span>)<br>
+&nbsp;&nbsp;<span class="fn">setCount</span>(prev <span class="op">=&gt;</span> prev <span class="op">+</span> <span class="num">1</span>)<br>
+}&nbsp;&nbsp;<span class="cm">// ← 点一次，+3</span>
+    </div>
+  </div>
+</div>
+
+<h3>事件处理速查</h3>
+<div class="code">
+<span class="cm">// 常见事件</span><br>
+<span class="op">&lt;</span>button onClick={<span class="op">=</span>&gt; ...}<span class="op">&gt;</span>点击<span class="op">&lt;</span>/button<span class="op">&gt;</span><br>
+<span class="op">&lt;</span>input onChange={<span class="op">=</span>&gt; ...} /<span class="op">&gt;</span><br>
+<span class="op">&lt;</span>form onSubmit={<span class="op">=</span>&gt; ...}<span class="op">&gt;</span><span class="op">&lt;</span>/form<span class="op">&gt;</span><br>
+<span class="op">&lt;</span>input onBlur={<span class="op">=</span>&gt; ...} /<span class="op">&gt;</span>&nbsp;&nbsp;<span class="cm">// 失去焦点</span><br><br>
+<span class="cm">// 事件对象 e</span><br>
+<span class="op">&lt;</span>input onChange={<span class="op">=</span> (e) <span class="op">=&gt;</span> <span class="fn">setText</span>(e.<span class="vl">target</span>.<span class="vl">value</span>)} /<span class="op">&gt;</span>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s6">
+<h2>⑥ 条件渲染 & 列表渲染 <span class="badge">模板逻辑</span></h2>
+
+<div class="grid-2">
+  <div>
+    <h3>条件渲染</h3>
+    <div class="code">
+<span class="cm">// 1. 三元运算符（最常用）</span><br>
+<span class="kw">return</span> (<br>
+&nbsp;&nbsp;<span class="op">&lt;</span>div<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;{isLoggedIn <span class="op">?</span> <span class="op">&lt;</span>UserPanel /<span class="op">&gt;</span> : <span class="op">&lt;</span>LoginBtn /<span class="op">&gt;</span>}<br>
+&nbsp;&nbsp;<span class="op">&lt;</span>/div<span class="op">&gt;</span><br>)<br><br>
+<span class="cm">// 2. && 短路（条件为真才渲染）</span><br>
+{unreadCount <span class="op">&gt;</span> <span class="num">0</span> <span class="op">&amp;&amp;</span> <span class="op">&lt;</span>Badge count={<span class="vl">unreadCount</span>} /<span class="op">&gt;</span>}<br><br>
+<span class="cm">// 3. if-else（抽成函数）</span><br>
+<span class="kw">if</span> (loading) <span class="kw">return</span> <span class="op">&lt;</span>Spinner /<span class="op">&gt;</span><br>
+<span class="kw">if</span> (error) <span class="kw">return</span> <span class="op">&lt;</span>ErrorMsg /<span class="op">&gt;</span><br>
+<span class="kw">return</span> <span class="op">&lt;</span>DataView /<span class="op">&gt;</span>
+    </div>
+  </div>
+
+  <div>
+    <h3>列表渲染</h3>
+    <div class="code">
+<span class="cm">// 用数组的 map 方法</span><br>
+<span class="kw">const</span> <span class="vl">todos</span> = [<span class="s">'学习React'</span>, <span class="s">'写代码'</span>, <span class="s">'睡觉'</span>]<br><br>
+<span class="kw">return</span> (<br>
+&nbsp;&nbsp;<span class="op">&lt;</span>ul<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<span class="vl">todos</span>.<span class="fn">map</span>((todo, index) <span class="op">=&gt;</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>li <span class="atr">key</span>={<span class="vl">index</span>}<span class="op">&gt;</span>{todo}<span class="op">&lt;</span>/li<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;))}<br>
+&nbsp;&nbsp;<span class="op">&lt;</span>/ul<span class="op">&gt;</span><br>
+)<br><br>
+<span class="cm">// ⚠️ key 属性：每个列表项要唯一</span><br>
+<span class="cm">// 用数据的 id，不要用 index（除非静态列表）</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s7">
+<h2>⑦ 组件通信 <span class="badge">数据怎么传</span></h2>
+
+<div class="flow">
+  <div class="fb blue" style="min-width:100px;">App<br><span style="font-size:11px;font-weight:400;">props ↓</span></div>
+  <div class="f-arrow">→</div>
+  <div class="fb green">Parent<br><span style="font-size:11px;font-weight:400;">props ↓ &nbsp; 回调 ↑</span></div>
+  <div class="f-arrow">→</div>
+  <div class="fb green">Child<br><span style="font-size:11px;font-weight:400;">回调函数传回数据</span></div>
+</div>
+
+<div class="grid-3">
+  <div class="hook-demo">
+    <h3>1️⃣ 父 → 子（Props）</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">最常见的方式，父传 props 给子。</p>
+    <div class="code">
+<span class="op">&lt;</span>Child <span class="atr">title</span>=<span class="s">"标题"</span> <span class="atr">data</span>={<span class="vl">data</span>} /<span class="op">&gt;</span>
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>2️⃣ 子 → 父（回调函数）</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">父传一个函数给子，子在需要时调用。</p>
+    <div class="code">
+<span class="cm">// 父传函数</span><br>
+<span class="op">&lt;</span>Child onDelete={<span class="op">=</span> (id) <span class="op">=&gt;</span> <span class="fn">handleDelete</span>(id)} /<span class="op">&gt;</span><br><br>
+<span class="cm">// 子组件调用</span><br>
+&lt;button onClick={<span class="op">=</span>&gt; onDelete(id)}&gt;删除&lt;/button&gt;
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>3️⃣ 兄弟通信（状态提升）</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">state 提到共同父组件，通过 props 下发。</p>
+    <div class="code">
+<span class="cm">// App 里定义 setSearch</span><br>
+<span class="op">&lt;</span>SearchBar onSearch={<span class="op">=</span> setSearch} /<span class="op">&gt;</span><br>
+<span class="op">&lt;</span>List filter={<span class="vl">search</span>} /<span class="op">&gt;</span>
+    </div>
+  </div>
+</div>
+
+<h3>状态提升示意图</h3>
+<div class="flow">
+  <div class="fb blue">App<br><span style="font-size:11px;font-weight:400;">state: searchText</span></div>
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <div class="fb green">SearchBar<br><span style="font-size:10px;font-weight:400;">onSearch→setSearchText</span></div>
+    <div class="fb green">List<br><span style="font-size:10px;font-weight:400;">filter={searchText}</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s8">
+<h2>⑧ 表单处理 <span class="badge">受控组件</span></h2>
+
+<div class="grid-2">
+  <div>
+    <h3>受控组件 — state 作为唯一数据源</h3>
+    <div class="code">
+<span class="kw">function</span> <span class="fn">LoginForm</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> [<span class="vl">email</span>, <span class="vl">setEmail</span>] = <span class="fn">useState</span>(<span class="s">''</span>)<br>
+&nbsp;&nbsp;<span class="kw">const</span> [<span class="vl">password</span>, <span class="vl">setPassword</span>] = <span class="fn">useState</span>(<span class="s">''</span>)<br><br>
+&nbsp;&nbsp;<span class="kw">const</span> <span class="fn">handleSubmit</span> = (e) <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;e.<span class="fn">preventDefault</span>()&nbsp;&nbsp;<span class="cm">// 阻止页面刷新</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">console</span>.<span class="fn">log</span>({ email, password })<br>
+&nbsp;&nbsp;}<br><br>
+&nbsp;&nbsp;<span class="kw">return</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>form onSubmit={<span class="vl">handleSubmit</span>}<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>input<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value={<span class="vl">email</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;onChange={<span class="op">=</span> (e) <span class="op">=&gt;</span> <span class="fn">setEmail</span>(e.<span class="vl">target</span>.<span class="vl">value</span>)}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>input <span class="atr">type</span>=<span class="s">"password"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value={<span class="vl">password</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;onChange={<span class="op">=</span> (e) <span class="op">=&gt;</span> <span class="fn">setPassword</span>(e.<span class="vl">target</span>.<span class="vl">value</span>)}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>button type=<span class="s">"submit"</span><span class="op">&gt;</span>登录<span class="op">&lt;</span>/button<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/form<span class="op">&gt;</span><br>
+&nbsp;&nbsp;)<br>
+}
+    </div>
+  </div>
+
+  <div>
+    <h3>常见表单元素</h3>
+    <div class="code">
+<span class="cm">// 复选框</span><br>
+<span class="op">&lt;</span>input <span class="atr">type</span>=<span class="s">"checkbox"</span><br>
+&nbsp;&nbsp;checked={<span class="vl">agree</span>}<br>
+&nbsp;&nbsp;onChange={<span class="op">=</span> (e) <span class="op">=&gt;</span> <span class="fn">setAgree</span>(e.<span class="vl">target</span>.<span class="vl">checked</span>)} /<span class="op">&gt;</span><br><br>
+<span class="cm">// 下拉框</span><br>
+<span class="op">&lt;</span>select value={<span class="vl">city</span>}<br>
+&nbsp;&nbsp;onChange={<span class="op">=</span> (e) <span class="op">=&gt;</span> <span class="fn">setCity</span>(e.<span class="vl">target</span>.<span class="vl">value</span>)}<span class="op">&gt;</span><br>
+&nbsp;&nbsp;<span class="op">&lt;</span>option value=<span class="s">"bj"</span><span class="op">&gt;</span>北京<span class="op">&lt;</span>/option<span class="op">&gt;</span><br>
+&nbsp;&nbsp;<span class="op">&lt;</span>option value=<span class="s">"sh"</span><span class="op">&gt;</span>上海<span class="op">&lt;</span>/option<span class="op">&gt;</span><br>
+<span class="op">&lt;</span>/select<span class="op">&gt;</span>
+    </div>
+
+    <div class="note green" style="margin-top:8px;">
+      <strong>受控 vs 非受控：</strong><br>
+      <strong>受控</strong> = React 管理输入值（state 控制 value）<br>
+      <strong>非受控</strong> = DOM 自己管理（用 <code>useRef</code> 取 defaultValue）
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s9">
+<h2>⑨ Hooks 核心三件套 <span class="badge">React 18+</span></h2>
+
+<div class="grid-3">
+  <div class="hook-demo">
+    <h3>useState</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">让函数组件有"记忆"</p>
+    <div class="code">
+<span class="kw">const</span> [<span class="vl">count</span>, <span class="vl">setCount</span>] = <span class="fn">useState</span>(<span class="num">0</span>)
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>useEffect</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">处理副作用（请求、订阅、DOM）</p>
+    <div class="code">
+<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="cm">// 做点事...</span><br>
+&nbsp;&nbsp;<span class="kw">return</span> () <span class="op">=&gt;</span> {} <span class="cm">// 清理</span><br>
+}, [<span class="vl">deps</span>])
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>useRef</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">可变引用，改值不触发渲染</p>
+    <div class="code">
+<span class="kw">const</span> <span class="vl">timerRef</span> = <span class="fn">useRef</span>(<span class="kw">null</span>)<br>
+<span class="vl">timerRef</span>.<span class="vl">current</span> = <span class="num">123</span>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  这三个在前面 <strong>React Hooks 可视化详解</strong> 已经深入讲过了，这里不再重复。直接看那个文件更详细。
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s10">
+<h2>⑩ Hooks 进阶 <span class="badge">性能 & 优化</span></h2>
+
+<div class="grid-2">
+  <div class="hook-demo">
+    <h3>useMemo — 缓存计算结果</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">避免每次渲染都重复计算复杂值。</p>
+    <div class="code">
+<span class="kw">const</span> <span class="vl">sortedList</span> = <span class="fn">useMemo</span>(<br>
+&nbsp;&nbsp;() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 只有 list 或 sortBy 变了才重新计算</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> [...list].<span class="fn">sort</span>(sortBy)<br>
+&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;[<span class="vl">list</span>, <span class="vl">sortBy</span>]<br>
+)
+    </div>
+    <p style="font-size:12px;color:#94a3b8;margin-top:4px;">回忆一下：<span class="lbl blue">useMemo</span> 缓存<strong>值</strong></p>
+  </div>
+
+  <div class="hook-demo">
+    <h3>useCallback — 缓存函数引用</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">避免子组件因父组件重新渲染而"无辜"重渲染。</p>
+    <div class="code">
+<span class="kw">const</span> <span class="vl">handleClick</span> = <span class="fn">useCallback</span>(<br>
+&nbsp;&nbsp;() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">setCount</span>(prev <span class="op">=&gt;</span> prev <span class="op">+</span> <span class="num">1</span>)<br>
+&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;[]<br>
+)
+    </div>
+    <p style="font-size:12px;color:#94a3b8;margin-top:4px;">回忆一下：<span class="lbl pink">useCallback</span> 缓存<strong>函数</strong></p>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="hook-demo">
+    <h3>useMemo vs useCallback</h3>
+    <div class="code">
+<span class="cm">// useMemo → 缓存结果值</span><br>
+<span class="fn">useMemo</span>(() <span class="op">=&gt;</span> <span class="vl">value</span>, deps)<br><br>
+<span class="cm">// useCallback → 缓存函数本身</span><br>
+<span class="fn">useCallback</span>(<span class="vl">fn</span>, deps)<br><br>
+<span class="cm">// useCallback(fn, deps) 等价于</span><br>
+<span class="fn">useMemo</span>(() <span class="op">=&gt;</span> <span class="vl">fn</span>, deps)
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>useTransition — 标记低优先级更新</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">React 18 新增，让 UI 保持响应。</p>
+    <div class="code">
+<span class="kw">const</span> [<span class="vl">isPending</span>, <span class="vl">startTransition</span>] = <span class="fn">useTransition</span>()<br><br>
+<span class="kw">const</span> <span class="fn">handleSearch</span> = (value) <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="fn">startTransition</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">setSearchQuery</span>(value)&nbsp;&nbsp;<span class="cm">// ← 低优先级更新</span><br>
+&nbsp;&nbsp;})<br>
+}
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>useDeferredValue — 延迟更新</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">类似防抖，但 React 内部调度。</p>
+    <div class="code">
+<span class="kw">const</span> [<span class="vl">query</span>, <span class="vl">setQuery</span>] = <span class="fn">useState</span>(<span class="s">''</span>)<br>
+<span class="kw">const</span> <span class="vl">deferredQuery</span> = <span class="fn">useDeferredValue</span>(<span class="vl">query</span>)<br><br>
+<span class="cm">// deferredQuery 会比 query 慢一拍更新</span><br>
+<span class="cm">// 适合搜索输入框 + 列表过滤</span>
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>useId — 唯一 ID 生成</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">生成在服务端和客户端一致的 ID。</p>
+    <div class="code">
+<span class="kw">const</span> <span class="vl">id</span> = <span class="fn">useId</span>()<br><br>
+<span class="op">&lt;</span>label htmlFor={<span class="vl">id</span>}<span class="op">&gt;</span>用户名<span class="op">&lt;</span>/label<span class="op">&gt;</span><br>
+<span class="op">&lt;</span>input id={<span class="vl">id</span>} /<span class="op">&gt;</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s11">
+<h2>⑪ Context — 跨层级数据传递 <span class="badge">避免 Props 层层传递</span></h2>
+
+<h3>什么时候用 Context？</h3>
+<div class="flow">
+  <div class="fb pink">App</div>
+  <div class="f-arrow">→</div>
+  <div class="fb green">Layout</div>
+  <div class="f-arrow">→</div>
+  <div class="fb green">Navbar</div>
+  <div class="f-arrow">→</div>
+  <div class="fb green">UserMenu</div>
+</div>
+<p style="font-size:13px;color:#94a3b8;margin:8px 0;">
+如果不做 Context，UserMenu 需要 theme 数据，就要从 App → Layout → Navbar → UserMenu 层层传，中间组件用不着也得传。
+</p>
+
+<div class="grid-2">
+  <div>
+    <div class="code">
+<span class="cm">// 1. 创建 Context</span><br>
+<span class="kw">const</span> ThemeContext = <span class="fn">createContext</span>(<span class="s">'light'</span>)<br><br>
+<span class="cm">// 2. 提供 Context（在 App 里）</span><br>
+<span class="kw">function</span> <span class="fn">App</span>() {<br>
+&nbsp;&nbsp;<span class="kw">return</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>ThemeContext.<span class="fn">Provider</span> value=<span class="s">"dark"</span><span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>Layout /<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/ThemeContext.<span class="fn">Provider</span><span class="op">&gt;</span><br>
+&nbsp;&nbsp;)<br>
+}
+    </div>
+  </div>
+
+  <div>
+    <div class="code">
+<span class="cm">// 3. 消费 Context（子组件直接拿）</span><br>
+<span class="kw">function</span> <span class="fn">UserMenu</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> <span class="vl">theme</span> = <span class="fn">useContext</span>(ThemeContext)<br>
+&nbsp;&nbsp;<span class="cm">// ← 直接拿，不需要经过中间组件</span><br>
+&nbsp;&nbsp;<span class="kw">return</span> <span class="op">&lt;</span>div className={<span class="s">`menu-`</span><span class="op">+</span><span class="vl">theme</span>}<span class="op">&gt;</span>...<span class="op">&lt;</span>/div<span class="op">&gt;</span><br>
+}
+    </div>
+
+    <div class="note green" style="margin-top:8px;">
+      <strong>⚠️ Context 的替代方案：</strong>组件组合（Component Composition）。
+      把组件作为 <code>children</code> 传下去，也能避免 Props 层层传。
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s12">
+<h2>⑫ useReducer — 复杂状态管理 <span class="badge">useState 的进阶版</span></h2>
+
+<div class="grid-2">
+  <div>
+    <h3>什么时候用它？</h3>
+    <ul style="font-size:13px;line-height:2;padding-left:18px;">
+      <li>多个 state 之间存在关联</li>
+      <li>更新逻辑复杂（比如多层嵌套对象）</li>
+      <li>下一个 state 依赖前一个 state</li>
+    </ul>
+  </div>
+
+  <div>
+    <div class="code">
+<span class="cm">// 1. 定义 reducer（就是个纯函数）</span><br>
+<span class="kw">function</span> <span class="fn">todoReducer</span>(state, action) {<br>
+&nbsp;&nbsp;<span class="kw">switch</span> (action.<span class="vl">type</span>) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">case</span> <span class="s">'ADD'</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> [...state, action.<span class="vl">payload</span>]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">case</span> <span class="s">'TOGGLE'</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> state.<span class="fn">map</span>(todo <span class="op">=&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;todo.<span class="vl">id</span> <span class="op">===</span> action.<span class="vl">id</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;? {...todo, done: !todo.done}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: todo<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">default</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> state<br>
+&nbsp;&nbsp;}<br>
+}
+    </div>
+  </div>
+</div>
+
+<div class="code">
+<span class="cm">// 2. 使用 useReducer</span><br>
+<span class="kw">const</span> [<span class="vl">todos</span>, <span class="vl">dispatch</span>] = <span class="fn">useReducer</span>(<span class="vl">todoReducer</span>, [])<br><br>
+<span class="cm">// 3. 触发更新（通过 dispatch 派发 action）</span><br>
+<span class="fn">dispatch</span>({ <span class="vl">type</span>: <span class="s">'ADD'</span>, <span class="vl">payload</span>: { <span class="vl">id</span>: <span class="num">1</span>, <span class="vl">text</span>: <span class="s">'学React'</span> } })<br>
+<span class="fn">dispatch</span>({ <span class="vl">type</span>: <span class="s">'TOGGLE'</span>, <span class="vl">id</span>: <span class="num">1</span> })
+</div>
+
+<div class="flow">
+  <div class="fb pink">用户操作</div>
+  <div class="f-arrow">→</div>
+  <div class="fb blue">dispatch(action)</div>
+  <div class="f-arrow">→</div>
+  <div class="fb purple">Reducer 纯函数<br><span style="font-size:11px;font-weight:400;">(prevState, action) → newState</span></div>
+  <div class="f-arrow">→</div>
+  <div class="fb green">新 State</div>
+  <div class="f-arrow">→</div>
+  <div class="fb green">重新渲染</div>
+</div>
+
+<div class="note">
+  <strong>useReducer + Context = 小 Redux：</strong>
+  用 Context 把 dispatch 和 state 传到子树，实现全局状态管理，不需要额外库。
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s13">
+<h2>⑬ 自定义 Hook — 逻辑复用的终极武器 <span class="badge">Reuse</span></h2>
+
+<div class="grid-2">
+  <div class="hook-demo">
+    <h3>示例：网络请求 Hook</h3>
+    <div class="code">
+<span class="kw">function</span> <span class="fn">useFetch</span>(url) {<br>
+&nbsp;&nbsp;<span class="kw">const</span> [<span class="vl">data</span>, <span class="vl">setData</span>] = <span class="fn">useState</span>(<span class="kw">null</span>)<br>
+&nbsp;&nbsp;<span class="kw">const</span> [<span class="vl">loading</span>, <span class="vl">setLoading</span>] = <span class="fn">useState</span>(<span class="kw">true</span>)<br>
+&nbsp;&nbsp;<span class="kw">const</span> [<span class="vl">error</span>, <span class="vl">setError</span>] = <span class="fn">useState</span>(<span class="kw">null</span>)<br><br>
+&nbsp;&nbsp;<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">fetch</span>(<span class="vl">url</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<span class="fn">then</span>(res <span class="op">=&gt;</span> res.<span class="fn">json</span>())<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<span class="fn">then</span>(<span class="vl">setData</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<span class="fn">catch</span>(<span class="vl">setError</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<span class="fn">finally</span>(() <span class="op">=&gt;</span> <span class="fn">setLoading</span>(<span class="kw">false</span>))<br>
+&nbsp;&nbsp;}, [<span class="vl">url</span>])<br><br>
+&nbsp;&nbsp;<span class="kw">return</span> { <span class="vl">data</span>, <span class="vl">loading</span>, <span class="vl">error</span> }<br>
+}
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>使用：一行搞定请求</h3>
+    <div class="code">
+<span class="kw">function</span> <span class="fn">UserList</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> { <span class="vl">data</span>, <span class="vl">loading</span>, <span class="vl">error</span> } = <span class="fn">useFetch</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="s">'/api/users'</span><br>
+&nbsp;&nbsp;)<br><br>
+&nbsp;&nbsp;<span class="kw">if</span> (loading) <span class="kw">return</span> <span class="op">&lt;</span>Spinner /<span class="op">&gt;</span><br>
+&nbsp;&nbsp;<span class="kw">if</span> (error) <span class="kw">return</span> <span class="op">&lt;</span>Error msg={<span class="vl">error</span>} /<span class="op">&gt;</span><br>
+&nbsp;&nbsp;<span class="kw">return</span> <span class="op">&lt;</span>UserList data={<span class="vl">data</span>} /<span class="op">&gt;</span><br>
+}
+    </div>
+    <div class="note green" style="margin:6px 0;">
+      <strong>任何组件都能用同一个 useFetch！</strong>
+      代码量从 N 个组件 × 30 行 → 1 个 Hook × 20 行。
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <strong>💡 自定义 Hook 的命名规则：</strong>函数名以 <code>use</code> 开头（React 靠这个检查 Hook 规则），内部可以调用其他 Hook。
+  就像"乐高积木"——把 useState + useEffect 等基础 Hook 组合成你自己的高阶功能块。
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s14">
+<h2>⑭ 性能优化 <span class="badge">让应用跑得更快</span></h2>
+
+<div class="grid-3">
+  <div class="hook-demo">
+    <h3>React.memo — 避免不必要的重渲染</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">浅比较 props，没变就不渲染。</p>
+    <div class="code">
+<span class="kw">const</span> <span class="fn">MyComponent</span> = React.<span class="fn">memo</span>(({ data }) <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="cm">// props 没变就不重新执行</span><br>
+&nbsp;&nbsp;<span class="kw">return</span> <span class="op">&lt;</span>div<span class="op">&gt;</span>{data}<span class="op">&lt;</span>/div<span class="op">&gt;</span><br>
+})
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>懒加载 — 按需加载</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">减小首屏加载体积。</p>
+    <div class="code">
+<span class="kw">const</span> <span class="fn">HeavyComponent</span> = <span class="fn">lazy</span>(() <span class="op">=&gt;</span> <span class="fn">import</span>(<span class="s">'./Heavy'</span>))<br><br>
+<span class="op">&lt;</span>Suspense fallback={<span class="op">&lt;</span>Loading /<span class="op">&gt;</span>}<span class="op">&gt;</span><br>
+&nbsp;&nbsp;<span class="op">&lt;</span>HeavyComponent /<span class="op">&gt;</span><br>
+<span class="op">&lt;</span>/Suspense<span class="op">&gt;</span>
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>虚拟列表 — 万条数据不卡</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:6px;">只渲染可见区域。</p>
+    <div class="code">
+<span class="cm">// 推荐库：react-window / react-virtuoso</span><br>
+<span class="kw">import</span> { <span class="fn">FixedSizeList</span> } <span class="kw">from</span> <span class="s">'react-window'</span><br><br>
+<span class="op">&lt;</span>FixedSizeList<br>
+&nbsp;&nbsp;height={<span class="num">500</span>}<br>
+&nbsp;&nbsp;itemCount={<span class="num">10000</span>}<br>
+&nbsp;&nbsp;itemSize={<span class="num">50</span>}<span class="op">&gt;</span><br>
+&nbsp;&nbsp;{({ index, style }) <span class="op">=&gt;</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>div style={<span class="vl">style</span>}<span class="op">&gt;</span>第 {index} 行<span class="op">&lt;</span>/div<span class="op">&gt;</span><br>
+&nbsp;&nbsp;)}<br>
+<span class="op">&lt;</span>/FixedSizeList<span class="op">&gt;</span>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="hook-demo">
+    <h3>🔄 渲染性能优化流程图</h3>
+    <div class="flow" style="font-size:12px;padding:8px 0;">
+      <div class="fb blue" style="min-width:70px;padding:6px 10px;">状态变化</div>
+      <div class="f-arrow" style="font-size:14px;">→</div>
+      <div class="fb" style="min-width:70px;padding:6px 10px;border-color:#61afef;">React.memo<br><span style="font-size:10px;font-weight:400;">浅比较 props</span></div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div style="font-size:11px;color:#56b6c2;">props 没变</div>
+        <div style="font-size:11px;color:#e06c75;">props 变了</div>
+      </div>
+      <div class="f-arrow" style="font-size:14px;">→</div>
+      <div class="fb green" style="min-width:70px;padding:6px 10px;">跳过渲染 ✅</div>
+      <div class="f-arrow" style="font-size:14px;">→</div>
+      <div class="fb pink" style="min-width:70px;padding:6px 10px;">重新渲染</div>
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>⚡ 性能排查 Checklist</h3>
+    <table class="tbl">
+      <tr><th>问题</th><th>方案</th></tr>
+      <tr><td>列表卡顿</td><td>虚拟列表</td></tr>
+      <tr><td>大组件重复渲染</td><td>React.memo</td></tr>
+      <tr><td>重复计算</td><td>useMemo</td></tr>
+      <tr><td>函数引用变化</td><td>useCallback</td></tr>
+      <tr><td>首屏太大</td><td>懒加载 + 代码分割</td></tr>
+      <tr><td>图片太多</td><td>懒加载 + 压缩</td></tr>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s15">
+<h2>⑮ React Router <span class="badge">页面导航</span></h2>
+
+<h3>React 官方推荐路由库，实现多页面切换</h3>
+
+<div class="grid-2">
+  <div>
+    <div class="code">
+<span class="cm">// 1. 安装：npm install react-router-dom</span><br><br>
+<span class="cm">// 2. 包裹应用</span><br>
+<span class="kw">import</span> { <span class="fn">BrowserRouter</span> } <span class="kw">from</span> <span class="s">'react-router-dom'</span><br><br>
+<span class="kw">function</span> <span class="fn">App</span>() {<br>
+&nbsp;&nbsp;<span class="kw">return</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>BrowserRouter<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>Routes<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>Route path=<span class="s">"/"</span> element={<span class="op">&lt;</span>Home /<span class="op">&gt;</span>} /<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>Route path=<span class="s">"/about"</span> element={<span class="op">&lt;</span>About /<span class="op">&gt;</span>} /<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>Route path=<span class="s">"/user/:id"</span> element={<span class="op">&lt;</span>User /<span class="op">&gt;</span>} /<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/Routes<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/BrowserRouter<span class="op">&gt;</span><br>
+&nbsp;&nbsp;)<br>
+}
+    </div>
+  </div>
+
+  <div>
+    <div class="code">
+<span class="cm">// 3. 页面跳转</span><br>
+<span class="kw">import</span> { <span class="fn">Link</span>, <span class="fn">useNavigate</span> } <span class="kw">from</span> <span class="s">'react-router-dom'</span><br><br>
+<span class="kw">function</span> <span class="fn">Nav</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> <span class="vl">navigate</span> = <span class="fn">useNavigate</span>()<br><br>
+&nbsp;&nbsp;<span class="kw">return</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>nav<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>Link to=<span class="s">"/"</span><span class="op">&gt;</span>首页<span class="op">&lt;</span>/Link<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>Link to=<span class="s">"/about"</span><span class="op">&gt;</span>关于<span class="op">&lt;</span>/Link<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<span class="cm">/* 编程式导航 */</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>button onClick={<span class="op">=</span>&gt; <span class="fn">navigate</span>(<span class="s">'/user/123'</span>)}<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;去用户页<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/button<span class="op">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">&lt;</span>/nav<span class="op">&gt;</span><br>
+&nbsp;&nbsp;)<br>
+}
+    </div>
+
+    <div class="code" style="margin-top:8px;">
+<span class="cm">// 4. 获取 URL 参数</span><br>
+<span class="kw">import</span> { <span class="fn">useParams</span> } <span class="kw">from</span> <span class="s">'react-router-dom'</span><br><br>
+<span class="kw">function</span> <span class="fn">User</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> { <span class="vl">id</span> } = <span class="fn">useParams</span>()&nbsp;&nbsp;<span class="cm">// /user/123 → id=123</span><br>
+&nbsp;&nbsp;<span class="kw">return</span> <span class="op">&lt;</span>h1<span class="op">&gt;</span>用户：{id}<span class="op">&lt;</span>/h1<span class="op">&gt;</span><br>
+}
+    </div>
+  </div>
+</div>
+
+<h3>路由层级结构</h3>
+<div class="flow">
+  <div class="fb blue">/ <br><span style="font-size:10px;font-weight:400;">Layout</span></div>
+  <div style="display:flex;flex-direction:column;gap:6px;">
+    <div class="fb green">/about<br><span style="font-size:10px;font-weight:400;">About</span></div>
+    <div class="fb green">/user/:id<br><span style="font-size:10px;font-weight:400;">UserProfile</span></div>
+    <div class="fb green">/dashboard<br><span style="font-size:10px;font-weight:400;">Dashboard</span>
+      <div style="display:flex;gap:6px;margin-top:4px;">
+        <div class="fb" style="font-size:10px;padding:4px 8px;border-color:#56b6c2;">/stats</div>
+        <div class="fb" style="font-size:10px;padding:4px 8px;border-color:#56b6c2;">/settings</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s16">
+<h2>⑯ 状态管理方案 <span class="badge">状态多到 Context 不够用时</span></h2>
+
+<div class="grid-3">
+  <div class="hook-demo">
+    <h3>🟢 useState / useReducer</h3>
+    <p style="font-size:12px;color:#94a3b8;">组件内部状态，够用就行。</p>
+    <div class="code" style="margin-top:6px;">
+<span class="kw">const</span> [count] = <span class="fn">useState</span>(<span class="num">0</span>)
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>🟡 Context + useReducer</h3>
+    <p style="font-size:12px;color:#94a3b8;">跨组件共享，中小项目够用。</p>
+    <div class="code" style="margin-top:6px;">
+<span class="op">&lt;</span>MyContext.<span class="fn">Provider</span><br>
+&nbsp;&nbsp;value={{ state, dispatch }}<span class="op">&gt;</span>
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>🔴 Zustand / Redux</h3>
+    <p style="font-size:12px;color:#94a3b8;">大型项目，复杂状态逻辑。</p>
+    <div class="code" style="margin-top:6px;">
+<span class="cm">// Zustand（现代推荐）</span><br>
+<span class="kw">const</span> useStore = <span class="fn">create</span>((set) <span class="op">=&gt;</span> ({<br>
+&nbsp;&nbsp;count: <span class="num">0</span>,<br>
+&nbsp;&nbsp;inc: () <span class="op">=&gt;</span> <span class="fn">set</span>((s) <span class="op">=&gt;</span> ({ count: s.count <span class="op">+</span> <span class="num">1</span> })),<br>}))
+    </div>
+  </div>
+</div>
+
+<h3>💡 选择建议</h3>
+<div class="flow">
+  <div class="fb purple" style="min-width:100px;">组件内部用<br><span style="font-size:11px;font-weight:400;">↳ useState</span></div>
+  <div class="f-arrow">→</div>
+  <div class="fb pink" style="min-width:120px;">跨组件共享<br><span style="font-size:11px;font-weight:400;">↳ Context + useReducer</span></div>
+  <div class="f-arrow">→</div>
+  <div class="fb blue" style="min-width:120px;">复杂大项目<br><span style="font-size:11px;font-weight:400;">↳ Zustand</span></div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s17">
+<h2>⑰ 项目架构指南 <span class="badge">真实项目怎么组织</span></h2>
+
+<h3>推荐目录结构</h3>
+<div class="grid-2">
+  <div>
+    <div class="code">
+src/<br>
+├── <span class="kw">components</span>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 通用组件</span><br>
+│&nbsp;&nbsp;├── Button/<br>
+│&nbsp;&nbsp;├── Modal/<br>
+│&nbsp;&nbsp;└── Loading/<br>
+├── <span class="kw">pages</span>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 页面组件</span><br>
+│&nbsp;&nbsp;├── Home/<br>
+│&nbsp;&nbsp;├── About/<br>
+│&nbsp;&nbsp;└── User/<br>
+├── <span class="kw">hooks</span>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 自定义 Hook</span><br>
+│&nbsp;&nbsp;├── useFetch.js<br>
+│&nbsp;&nbsp;└── useAuth.js<br>
+├── <span class="kw">context</span>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// Context</span><br>
+├── <span class="kw">services</span>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// API 请求</span><br>
+├── <span class="kw">utils</span>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 工具函数</span><br>
+├── <span class="kw">styles</span>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 样式</span><br>
+└── <span class="kw">App.jsx</span>
+    </div>
+  </div>
+
+  <div>
+    <h3>⚛️ 组件设计原则</h3>
+    <ul style="font-size:13px;line-height:2.2;padding-left:18px;">
+      <li><strong>单一职责</strong> — 一个组件只做一件事</li>
+      <li><strong>状态下沉</strong> — 状态放在需要它的最底层组件</li>
+      <li><strong>组件拆分</strong> — 超过 200 行考虑拆分</li>
+      <li><strong>容器 vs 展示</strong> — 逻辑组件和数据展示组件分离</li>
+    </ul>
+    <div class="note green" style="margin-top:8px;">
+      <strong>组件粒度判断标准：</strong><br>
+      如果一个组件要写注释才能看懂它在做什么，就该拆分了。
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="card" id="s18">
+<h2>⑱ 常见陷阱 & 避坑指南 <span class="badge">Pitfalls</span></h2>
+
+<div class="grid-2">
+  <div class="hook-demo">
+    <h3>⚠️ 闭包陷阱</h3>
+    <div class="code">
+<span class="cm">// ❌ useEffect 里用旧的 state</span><br>
+<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="kw">const</span> timer = <span class="fn">setInterval</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)&nbsp;&nbsp;<span class="cm">// ← count 永远是初始值！</span><br>
+&nbsp;&nbsp;}, <span class="num">1000</span>)<br>
+&nbsp;&nbsp;<span class="kw">return</span> () <span class="op">=&gt;</span> <span class="fn">clearInterval</span>(timer)<br>
+}, [])<br><br>
+<span class="cm">// ✅ 用函数形式更新</span><br>
+<span class="fn">setCount</span>(prev <span class="op">=&gt;</span> prev <span class="op">+</span> <span class="num">1</span>)
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>⚠️ useEffect 无限循环</h3>
+    <div class="code">
+<span class="cm">// ❌ 依赖数组里放了对象/数组</span><br>
+<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="fn">fetchData</span>(options)&nbsp;&nbsp;<span class="cm">// 不停重请求</span><br>
+}, [<span class="vl">options</span>])&nbsp;&nbsp;<span class="cm">// ← options 每次渲染都是新引用</span><br><br>
+<span class="cm">// ✅ 拆开传基本类型</span><br>
+}, [<span class="vl">options</span>.<span class="vl">page</span>, <span class="vl">options</span>.<span class="vl">size</span>])
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>⚠️ 直接修改 State</h3>
+    <div class="code">
+<span class="cm">// ❌ 直接修改对象</span><br>
+<span class="kw">const</span> [user, setUser] = <span class="fn">useState</span>({ name: <span class="s">'Xia'</span>, age: <span class="num">18</span> })<br>
+user.<span class="vl">age</span> = <span class="num">19</span>&nbsp;&nbsp;<span class="cm">// ❌ React 检测不到变化</span><br>
+<span class="fn">setUser</span>(user)<br><br>
+<span class="cm">// ✅ 创建新对象</span><br>
+<span class="fn">setUser</span>({ ...user, age: <span class="num">19</span> })
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>⚠️ setState 是异步的</h3>
+    <div class="code">
+<span class="cm">// 一个事件处理函数内多次 setState</span><br>
+<span class="kw">const</span> <span class="fn">handleClick</span> = () <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)<br>
+&nbsp;&nbsp;<span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)<br>
+&nbsp;&nbsp;<span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)<br>
+&nbsp;&nbsp;<span class="cm">// count 只加了 1！React 会批量合并</span><br>
+}<br><br>
+<span class="cm">// ✅ 用函数形式</span><br>
+<span class="fn">setCount</span>(prev <span class="op">=&gt;</span> prev <span class="op">+</span> <span class="num">1</span>)<br>
+<span class="fn">setCount</span>(prev <span class="op">=&gt;</span> prev <span class="op">+</span> <span class="num">1</span>)<br>
+<span class="fn">setCount</span>(prev <span class="op">=&gt;</span> prev <span class="op">+</span> <span class="num">1</span>)
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>⚠️ set 后的值不能马上</h3>
+    <div class="code">
+<span class="kw">const</span> <span class="fn">handleAdd</span> = () <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="fn">setItems</span>([...items, newItem])<br>
+&nbsp;&nbsp;<span class="fn">console</span>.<span class="fn">log</span>(items.<span class="vl">length</span>)&nbsp;&nbsp;<span class="cm">// ❌ 旧的长度！渲染后才更新</span><br>
+}<br><br>
+<span class="cm">// ✅ 用 useEffect 监听</span><br>
+<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> {<br>
+&nbsp;&nbsp;<span class="fn">console</span>.<span class="fn">log</span>(<span class="s">'items 变了'</span>, items.<span class="vl">length</span>)<br>
+}, [items])
+    </div>
+  </div>
+
+  <div class="hook-demo">
+    <h3>⚠️ key 用 index</h3>
+    <div class="code">
+<span class="cm">// ❌ 用 index 做 key</span><br>
+{items.<span class="fn">map</span>((item, i) <span class="op">=&gt;</span> (<br>
+&nbsp;&nbsp;<span class="op">&lt;</span>ListItem key={<span class="vl">i</span>} /<span class="op">&gt;</span>&nbsp;&nbsp;<span class="cm">// ← 列表增删会出 bug</span><br>
+))}<br><br>
+<span class="cm">// ✅ 用唯一 id</span><br>
+{items.<span class="fn">map</span>(item <span class="op">=&gt;</span> (<br>
+&nbsp;&nbsp;<span class="op">&lt;</span>ListItem key={<span class="vl">item</span>.<span class="vl">id</span>} /<span class="op">&gt;</span><br>
+))}
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============ 底部总结 ============ -->
+<div class="card" style="text-align:center;">
+  <h2 style="border:none;justify-content:center;font-size:20px;">🎯 学习路线图</h2>
+  <div class="flow" style="font-size:12px;">
+    <div class="fb pink" style="min-width:80px;padding:10px;">HTML/CSS<br><span style="font-size:10px;font-weight:400;">基础</span></div>
+    <div class="f-arrow">→</div>
+    <div class="fb pink" style="min-width:80px;padding:10px;">JavaScript<br><span style="font-size:10px;font-weight:400;">ES6+</span></div>
+    <div class="f-arrow">→</div>
+    <div class="fb blue" style="min-width:80px;padding:10px;">React 基础<br><span style="font-size:10px;font-weight:400;">JSX / 组件 / props / state</span></div>
+    <div class="f-arrow">→</div>
+    <div class="fb blue" style="min-width:80px;padding:10px;">Hooks<br><span style="font-size:10px;font-weight:400;">useState / useEffect / useRef</span></div>
+    <div class="f-arrow">→</div>
+    <div class="fb purple" style="min-width:80px;padding:10px;">进阶<br><span style="font-size:10px;font-weight:400;">Context / Router / 性能优化</span></div>
+    <div class="f-arrow">→</div>
+    <div class="fb green" style="min-width:80px;padding:10px;">实战<br><span style="font-size:10px;font-weight:400;">项目 + 状态管理</span></div>
+  </div>
+
+  <div class="note" style="margin-top:16px;text-align:left;">
+    <strong>📌 学习建议：</strong><br>
+    1. 先把 <strong>JSX + 组件 + Props + State</strong> 搞熟，这 4 个够写 80% 的页面了<br>
+    2. 然后 <strong>useEffect</strong> 处理 API 请求和副作用<br>
+    3. 遇到复杂状态用 <strong>useReducer</strong>，跨组件用 <strong>Context</strong><br>
+    4. 项目大了再学 <strong>React Router、性能优化、状态管理库</strong><br>
+    5. 别一开始就想全学完——写几个项目自然就熟了
+  </div>
+</div>
+
+<div style="text-align:center;color:#4a5568;font-size:12px;padding:10px 0;">
+从入门到熟练 · 18个专题 · 完整 React 学习指南
+</div>
+
+</body>
+</html>
