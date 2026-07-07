@@ -16,120 +16,53 @@
 | 6 | 🔬 | **[低光照处理专题](./06-低光照处理专题/README.md)** | 低光照图像处理全链路：增强、降噪、论文、分割预处理 | 🖼️ 多张 |
 | 7 | 🖼️ | **[OpenCV 完整学习笔记](./07-OpenCV学习笔记/README.md)** | OpenCV 全模块指南：20个专题+流行度排行+配图 | 🖼️ 11 张 |
 | 8 | 📝 | **[NLP 完整学习笔记](./08-NLP学习笔记/README.md)** | NLP全栈：传统方法→BERT/GPT→LLM→RAG→Agent→多模态 | 🖼️ 8 张 |
-| 9 | 🎯 | **[Roboflow 学习笔记](./09-Roboflow学习笔记/README.md)**
-| 10 | 🐳 | **[Docker 学习笔记](./10-Docker学习笔记/README.md)** | Docker全指南：容器/镜像/Compose/网络/卷/部署/RK3576 | 🖼️ 4 张 | | Roboflow全指南：数据集→标注→增强→合并→训练→部署 | 🖼️ 4 张 |
-| 7 | 🖼️ | **[OpenCV 完整学习笔记](./07-OpenCV学习笔记/README.md)** | OpenCV 全模块指南：20个专题+流行度排行+配图 | 🖼️ 11 张 |
-| 8 | 📝 | **[NLP 完整学习笔记](./08-NLP学习笔记/README.md)** | NLP全栈：传统方法→BERT/GPT→LLM→RAG→Agent→多模态 | 🖼️ 8 张 |
-| 9 | 🎯 | **[Roboflow 学习笔记](./09-Roboflow学习笔记/README.md)**
-| 10 | 🐳 | **[Docker 学习笔记](./10-Docker学习笔记/README.md)** | Docker全指南：容器/镜像/Compose/网络/卷/部署/RK3576 | 🖼️ 4 张 | | Roboflow全指南：数据集→标注→增强→合并→训练→部署 | 🖼️ 4 张 |
+| 9 | 🎯 | **[Roboflow 学习笔记](./09-Roboflow学习笔记/README.md)** | Roboflow全指南：数据集→标注→增强→合并→训练→部署 | 🖼️ 4 张 |
+| 10 | 🐳 | **[Docker 学习笔记](./10-Docker学习笔记/README.md)** | Docker全指南：容器/镜像/Compose/网络/卷/部署/RK3576 | 🖼️ 4 张 |
+| 11 | 🧩 | **[RK3576-ROS2 详解](./11-RK3576-ROS2%E8%AF%A6%E8%A7%A3/RK3576-ROS2%E7%AC%94%E8%AE%B0.md)** | RK3576 开发板上的 ROS2 开发实战 | 🖼️ 3 张 |
+| 12 | 🤖 | **[ROS2 Humble 学习笔记](./12-ROS2-Humble-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/README.md)** | ROS2 Humble 完整学习记录 | |
+| 13 | 🌳 | **[行为树的学习](./13-行为树的学习/README.md)** | BehaviorTree.CPP 学习笔记 | |
+| 14 | 🌐 | **[HTTP 与 WebSocket 笔记](./14-HTTP%E4%B8%8EWebSocket%E7%AC%94%E8%AE%B0/README.md)** | HTTP/WebSocket 协议学习记录 | 🖼️ 多张 |
+| 15 | 🔄 | **[reminder_project_protocol](./15-reminder_project_protocol/)** | 提醒项目协议定义 | |
+| 16 | 🛠️ | **[自定义接口实战](./16-自定义接口实战/)** | 自定义ROS2接口开发实战 | |
+| 17 | 📦 | **[ROS2 标准官方组件](./17-ROS2%E6%A0%87%E5%87%86%E5%AE%98%E6%96%B9%E7%BB%84%E4%BB%B6/)** | ROS2 官方标准组件学习 | |
+| 18 | 🔗 | **[Groot2-ZMQ 连接调试](./18-Groot2-ZMQ%E8%BF%9E%E6%8E%A5%E8%B0%83%E8%AF%95/)** | Groot2 与 ZMQ 调试记录 | |
+| 19 | 🔧 | **[Groot2-ZMQ 方案A 完整修复记录](./19-Groot2-ZMQ%E6%96%B9%E6%A1%88A-%E5%AE%8C%E6%95%B4%E4%BF%AE%E5%A4%8D%E8%AE%B0%E5%BD%95/)** | Groot2-ZMQ 方案A 修复全记录 | |
+| 20 | ⏰ | **[reminder_project](./20-reminder_project/)** | 提醒项目相关 | |
+| 21 | 🔊 | **[板子声音](./21-%E6%9D%BF%E5%AD%90%E5%A3%B0%E9%9F%B3/)** | 开发板音频相关笔记 | |
+| 22 | 🌳 | **[行为子树接入主树图解](./22-%E8%A1%8C%E4%B8%BA%E5%AD%90%E6%A0%91%E6%8E%A5%E5%85%A5%E4%B8%BB%E6%A0%91%E5%9B%BE%E8%A7%A3/)** | BT.CPP 黑板机制与子树接入方案图解 | 🖼️ HTML 可视化 |
 
 ---
 
 ## 🗂️ 文件结构
 
 ```
-├── README.md                        # 项目说明
+├── README.md                             # 项目说明
+├── 行为树教程.md                          # 行为树教程
 │
-├── 📁 01-AI-Agent/                  # 🤖 AI Agent
-│   ├── AI Agent学习笔记.md
-│   ├── ai_agent_architecture.svg    # 核心架构图
-│   └── react_loop.svg               # ReAct 循环图
-│
-├── 📁 02-MCP/                       # 🔌 MCP 协议
-│   ├── MCP学习笔记.md
-│   ├── mcp_architecture.svg         # 协议架构图
-│   └── mcp_protocol_flow.svg        # 交互流程图
-│
-├── 📁 03-Git/                       # 📚 Git 版本控制
-│   ├── Git学习笔记.md
-│   ├── git_workflow.svg             # 工作流图
-│   └── git_branching.svg            # 分支模型图
-│
-├── 📁 04-ROS2/                      # 🤖 ROS2 机器人
-│   ├── ROS2学习笔记.md
-│   ├── ros2_architecture.svg        # 整体架构图
-│   └── ros2_communication.svg       # 通信模型图
-│
-├── 📁 05-Nav2/                      # 🗺️ Nav2 导航
-│   ├── Nav2学习笔记.md
-│   ├── nav2_architecture.svg        # 导航架构图
-│   └── nav2_bt.svg                  # 行为树图
-│
-└── 📁 06-低光照处理专题/            # 🔬 低光照处理全链路
-│
-└── 📁 07-OpenCV学习笔记/              # 🖼️ OpenCV 完整指南
-│
-└── 📁 08-NLP学习笔记/                  # 📝 NLP 完整指南
-│
-└── 📁 09-Roboflow学习笔记/              # 🎯 Roboflow 完整指南
-│
-└── 📁 10-Docker学习笔记/                 # 🐳 Docker 完整指南
-    ├── README.md                       # 18个专题完整笔记
-    ├── gen_figures.py                  # 配图生成脚本
-    ├── fig_vm_vs_docker.png            # VM vs Docker架构对比
-    ├── fig_architecture.png            # Docker核心架构图
-    ├── fig_dockerfile.png              # Dockerfile分层构建
-    └── fig_network.png                 # 网络模式对比
-    ├── README.md                       # 17个专题完整笔记
-    ├── gen_figures.py                  # 配图生成脚本
-    ├── fig_pipeline.png                # 完整工作流图
-    ├── fig_merge.png                   # 数据集合并示意
-    ├── fig_formats.png                 # 标注格式对比
-    └── fig_deploy.png                  # 部署选项对比
-    ├── README.md                       # 19个专题完整笔记
-    ├── gen_figures.py                  # 配图生成脚本
-    ├── fig_timeline.png                # NLP技术演进时间线
-    ├── fig_transformer.png             # Transformer架构图
-    ├── fig_model_size.png              # 模型参数规模对比
-    ├── fig_frameworks.png              # 框架流行度排行
-    ├── fig_rag.png                     # RAG架构图
-    ├── fig_tasks.png                   # NLP任务流行度
-    ├── fig_paradigms.png               # 微调范式对比
-    └── fig_embedding.png               # 词嵌入可视化
-    ├── README.md                       # 20个专题完整笔记
-    ├── gen_figures.py                  # 配图生成脚本
-    ├── fig_filter.png                  # 滤波对比图
-    ├── fig_edge.png                    # 边缘检测
-    ├── fig_threshold.png               # 阈值处理
-    ├── fig_morph.png                   # 形态学操作
-    ├── fig_hist.png                    # 直方图对比
-    ├── fig_contour.png                 # 轮廓检测
-    ├── fig_colorspace.png              # 色彩空间
-    ├── fig_geo.png                     # 几何变换
-    ├── fig_pyramid.png                 # 金字塔
-    ├── fig_lowlight.png                # 低光照增强
-    └── fig_dnn.png                     # DNN 流程
-    ├── README.md                    # 专题总览
-    │
-    ├── 📁 01-低光照增强与分割方案汇总/   # 🌙 方案汇总
-    │   ├── 低光照增强与分割方案汇总.md
-    │   ├── overview_pipeline.svg
-    │   ├── clahe_diagram.svg
-    │   ├── low_light_tool.py
-    │   └── low_light_gui.py
-    │
-    ├── 📁 02-低光照增强论文精读/        # 📄 论文精读
-    │   ├── 低光照增强论文精读_KSCE2025.md
-    │   ├── experiment_pipeline.svg
-    │   └── methods_overview.svg
-    │
-    ├── 📁 03-OpenCV低光照处理方法/      # 🖼️ OpenCV 方法
-    │   ├── README.md
-    │   ├── generate_comparison.py
-    │   ├── comparison_single_scene.png
-    │   ├── comparison_single_portrait.png
-    │   ├── comparison_combined_scene.png
-    │   ├── comparison_combined_portrait.png
-    │   └── histogram_comparison.png
-    │
-    └── 📁 04-低光照降噪与分割预处理/    # 🧹 降噪+分割预处理
-        ├── README.md
-        ├── generate_comparison.py
-        ├── test_noisy_lowlight.png
-        ├── comparison_denoise_only.png
-        ├── comparison_edge_preservation.png
-        ├── comparison_pipeline.png
-        └── comparison_segmentation_preview.png
+├── 📁 01-AI-Agent/                       # 🤖 AI Agent
+├── 📁 02-MCP/                            # 🔌 MCP 协议
+├── 📁 03-Git/                            # 📚 Git 版本控制
+├── 📁 04-ROS2/                           # 🤖 ROS2 机器人
+├── 📁 05-Nav2/                           # 🗺️ Nav2 导航
+├── 📁 06-低光照处理专题/                 # 🔬 低光照处理全链路
+├── 📁 07-OpenCV学习笔记/                 # 🖼️ OpenCV 完整指南
+├── 📁 08-NLP学习笔记/                    # 📝 NLP 完整指南
+├── 📁 09-Roboflow学习笔记/               # 🎯 Roboflow 完整指南
+├── 📁 10-Docker学习笔记/                 # 🐳 Docker 完整指南
+├── 📁 11-RK3576-ROS2详解/               # 🧩 RK3576 + ROS2
+├── 📁 12-ROS2-Humble-学习笔记/           # 🤖 ROS2 Humble
+├── 📁 13-行为树的学习/                   # 🌳 BehaviorTree 学习
+├── 📁 14-HTTP与WebSocket笔记/            # 🌐 HTTP/WebSocket
+├── 📁 15-reminder_project_protocol/      # 🔄 提醒协议
+├── 📁 16-自定义接口实战/                 # 🛠️ 自定义接口
+├── 📁 17-ROS2标准官方组件/               # 📦 标准组件
+├── 📁 18-Groot2-ZMQ连接调试/             # 🔗 Groot2-ZMQ
+├── 📁 19-Groot2-ZMQ方案A-完整修复记录/   # 🔧 ZMQ 修复
+├── 📁 20-reminder_project/               # ⏰ 提醒项目
+├── 📁 21-板子声音/                       # 🔊 板子音频
+└── 📁 22-行为子树接入主树图解/           # 🌳 子树接入图解
+    ├── BT黑板机制流程图.html              # 黑板机制可视化
+    └── 提醒子树接入主树方案.html           # 子树接入方案图解
 ```
 
 ---
@@ -177,10 +110,37 @@ ROS1 vs ROS2 → 分层架构 → 核心概念（Node/Topic/Service/Action）→
 ├─ 02 低光照增强论文精读（KSCE 2025 论文精读 + 6种方法评估）
 ├─ 03 OpenCV低光照处理方法（8种OpenCV方法对比 + 组合管线 + 效果图）
 └─ 04 低光照降噪与分割预处理（6种降噪方法 + 增强管线 + RK3576性能估算）
-│
-└─ 07 OpenCV 完整学习笔记（全部20个模块 + 流行度排序 + 配图）
-│
-└─ 08 NLP 完整学习笔记（NLP全栈：传统→BERT/GPT→LLM→RAG→Agent→多模态）
+```
+
+### 07 — 🖼️ OpenCV 完整学习笔记
+
+```
+全部20个模块 + 流行度排序 + 11张配图
+```
+
+### 08 — 📝 NLP 完整学习笔记
+
+```
+NLP全栈：传统 → BERT/GPT → LLM → RAG → Agent → 多模态
+```
+
+### 09 — 🎯 Roboflow 完整指南
+
+```
+数据集管理 → 标注 → 增强 → 合并 → 训练 → 部署，4张配图
+```
+
+### 10 — 🐳 Docker 完整指南
+
+```
+容器/镜像/Compose/网络/卷/部署/RK3576，4张配图
+```
+
+### 22 — 🌳 行为子树接入主树图解
+
+```
+BT.CPP 黑板机制 → 子树隔离与映射 → 子树内读写黑板 → 感知数据直写
+（HTML 可视化交互图解）
 ```
 
 ---
@@ -188,6 +148,7 @@ ROS1 vs ROS2 → 分层架构 → 核心概念（Node/Topic/Service/Action）→
 ## 📝 说明
 
 - 笔记使用 **Markdown** 编写，内含 **SVG 架构图/流程图/对比图**
+- 部分章节使用 **HTML** 可视化图解，浏览器打开即可交互查看
 - 推荐用 **Typora**、**VS Code**、**Obsidian** 等支持图片渲染的编辑器打开
 - 各笔记末尾附有学习心得
 - 持续更新中 🚧
