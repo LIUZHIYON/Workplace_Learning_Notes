@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>BT.CPP 黑板机制 - 可视化详解</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8;
+  color: #1a202c;
+  padding: 40px;
+}
+h1 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 8px;
+  color: #2d3748;
+}
+.subtitle {
+  text-align: center;
+  color: #718096;
+  margin-bottom: 40px;
+  font-size: 14px;
+}
+.section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.section h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e2e8f0;
+  color: #2b6cb0;
+}
+.section h2 .tag {
+  font-size: 12px;
+  background: #2b6cb0;
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-left: 8px;
+}
+.diagram {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  padding: 10px 0;
+  flex-wrap: wrap;
+}
+.box {
+  border: 2px solid #3182ce;
+  border-radius: 8px;
+  padding: 14px 20px;
+  background: #ebf8ff;
+  text-align: center;
+  min-width: 100px;
+  font-size: 14px;
+  font-weight: 600;
+  position: relative;
+}
+.box.sub { border-color: #38a169; background: #f0fff4; }
+.box.child { border-color: #d69e2e; background: #fffff0; }
+.box.sensor { border-color: #e53e3e; background: #fff5f5; }
+.box.warn { border-color: #805ad5; background: #faf5ff; }
+
+.arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  font-size: 18px;
+  color: #718096;
+}
+.arrow-label {
+  font-size: 11px;
+  color: #718096;
+  text-align: center;
+  line-height: 1.3;
+  padding: 0 4px;
+}
+
+.blackboard {
+  border: 3px solid #553c9a;
+  border-radius: 10px;
+  background: #faf5ff;
+  padding: 16px 20px;
+  min-width: 200px;
+}
+.blackboard h3 {
+  font-size: 14px;
+  color: #553c9a;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.bb-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  background: rgba(85,60,154,0.06);
+  border-radius: 4px;
+  margin: 3px 0;
+}
+.bb-row .key { color: #553c9a; }
+.bb-row .val { color: #e53e3e; }
+
+.flow-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+
+/* 代码片段 */
+.code-block {
+  background: #1a202c;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-x: auto;
+  margin: 10px 0;
+}
+.code-block .comment { color: #68d391; }
+.code-block .keyword { color: #fc8181; }
+.code-block .string { color: #f6e05e; }
+.code-block .func { color: #63b3ed; }
+.code-block .var { color: #f6ad55; }
+
+/* 标注 */
+.note {
+  background: #fffbeb;
+  border-left: 4px solid #d69e2e;
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  margin: 10px 0;
+  color: #744210;
+}
+.note.blue { background: #ebf8ff; border-color: #3182ce; color: #2a4365; }
+.note.green { background: #f0fff4; border-color: #38a169; color: #22543d; }
+.note.red { background: #fff5f5; border-color: #e53e3e; color: #742a2a; }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 15px 0;
+}
+@media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.mapping-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 4px 0;
+}
+.mapping-line .key-label {
+  background: #edf2f7;
+  border-radius: 4px;
+  padding: 2px 10px;
+  font-family: monospace;
+  font-size: 12px;
+}
+.mapping-line .conn {
+  color: #a0aec0;
+  font-size: 16px;
+}
+</style>
+</head>
+<body>
+
+<h1>🧠 BT.CPP 黑板（Blackboard）机制</h1>
+<p class="subtitle">子树隔离 · 端口映射 · 感知数据直写 · 完整数据流</p>
+
+<!-- ==================== 第一节 ==================== -->
+<div class="section">
+<h2>① 什么是黑板？ <span class="tag">核心概念</span></h2>
+
+<div style="display:flex; justify-content:center; gap:40px; flex-wrap:wrap; align-items:start;">
+  <div style="flex:1; min-width:200px;">
+    <p style="margin-bottom:12px; line-height:1.8; font-size:14px;">
+      <strong>黑板 = 公共便签墙</strong><br>
+      行为树的节点不直接传数据给对方，而是通过一个公共的键值对存储交换信息。
+    </p>
+    <ul style="font-size:13px; line-height:2; padding-left:18px;">
+      <li>✅ 任意节点都可以<strong>读</strong>黑板</li>
+      <li>✅ 任意节点都可以<strong>写</strong>黑板</li>
+      <li>✅ 键值对格式：<code>变量名 → 值</code></li>
+      <li>✅ 子树有自己<strong>独立</strong>的黑板</li>
+    </ul>
+  </div>
+
+  <div class="blackboard" style="flex:0 0 auto;">
+    <h3>📋 黑板（Blackboard）</h3>
+    <div class="bb-row"><span class="key">touch_key</span><span class="val">"tap_001"</span></div>
+    <div class="bb-row"><span class="key">action_id</span><span class="val">3</span></div>
+    <div class="bb-row"><span class="key">audio_path</span><span class="val">"1.mp3"</span></div>
+    <div class="bb-row"><span class="key">voice_text</span><span class="val">"你好"</span></div>
+    <div class="bb-row"><span class="key">perception.reminder</span><span class="val">"吃药"</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== 第二节 ==================== -->
+<div class="section">
+<h2>② 子树间的黑板隔离与映射 <span class="tag">3.2</span></h2>
+
+<p style="font-size:14px; line-height:1.7; margin-bottom:16px;">
+每个 <code>SubTree</code> 默认有自己的<strong>独立黑板</strong>，主黑板的变量不会自动流到子树里。
+需要两种方式打通：
+</p>
+
+<div class="grid-2">
+  <!-- 方式 A -->
+  <div style="border:2px solid #38a169; border-radius:8px; padding:16px;">
+    <h3 style="color:#276749; margin-bottom:10px;">✅ 方式 A：自动映射</h3>
+    <div class="code-block">
+      <span class="comment">&lt;!-- 声明 --></span><br>
+      &lt;SubTree ID=<span class="string">"DefaultMode"</span> <span class="keyword">_autoremap</span>=<span class="string">"true"</span>/&gt;
+    </div>
+    <p style="font-size:13px; line-height:1.6; margin:10px 0;">
+      同名端口自动绑定，省事但不灵活。
+    </p>
+    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin:8px 0;">
+      <div class="box" style="min-width:80px; padding:8px;">主黑板<br><span style="font-weight:400;font-size:11px;">touch_key</span></div>
+      <span style="color:#38a169; font-size:20px; font-weight:bold;">⇄</span>
+      <div class="box sub" style="min-width:80px; padding:8px;">子黑板<br><span style="font-weight:400;font-size:11px;">touch_key</span></div>
+    </div>
+    <div class="note green">
+      <strong>原理：</strong>子树端口若声明 <code>touch_key="{touch_key}"</code>，
+      <code>_autoremap</code> 发现子黑板没有 <code>touch_key</code>，就去主黑板找同名的，自动连通。
+    </div>
+  </div>
+
+  <!-- 方式 B -->
+  <div style="border:2px solid #d69e2e; border-radius:8px; padding:16px;">
+    <h3 style="color:#975a16; margin-bottom:10px;">🔧 方式 B：显式端口绑定</h3>
+    <div class="code-block">
+      <span class="comment">&lt;!-- 显式映射 --></span><br>
+      &lt;SubTree ID=<span class="string">"IdleFallback"</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;face_detected=<span class="string">"{perception.face_detected}"</span>/&gt;
+    </div>
+    <p style="font-size:13px; line-height:1.6; margin:10px 0;">
+      手动指定映射关系，灵活但要多写。
+    </p>
+    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin:8px 0;">
+      <div class="box" style="min-width:100px; padding:8px;">主黑板<br><span style="font-weight:400;font-size:11px;">perception.face_detected</span></div>
+      <span style="color:#d69e2e; font-size:16px;">→</span>
+      <div class="box sub" style="min-width:80px; padding:8px;">子树的<br><span style="font-weight:400;font-size:11px;">face_detected</span></div>
+    </div>
+    <div class="note" style="border-color:#d69e2e; background:#fffff0;">
+      <strong>语法规则：</strong><br>
+      <code>{变量名}</code> → 从黑板读/写值<br>
+      <code>"常量"</code> → 字面量，不走黑板<br>
+      <code>""</code> → 空字符串
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== 第三节 ==================== -->
+<div class="section">
+<h2>③ 子树内部如何读写黑板 <span class="tag">3.3</span></h2>
+
+<p style="font-size:14px; line-height:1.7; margin-bottom:16px;">
+以 <code>touch_behavior.xml</code> 为例，节点通过 <code>{变量名}</code> 语法读写黑板：
+</p>
+
+<div class="code-block">
+<span class="comment">&lt;!-- ① 读：从黑板拿 touch_key --></span><br>
+&lt;TouchEdgeDetector touch_key=<span class="string">"{touch_key}"</span>/&gt;<br><br>
+<span class="comment">&lt;!-- ② 写：GetConfigSync 内部 setOutput 把结果写回黑板 --></span><br>
+&lt;GetConfigSync command_key=<span class="string">"{touch_key}"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; action_id=<span class="string">"{action_id}"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; audio_path=<span class="string">"{audio_path}"</span>/&gt;<br><br>
+<span class="comment">&lt;!-- ③ 读：从黑板拿 action_id 执行动作 --></span><br>
+&lt;ActionSync action_id=<span class="string">"{action_id}"</span>/&gt;
+</div>
+
+<!-- 流程图 -->
+<div style="display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px; margin:20px 0;">
+
+  <div class="box child" style="min-width:90px; padding:10px;">
+    TouchEdge<br>Detector
+    <div style="font-size:11px; font-weight:400; color:#744210;">读 touch_key</div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <div class="box child" style="min-width:110px; padding:10px;">
+    GetConfigSync
+    <div style="font-size:11px; font-weight:400; color:#744210;">读 touch_key<br>写 action_id / audio_path</div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <div class="box child" style="min-width:90px; padding:10px;">
+    ActionSync
+    <div style="font-size:11px; font-weight:400; color:#744210;">读 action_id</div>
+  </div>
+</div>
+
+<!-- 黑板内容变化 -->
+<div style="display:flex; align-items:start; justify-content:center; gap:20px; flex-wrap:wrap; margin:10px 0;">
+  <div class="blackboard" style="min-width:150px;">
+    <h3>📋 执行前</h3>
+    <div class="bb-row"><span class="key">touch_key</span><span class="val">"tap_001"</span></div>
+    <div class="bb-row" style="opacity:0.3;"><span class="key">action_id</span><span class="val">—</span></div>
+    <div class="bb-row" style="opacity:0.3;"><span class="key">audio_path</span><span class="val">—</span></div>
+  </div>
+
+  <div style="display:flex; align-items:center; font-size:24px; color:#a0aec0; padding:20px 0;">→</div>
+
+  <div class="blackboard" style="min-width:150px;">
+    <h3>📋 GetConfigSync 执行后</h3>
+    <div class="bb-row"><span class="key">touch_key</span><span class="val">"tap_001"</span></div>
+    <div class="bb-row"><span class="key">action_id</span><span class="val">3</span></div>
+    <div class="bb-row"><span class="key">audio_path</span><span class="val">"1.mp3"</span></div>
+  </div>
+</div>
+
+<div class="note blue">
+  🔄 <strong>流程：</strong>touch_key 读出 → TouchEdgeDetector 处理 → GetConfigSync 查配置 →
+  <strong>写回 action_id / audio_path 到黑板</strong> → ActionSync 读到 action_id 去执行动作
+</div>
+</div>
+
+<!-- ==================== 第四节 ==================== -->
+<div class="section">
+<h2>④ 感知数据怎么进黑板？ <span class="tag">3.4</span></h2>
+
+<div class="note red">
+  <strong>⚠️ 不走行为树！</strong>感知数据通过 ROS2 订阅回调<strong>直接写黑板</strong>，不需要等 tick 轮询。
+</div>
+
+<div class="code-block">
+<span class="comment">// 语音识别结果 → 直接写黑板</span><br>
+voice_sub_ = ros_node_-&gt;create_subscription&lt;std_msgs::msg::String&gt;(<br>
+&nbsp;&nbsp;<span class="string">"/robot_language_big_model/model_output"</span>, ...,<br>
+&nbsp;&nbsp;[<span class="keyword">this</span>](<span class="keyword">auto</span> msg) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;main_bb_-&gt;<span class="func">set</span>(<span class="string">"voice_text"</span>, msg-&gt;data);&nbsp;&nbsp;<span class="comment">// ← 收到消息立即写入</span><br>
+&nbsp;&nbsp;});<br><br>
+<span class="comment">// 提醒消息 → 直接写黑板</span><br>
+reminder_sub_ = ros_node_-&gt;create_subscription&lt;std_msgs::msg::String&gt;(<br>
+&nbsp;&nbsp;<span class="string">"/robot/reminder"</span>, ...,<br>
+&nbsp;&nbsp;[<span class="keyword">this</span>](<span class="keyword">auto</span> msg) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;main_bb_-&gt;<span class="func">set</span>(<span class="string">"perception.reminder"</span>, msg-&gt;data);&nbsp;&nbsp;<span class="comment">// ← 直接写入</span><br>
+&nbsp;&nbsp;});
+</div>
+
+<!-- 时序图 -->
+<div style="display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin:20px 0;">
+
+  <div class="box sensor" style="min-width:110px; padding:12px;">
+    📡 语音识别<br>
+    <span style="font-size:11px; font-weight:400;">ROS2 Topic</span>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <div class="box warn" style="min-width:110px; padding:12px;">
+    🔄 订阅回调<br>
+    <span style="font-size:11px; font-weight:400;">main_bb_->set()</span>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <div class="blackboard" style="min-width:150px;">
+    <h3>📋 黑板</h3>
+    <div class="bb-row"><span class="key">voice_text</span><span class="val">"你好"</span></div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <div class="box" style="min-width:80px; padding:10px; border-color:#e53e3e;">
+    ⏱ 下次 tick<br>
+    <span style="font-size:11px; font-weight:400;">BT 节点读到最新值</span>
+  </div>
+
+</div>
+
+<div class="note blue">
+  <strong>好处：</strong><br>
+  ✅ <strong>实时性</strong> — 感知数据一产生就进黑板，不等 tick<br>
+  ✅ <strong>解耦</strong> — 感知模块和行为树模块独立运行<br>
+  ✅ <strong>最新值立即可见</strong> — 行为树下次 tick 时，数据已经是最新的
+</div>
+</div>
+
+<!-- ==================== 第五节 汇总 ==================== -->
+<div class="section">
+<h2>⑤ 完整数据流总览 <span class="tag">Putting It All Together</span></h2>
+
+<div style="display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; margin:20px 0;">
+
+  <!-- 外部输入 -->
+  <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+    <div class="box sensor" style="min-width:90px;">📡 感知模块<br><span style="font-size:10px; font-weight:400;">ROS2 Topic</span></div>
+    <div style="font-size:11px; color:#718096;">语音/提醒/人脸</div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- 直接写黑板 -->
+  <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+    <div class="box warn" style="min-width:90px;">⬇️ 回调直接写</div>
+    <div style="font-size:11px; color:#805ad5;">main_bb_->set()</div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <!-- 主黑板 -->
+  <div class="blackboard" style="min-width:180px;">
+    <h3>📋 <strong>主黑板</strong></h3>
+    <div class="bb-row"><span class="key">voice_text</span><span class="val">"你好"</span></div>
+    <div class="bb-row"><span class="key">perception.reminder</span><span class="val">"吃药"</span></div>
+    <div class="bb-row"><span class="key">touch_key</span><span class="val">"tap_001"</span></div>
+    <div class="bb-row"><span class="key">action_id</span><span class="val">3</span></div>
+  </div>
+
+  <!-- 映射箭头 -->
+  <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+    <div class="arrow" style="font-size:12px;">_autoremap</div>
+    <div class="arrow" style="font-size:12px;">显式绑定</div>
+  </div>
+
+  <!-- 子树 -->
+  <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+    <div class="box sub" style="min-width:110px;">🌳 子树黑板<br><span style="font-size:10px; font-weight:400;">DefaultMode</span></div>
+    <div style="font-size:11px; color:#718096;">映射到主黑板同名键</div>
+  </div>
+
+</div>
+
+<div class="note" style="margin-top:16px; background:#f7fafc; border-color:#553c9a;">
+  🎯 <strong>核心设计思想：</strong><br>
+  感知数据<b>实时</b>写入黑板（独立于行为树 tick 循环）→ 子树通过 <code>_autoremap</code> 或显式绑定共享主黑板数据 →
+  BT 节点通过 <code>{变量名}</code> 读写自身的黑板 → 行为树驱动动作执行。
+</div>
+
+</div>
+
+<div style="text-align:center; color:#a0aec0; font-size:12px; padding:10px 0;">
+参考 BT.CPP v4 黑板机制 · 可视化学习用
+</div>
+
+</body>
+</html>

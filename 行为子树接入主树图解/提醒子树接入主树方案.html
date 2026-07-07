@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>提醒子树接入主树方案 — 完整流程图解</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #1a1a2e; padding: 24px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  h1 { font-size: 28px; margin-bottom: 4px; color: #16213e; display: flex; align-items: center; gap: 10px; }
+  h1 small { font-size: 14px; color: #888; font-weight: normal; }
+  .subtitle { color: #888; margin-bottom: 24px; font-size: 14px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn { padding: 8px 18px; border: none; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 14px;
+             background: #ddd; color: #555; transition: all .2s; }
+  .tab-btn.active { background: #16213e; color: #fff; font-weight: 600; }
+  .tab-btn:hover:not(.active) { background: #ccc; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+  .card { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 20px; }
+  .card h2 { font-size: 18px; color: #0f3460; margin-bottom: 16px; border-left: 4px solid #e94560; padding-left: 12px; }
+  .card h3 { font-size: 15px; color: #16213e; margin: 16px 0 8px; }
+  .diagram-wrap { background: #fafbfc; border: 1px solid #e1e4e8; border-radius: 8px; padding: 16px; overflow: auto; resize: vertical; min-height: 320px; }
+  .diagram-wrap svg { max-width: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #16213e; color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+  tr:hover td { background: #f0f4ff; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin: 1px; }
+  .tag-green { background: #d4edda; color: #155724; }
+  .tag-blue { background: #cce5ff; color: #004085; }
+  .tag-yellow { background: #fff3cd; color: #856404; }
+  .tag-red { background: #f8d7da; color: #721c24; }
+  .tag-purple { background: #e8d4f5; color: #6c2d8a; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .badge-new { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .badge-exist { background: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; }
+  .badge-mod { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+  .file-tree { font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; line-height: 1.8; background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px; }
+  .file-tree .dir { color: #89b4fa; }
+  .file-tree .file { color: #a6e3a1; }
+  .file-tree .new { color: #f9e2af; }
+  .file-tree .mod { color: #f38ba8; }
+  .file-tree .comment { color: #6c7086; font-style: italic; }
+  pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px; font-size: 13px; overflow-x: auto; }
+  code { font-family: 'Consolas', 'Courier New', monospace; }
+  .step-list { counter-reset: step; }
+  .step-item { counter-increment: step; display: flex; gap: 16px; margin: 12px 0; padding: 12px 16px;
+               background: #f8f9fa; border-radius: 8px; border-left: 4px solid #16213e; }
+  .step-item::before { content: counter(step); background: #16213e; color: #fff; width: 28px; height: 28px;
+                       border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                       font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .step-item .body { flex: 1; }
+  .step-item .title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .step-item .desc { font-size: 13px; color: #555; line-height: 1.6; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+  .compare-col { background: #f8f9fa; border-radius: 8px; padding: 14px; }
+  .compare-col h4 { font-size: 14px; margin-bottom: 8px; text-align: center; padding: 4px; border-radius: 4px; }
+  .compare-col.left h4 { background: #e3f2fd; color: #0d47a1; }
+  .compare-col.right h4 { background: #fff3e0; color: #e65100; }
+  @media (max-width: 768px) {
+    body { padding: 12px; }
+    .compare-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>🔔 提醒子树接入主树方案</h1>
+<p class="subtitle">BehaviorTree.CPP v4 + ROS2 · board_backup → robot_behavior 集成图解 · 只给方案不动代码</p>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('overview')">📊 全貌总览</button>
+  <button class="tab-btn" onclick="switchTab('dataflow')">🔄 数据流对比</button>
+  <button class="tab-btn" onclick="switchTab('steps')">📋 接入步骤</button>
+  <button class="tab-btn" onclick="switchTab('nodes')">🧩 节点注册</button>
+  <button class="tab-btn" onclick="switchTab('files')">📁 文件变更</button>
+  <button class="tab-btn" onclick="switchTab('priority')">⚡ 优先级仲裁</button>
+</div>
+
+<!-- ============ TAB 1 ============ -->
+<div id="tab-overview" class="tab-pane active">
+  <div class="card">
+    <h2>📊 集成全貌 — 方案 A（推荐）</h2>
+    <p style="color:#666;font-size:13px;margin-bottom:12px;">把提醒子树作为主树的一个 SubTree 嵌入，共享同一个 BtRunner 的 100Hz tick 循环</p>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+block-beta
+  columns 12
+  block:cloud:3
+    columns 1
+    ☁️ 云端
+  end
+  space:1
+  block:ws:3
+    columns 1
+    📡 reminder_ws_daemon
+  end
+  space:1
+  block:router:3
+    columns 1
+    📨 aipet_reminder_node
+  end
+  space:1
+
+  block:bridge:3
+    columns 1
+    🌉 reminder_bridge_node
+    style bridge fill:#e8f5e9,stroke:#2e7d32
+  end
+  space:3
+
+  block:main:12
+    columns 3
+    block:bt_runner:3
+      columns 1
+      🧠 BtRunner（主引擎）
+    end
+    block:bb:3
+      columns 1
+      🧠 主黑板
+    end
+    block:tree:3
+      columns 1
+      🌳 MainTree 100Hz
+    end
+  end
+
+  style cloud fill:#16213e,color:#fff
+  style ws fill:#0f3460,color:#fff
+  style router fill:#533483,color:#fff
+  style bt_runner fill:#e94560,color:#fff
+  style bb fill:#2d6a4f,color:#fff
+  style tree fill:#f4a261,color:#fff
+
+  cloud --> ws
+  ws --> router
+  router --> bridge
+  bridge --> bt_runner
+  bt_runner --> bb
+  bb --> tree
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔑 核心改动点</h2>
+    <div class="compare-grid">
+      <div class="compare-col left">
+        <h4>🏠 现有主树（robot_behavior）</h4>
+        <ul style="font-size:13px;line-height:2;padding-left:18px;">
+          <li>✅ 已有 <code>reminder_sub_</code> 订阅</li>
+          <li>✅ 已有 <code>perception.reminder</code> 黑板键</li>
+          <li>✅ 已有 <code>AudioSync</code> 可复用</li>
+          <li>❌ 缺少 12 个提醒 BT 节点注册</li>
+          <li>❌ 缺少 9 个黑板键初始化</li>
+          <li>❌ 缺少 <code>reminder_behavior.xml</code></li>
+        </ul>
+      </div>
+      <div class="compare-col right">
+        <h4>📦 board_backup 提醒系统</h4>
+        <ul style="font-size:13px;line-height:2;padding-left:18px;">
+          <li>✅ 12 个 BT 节点已实现</li>
+          <li>✅ reminder_behavior.xml 完整</li>
+          <li>✅ ReportStatus / PublishResponse 就绪</li>
+          <li>❌ 独立节点，冗余基础设施</li>
+          <li>❌ 5Hz 与主树 100Hz 不同步</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 2 ============ -->
+<div id="tab-dataflow" class="tab-pane">
+  <div class="card">
+    <h2>🔄 集成前 vs 集成后的数据流</h2>
+    <h3>❌ 集成前（两套独立系统）</h3>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+sequenceDiagram
+    participant Cloud as ☁️ 云端
+    participant WS as 📡 reminder_ws_daemon
+    participant AN as 📨 aipet_reminder_node
+    participant Bridge as 🌉 reminder_bridge_node
+    participant Main as 🧠 主树 BtRunner
+    participant Remind as 📋 提醒 driver_cpp
+
+    rect rgb(240, 240, 255)
+    Note over Cloud,Remind: === 提醒系统（独立 tick 5Hz）===
+    Cloud->>WS: WebSocket
+    WS->>AN: /reminder/ws/delivery
+    AN->>Bridge: /robot/command
+    Bridge->>Remind: /perception/reminder
+    Note over Remind: 自己的黑板、自己的树
+    Remind-->>AN: /reminder/ws/result
+    AN-->>WS: /reminder/ws/result
+    WS-->>Cloud: WebSocket
+    end
+
+    rect rgb(255, 240, 240)
+    Note over Cloud,Remind: === 主树系统（独立 tick 100Hz）===
+    Main->>Main: touch/voice/vision 感知
+    Note over Main: 完全不知道提醒的存在
+    end
+      </div>
+    </div>
+
+    <h3 style="margin-top:20px;">✅ 集成后（统一到主树）</h3>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+sequenceDiagram
+    participant Cloud as ☁️ 云端
+    participant WS as 📡 reminder_ws_daemon
+    participant AN as 📨 aipet_reminder_node
+    participant Bridge as 🌉 reminder_bridge_node
+    participant Runner as 🧠 BtRunner
+    participant BB as 🧠 主黑板
+    participant BT as 🌳 MainTree 100Hz
+
+    Cloud->>WS: WebSocket: reminder_delivery
+    WS->>AN: /reminder/ws/delivery
+    AN->>Bridge: /robot/command (JSON)
+    Bridge->>Runner: /perception/reminder
+
+    Note over Runner: reminder_sub_ 回调
+    Runner->>BB: perception.reminder
+
+    Note over BT: === 每 10ms tick ===
+
+    BT->>BT: ReactiveFallback 遍历
+    Note over BT: P0: DefaultMode → P1: ReminderBehavior → P2: IdleFallback
+
+    BT->>BB: HasPendingReminders?
+    BB-->>BT: 有未处理提醒
+    BT->>BB: LoadNextReminder → 取最早一条
+    BB-->>BT: reminder_id / title / time
+    BT->>BB: CheckTimeCondition?
+    BB-->>BT: now >= reminder_time
+    BT->>BB: MarkStatus = executing
+    BT->>BB: CheckPersonPresent?
+    BB-->>BT: 有人
+    BT->>BB: BuildReminderTts
+    BT->>BT: PlayReminderAudio /voice/speak
+    BT->>BB: MarkStatus = completed
+    BT->>WS: ReportStatus /reminder/ws/result
+    WS-->>Cloud: WebSocket done
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📡 Topic 通信一览</h2>
+    <table>
+      <thead><tr><th>Topic</th><th>发布方</th><th>订阅方</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr><td><code>/reminder/ws/delivery</code></td><td>ws_daemon</td><td>aipet_reminder_node</td><td><span class="badge badge-exist">不变</span></td></tr>
+        <tr><td><code>/robot/command</code></td><td>aipet_reminder_node</td><td>reminder_bridge_node</td><td><span class="badge badge-exist">不变</span></td></tr>
+        <tr><td><code>/perception/reminder</code></td><td>reminder_bridge_node</td><td><strong>BtRunner</strong></td><td><span class="badge badge-exist">已存在</span></td></tr>
+        <tr><td><code>/reminder/ws/result</code></td><td><strong>ReportStatus 节点</strong></td><td>ws_daemon</td><td><span class="badge badge-mod">需新增 publisher</span></td></tr>
+        <tr><td><code>/person_present</code></td><td>外部传感器</td><td><strong>BtRunner</strong></td><td><span class="badge badge-new">需新增订阅</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ TAB 3 ============ -->
+<div id="tab-steps" class="tab-pane">
+  <div class="card">
+    <h2>📋 逐项接入步骤（8 步）</h2>
+    <div class="step-list">
+      <div class="step-item"><div class="body"><div class="title">复制节点文件</div><div class="desc"><code>reminder_nodes.hpp</code> → <code>robot_behavior/include/</code><br><code>reminder_nodes.cpp</code> → <code>robot_behavior/src/nodes/</code><br>namespace 已用 <code>robot_behavior</code>，与主树一致</div></div></div>
+      <div class="step-item"><div class="body"><div class="title">复制行为树 XML</div><div class="desc"><code>reminder_behavior.xml</code> → <code>robot_behavior/trees/</code></div></div></div>
+      <div class="step-item"><div class="body"><div class="title">修改 CMakeLists.txt</div><div class="desc">添加 <code>reminder_nodes.cpp</code> 到编译列表</div></div></div>
+      <div class="step-item"><div class="body"><div class="title">修改 bt_runner.hpp</div><div class="desc">新增 2 个 publisher 成员 + person_sub_ 成员 + #include</div></div></div>
+      <div class="step-item"><div class="body"><div class="title">修改 registerNodes()</div><div class="desc">用 <code>registerBuilder</code> 注册 12 个提醒节点（详见下一 Tab）</div></div></div>
+      <div class="step-item"><div class="body"><div class="title">修改 initPerception()</div><div class="desc">新增 <code>/person_present</code> 订阅，写入 <code>person_present</code> 黑板键</div></div></div>
+      <div class="step-item"><div class="body"><div class="title">修改 loadTree()</div><div class="desc">追加 9 个黑板键初始化：pending_reminders / reminder_id / reminder_title / reminder_content / reminder_time / tts_text / reminder_status / repeat_type / person_present</div></div></div>
+      <div class="step-item"><div class="body"><div class="title">修改 main_tree.xml</div><div class="desc">+1 行：<code>&lt;SubTree ID="ReminderBehavior" _autoremap="true"/&gt;</code> 插在 DefaultMode 和 IdleFallback 之间</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 4 ============ -->
+<div id="tab-nodes" class="tab-pane">
+  <div class="card">
+    <h2>🧩 所有 12 个提醒节点的注册方式</h2>
+    <table>
+      <thead><tr><th>节点名</th><th>类型</th><th>构造函数参数</th><th>注册方式</th><th>依赖</th></tr></thead>
+      <tbody>
+        <tr style="background:#f0fdf4;"><td><code>HasPendingReminders</code></td><td><span class="tag tag-green">Condition</span></td><td><code>(name, config)</code></td><td><span class="tag tag-blue">registerBuilder</span></td><td>无</td></tr>
+        <tr style="background:#f0fdf4;"><td><code>CheckPersonPresent</code></td><td><span class="tag tag-green">Condition</span></td><td><code>(name, config)</code></td><td><span class="tag tag-blue">registerBuilder</span></td><td>无</td></tr>
+        <tr style="background:#f0fdf4;"><td><code>CheckReminderTimeout</code></td><td><span class="tag tag-green">Condition</span></td><td><code>(name, config)</code></td><td><span class="tag tag-blue">registerBuilder</span></td><td>无</td></tr>
+        <tr style="background:#f0fdf4;"><td><code>CheckRepeating</code></td><td><span class="tag tag-green">Condition</span></td><td><code>(name, config)</code></td><td><span class="tag tag-blue">registerBuilder</span></td><td>无</td></tr>
+        <tr><td><code>LoadNextReminder</code></td><td><span class="tag tag-yellow">SyncAction</span></td><td><code>(name, config, node)</code></td><td><span class="tag tag-blue">registerBuilder</span></td><td>ros_node_</td></tr>
+        <tr><td><code>CheckTimeCondition</code></td><td><span class="tag tag-green">Condition</span></td><td><code>(name, config, node)</code></td><td><span class="tag tag-blue">registerBuilder</span></td><td>ros_node_</td></tr>
+        <tr><td><code>MarkStatus</code></td><td><span class="tag tag-yellow">SyncAction</span></td><td><code>(name, config, node)</code></td><td><span class="tag tag-blue">registerBuilder</span></td><td>ros_node_</td></tr>
+        <tr><td><code>BuildReminderTts</code></td><td><span class="tag tag-yellow">SyncAction</span></td><td><code>(name, config, node)</code></td><td><span class="tag tag-blue">registerBuilder</span></td><td>ros_node_</td></tr>
+        <tr><td><code>PlayReminderAudio</code></td><td><span class="tag tag-red">StatefulAction</span></td><td><code>(name, config, node)</code></td><td><span class="tag tag-blue">registerBuilder</span></td><td>ros_node_</td></tr>
+        <tr><td><code>RescheduleRepeating</code></td><td><span class="tag tag-yellow">SyncAction</span></td><td><code>(name, config, node)</code></td><td><span class="tag tag-blue">registerBuilder</span></td><td>ros_node_</td></tr>
+        <tr style="background:#fff8e1;"><td><code>PublishResponse</code></td><td><span class="tag tag-yellow">SyncAction</span></td><td><code>(name, config, node, pub)</code></td><td><span class="tag tag-blue">registerBuilder</span></td><td>node + response_pub_</td></tr>
+        <tr style="background:#fff8e1;"><td><code>ReportStatus</code></td><td><span class="tag tag-yellow">SyncAction</span></td><td><code>(name, config, node, pub)</code></td><td><span class="tag tag-blue">registerBuilder</span></td><td>node + ws_result_pub_</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>📝 registerNodes() 注册代码模板</h2>
+    <p style="color:#666;font-size:13px;margin-bottom:12px;">以下代码是 registration 的部分，在现有 registerNodes() 尾部追加</p>
+    <pre>// ── 提醒子系统节点注册（registerBuilder 模式）──
+// 纯条件节点（无 ROS 依赖）
+factory_.registerBuilder&lt;HasPendingReminders&gt;("HasPendingReminders",
+    [](const std::string& name, const BT::NodeConfig& cfg) {
+      return std::make_unique&lt;HasPendingReminders&gt;(name, cfg);
+    });
+factory_.registerBuilder&lt;CheckPersonPresent&gt;("CheckPersonPresent", ...);
+factory_.registerBuilder&lt;CheckReminderTimeout&gt;("CheckReminderTimeout", ...);
+factory_.registerBuilder&lt;CheckRepeating&gt;("CheckRepeating", ...);
+
+// 需要 ros_node_ 的节点
+auto node = ros_node_;
+factory_.registerBuilder&lt;LoadNextReminder&gt;("LoadNextReminder",
+    [node](const std::string& name, const BT::NodeConfig& cfg) {
+      return std::make_unique&lt;LoadNextReminder&gt;(name, cfg, node);
+    });
+// ... CheckTimeCondition, MarkStatus, BuildReminderTts,
+//     PlayReminderAudio, RescheduleRepeating 同理
+
+// 需要 publisher 的节点
+factory_.registerBuilder&lt;PublishResponse&gt;("PublishResponse",
+    [node, pub=response_pub_](const std::string& name, const BT::NodeConfig& cfg) {
+      return std::make_unique&lt;PublishResponse&gt;(name, cfg, node, pub);
+    });
+factory_.registerBuilder&lt;ReportStatus&gt;("ReportStatus",
+    [node, pub=ws_result_pub_](const std::string& name, const BT::NodeConfig& cfg) {
+      return std::make_unique&lt;ReportStatus&gt;(name, cfg, node, pub);
+    });</pre>
+  </div>
+</div>
+
+<!-- ============ TAB 5 ============ -->
+<div id="tab-files" class="tab-pane">
+  <div class="card">
+    <h2>📁 完整文件变更清单</h2>
+    <div class="file-tree">
+<span class="comment">━━━ robot_behavior（主树包）━━━</span>
+├── <span class="dir">include/robot_behavior/</span>
+│   ├── <span class="file">bt_runner.hpp</span> <span class="mod">🔧 修改</span>
+│   └── <span class="dir">nodes/</span>
+│       ├── <span class="file">action_sync.hpp</span>
+│       ├── <span class="file">audio_sync.hpp</span>
+│       ├── <span class="file new">reminder_nodes.hpp</span> <span class="new">✨ 新增</span>
+│       └── <span class="file">...</span>
+├── <span class="dir">src/</span>
+│   ├── <span class="file">bt_runner.cpp</span> <span class="mod">🔧 修改</span>
+│   ├── <span class="file">main.cpp</span>
+│   └── <span class="dir">nodes/</span>
+│       ├── <span class="file">action_sync.cpp</span>
+│       ├── <span class="file new">reminder_nodes.cpp</span> <span class="new">✨ 新增</span>
+│       └── <span class="file">...</span>
+├── <span class="dir">trees/</span>
+│   ├── <span class="file">main_tree.xml</span> <span class="mod">🔧 修改</span>
+│   ├── <span class="file new">reminder_behavior.xml</span> <span class="new">✨ 新增</span>
+│   └── <span class="file">touch_behavior.xml / voice_behavior.xml</span>
+└── <span class="file">CMakeLists.txt</span> <span class="mod">🔧 修改</span>
+
+<span class="comment">━━━ board_backup（提醒系统，零改动）━━━</span>
+└── <span class="dir">robot_reminder_behavior/</span>
+    ├── <span class="comment">（所有文件保持原样）</span>
+    └── <span class="file">reminder_bt_driver_cpp.cpp</span> <span class="comment">不再需要独立运行</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📊 变更统计</h2>
+    <table>
+      <tr><th>操作</th><th>数量</th><th>说明</th></tr>
+      <tr><td><span class="badge badge-new">新增文件</span></td><td>3 个</td><td>reminder_nodes.hpp / .cpp / reminder_behavior.xml</td></tr>
+      <tr><td><span class="badge badge-mod">修改文件</span></td><td>4 个</td><td>bt_runner.hpp / bt_runner.cpp / main_tree.xml / CMakeLists.txt</td></tr>
+      <tr><td><span class="badge badge-exist">保留不变</span></td><td>12+ 个</td><td>所有现有节点、XML 树、launch 文件</td></tr>
+      <tr><td><span class="tag tag-red">零改动</span></td><td>外部 3 个</td><td>reminder_bridge_node / aipet_reminder_node / ws_daemon</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ============ TAB 6 ============ -->
+<div id="tab-priority" class="tab-pane">
+  <div class="card">
+    <h2>⚡ 集成后的主树优先级仲裁</h2>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+flowchart TD
+    Root["🌳 MainTree ReactiveFallback"] --> P0["🔴 P0: DefaultMode"]
+    Root --> P1["🟠 P1: ReminderBehavior ← NEW"]
+    Root --> P2["🟡 P2: IdleFallback"]
+    Root --> P3["⚪ 兜底: AlwaysSuccess"]
+
+    P0 --> P0A["触摸阻塞"]
+    P0 --> P0B["语音排队"]
+    P0 --> P0C["手势响应"]
+
+    P1 --> P1A["HasPendingReminders?"]
+    P1A -- 有 --> P1B["LoadNextReminder"]
+    P1B --> P1C["CheckTimeCondition?"]
+    P1C --> P1D["MarkStatus=executing"]
+    P1D --> P1E["Fallback: 超时/播放"]
+    P1E --> P1F1["超时→失败"]
+    P1E --> P1F2["等人→播报→完成→重复"]
+
+    P2 --> P2A["盯人"]
+    P2 --> P2B["自主动作"]
+
+    style Root fill:#16213e,color:#fff
+    style P0 fill:#e94560,color:#fff
+    style P1 fill:#f4a261,color:#fff,stroke:#e94560,stroke-width:3px
+    style P2 fill:#2d6a4f,color:#fff
+    style P3 fill:#888,color:#fff
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧠 优先级说明</h2>
+    <table>
+      <tr><th>优先级</th><th>子树</th><th>触发条件</th><th>释放条件</th></tr>
+      <tr><td><span class="tag tag-red">P0</span></td><td><code>DefaultMode</code></td><td>有触摸/语音/手势输入</td><td>触摸消费完/语音队列空</td></tr>
+      <tr style="background:#fff8e1;"><td><span class="tag tag-yellow">P1</span></td><td><code><strong>ReminderBehavior</strong></code></td><td>pending_reminders 有未处理提醒</td><td>当前提醒处理完成</td></tr>
+      <tr><td><span class="tag tag-green">P2</span></td><td><code>IdleFallback</code></td><td>无触摸/语音/手势/提醒</td><td>检测到人脸/自主动作结束</td></tr>
+      <tr><td><span class="tag" style="background:#eee;color:#666;">P3</span></td><td><code>AlwaysSuccess</code></td><td>无条件</td><td>永不释放</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>💡 播报复用建议</h2>
+    <p style="font-size:13px;line-height:1.8;">
+      提醒系统的 <code>PlayReminderAudio</code> 和主树的 <code>AudioSync</code> 都调用 <code>/voice/speak</code> Action。<br>
+      <strong>建议</strong>：提醒子树直接复用 <strong>AudioSync</strong> 节点：<br>
+      <code>&lt;AudioSync audio="{tts_text}"/&gt;</code><br>
+      少注册 1 个节点，走同一套语音队列。
+    </p>
+  </div>
+</div>
+
+</div>
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'neutral',
+    securityLevel: 'loose',
+    sequence: { showSequenceNumbers: false, mirrorActors: false }
+  });
+</script>
+</body>
+</html>
