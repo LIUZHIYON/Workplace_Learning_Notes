@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>board_backup 提醒行为树完整图解</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #1a1a2e; padding: 24px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  h1 { font-size: 28px; margin-bottom: 4px; color: #16213e; }
+  .subtitle { color: #888; margin-bottom: 20px; font-size: 14px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn { padding: 8px 18px; border: none; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 14px;
+             background: #ddd; color: #555; transition: all .2s; }
+  .tab-btn.active { background: #16213e; color: #fff; font-weight: 600; }
+  .tab-btn:hover:not(.active) { background: #ccc; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+  .card { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 20px; }
+  .card h2 { font-size: 18px; color: #0f3460; margin-bottom: 16px; border-left: 4px solid #e94560; padding-left: 12px; }
+  .card h3 { font-size: 15px; color: #16213e; margin: 16px 0 8px; }
+  .diagram-wrap { background: #fafbfc; border: 1px solid #e1e4e8; border-radius: 8px; padding: 16px; overflow: auto; resize: vertical; min-height: 380px; }
+  .diagram-wrap svg { max-width: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #16213e; color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+  tr:hover td { background: #f0f4ff; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin: 1px; }
+  .tag-ctrl { background: #fce4ec; color: #c62828; }
+  .tag-cond { background: #e8f5e9; color: #2e7d32; }
+  .tag-act { background: #e3f2fd; color: #0d47a1; }
+  .tag-async { background: #f3e5f5; color: #6a1b9a; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .badge-in { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .badge-out { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+  .badge-inout { background: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; }
+  .flow-box { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .flow-step { display: inline-block; padding: 6px 14px; border-radius: 16px; font-size: 13px; white-space: nowrap; color: #fff; }
+  .flow-step.ext { background: #16213e; }
+  .flow-step.bt { background: #e94560; }
+  .flow-step.act { background: #2d6a4f; }
+  .flow-arrow { color: #999; font-size: 18px; }
+  pre { background: #1e1e2e; color: #cdd6f4; padding: 14px; border-radius: 8px; font-size: 13px; overflow-x: auto; }
+  code { font-family: 'Consolas', 'Courier New', monospace; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+  .compare-col { background: #f8f9fa; border-radius: 8px; padding: 14px; }
+  .compare-col h4 { font-size: 14px; margin-bottom: 8px; text-align: center; padding: 4px; border-radius: 4px; }
+  .compare-col.left h4 { background: #e3f2fd; color: #0d47a1; }
+  .compare-col.right h4 { background: #fff3e0; color: #e65100; }
+  @media (max-width: 768px) {
+    body { padding: 12px; }
+    .compare-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>📋 board_backup 提醒行为树完整图解</h1>
+<p class="subtitle">17 个节点 · 黑板通信 · 外部调用 · vs board_package_v2 对比</p>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('overview')">🌳 树结构</button>
+  <button class="tab-btn" onclick="switchTab('nodes')">🧩 节点详解</button>
+  <button class="tab-btn" onclick="switchTab('blackboard')">🧠 黑板通信</button>
+  <button class="tab-btn" onclick="switchTab('flow')">🔄 完整流程</button>
+  <button class="tab-btn" onclick="switchTab('external')">📡 外部调用</button>
+  <button class="tab-btn" onclick="switchTab('compare')">⚖️ 版本对比</button>
+</div>
+
+<!-- ============ TAB 1: 树结构 ============ -->
+<div id="tab-overview" class="tab-pane active">
+  <div class="card">
+    <h2>🌳 完整树结构（17 个节点）</h2>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+flowchart TD
+    Root["ReactiveSequence<br>ProcessReminders"] --> C1["Condition<br>HasPendingReminders"]
+    Root --> Seq1["Sequence<br>ProcessOneReminder"]
+
+    Seq1 --> A1["Action<br>LoadNextReminder"]
+    Seq1 --> C2["Condition<br>CheckTimeCondition"]
+    Seq1 --> A2["Action<br>MarkStatus → executing"]
+    Seq1 --> A3["Action<br>ReportStatus → executing"]
+    Seq1 --> FB1["Fallback<br>TimeoutOrPlay"]
+
+    FB1 --> SeqT["Sequence<br>TimeoutPath"]
+    FB1 --> SeqN["Sequence<br>NormalPlayPath"]
+
+    SeqT --> C3["Condition<br>CheckReminderTimeout"]
+    SeqT --> A4["Action<br>MarkStatus → failed"]
+    SeqT --> A5["Action<br>ReportStatus → failed"]
+
+    SeqN --> C4["Condition<br>CheckPersonPresent"]
+    SeqN --> A6["Action<br>BuildReminderTts"]
+    SeqN --> A7["AsyncAction<br>PlayReminderAudio"]
+    SeqN --> A8["Action<br>MarkStatus → completed"]
+    SeqN --> A9["Action<br>ReportStatus → completed"]
+    SeqN --> FB2["Fallback<br>RepeatBranch"]
+
+    FB2 --> SeqR["Sequence<br>RepeatPath"]
+    FB2 --> SeqNR["Sequence<br>NoRepeatPath"]
+
+    SeqR --> C5["Condition<br>CheckRepeating"]
+    SeqR --> A10["Action<br>RescheduleRepeating"]
+    SeqR --> A11["Action<br>ReportStatus → sent"]
+
+    SeqNR --> A12["Action<br>PublishResponse"]
+
+    style Root fill:#16213e,color:#fff,stroke:#fff
+    style FB1 fill:#fce4ec,stroke:#c62828
+    style FB2 fill:#fce4ec,stroke:#c62828
+    style SeqT fill:#fff3e0,stroke:#e65100
+    style SeqN fill:#e8f5e9,stroke:#2e7d32
+    style SeqR fill:#e3f2fd,stroke:#0d47a1
+    style SeqNR fill:#f3e5f5,stroke:#6a1b9a
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📊 节点分类统计</h2>
+    <table>
+      <tr><th>类别</th><th>数量</th><th>颜色标识</th><th>节点名</th></tr>
+      <tr>
+        <td><span class="tag tag-ctrl">控制节点</span></td>
+        <td>4</td>
+        <td><span style="background:#fce4ec;color:#c62828;padding:2px 8px;border-radius:4px;">红色</span></td>
+        <td>ProcessReminders, ProcessOneReminder, TimeoutOrPlay, RepeatBranch</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-cond">条件节点</span></td>
+        <td>5</td>
+        <td><span style="background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:4px;">绿色</span></td>
+        <td>HasPendingReminders, CheckTimeCondition, CheckReminderTimeout, CheckPersonPresent, CheckRepeating</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-act">同步动作</span></td>
+        <td>7</td>
+        <td><span style="background:#e3f2fd;color:#0d47a1;padding:2px 8px;border-radius:4px;">蓝色</span></td>
+        <td>LoadNextReminder, MarkStatus(×3), BuildReminderTts, ReportStatus(×3), PublishResponse, RescheduleRepeating</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-async">异步动作</span></td>
+        <td>1</td>
+        <td><span style="background:#f3e5f5;color:#6a1b9a;padding:2px 8px;border-radius:4px;">紫色</span></td>
+        <td>PlayReminderAudio</td>
+      </tr>
+      <tr><td><strong>合计</strong></td><td><strong>17</strong></td><td colspan="2"></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ============ TAB 2: 节点详解 ============ -->
+<div id="tab-nodes" class="tab-pane">
+  <div class="card">
+    <h2>🧩 各节点详解</h2>
+    <table>
+      <thead>
+        <tr><th>#</th><th>节点名</th><th>类型</th><th>C++ 类</th><th>作用</th><th>端口（输入→输出）</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>ProcessReminders</strong></td>
+          <td><span class="tag tag-ctrl">ReactiveSequence</span></td>
+          <td>内置</td>
+          <td>每 tick 从头遍历子节点。任何子节点 FAILURE 立即重试</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>ProcessOneReminder</strong></td>
+          <td><span class="tag tag-ctrl">Sequence</span></td>
+          <td>内置</td>
+          <td>有记忆的序列。子节点全 SUCCESS 才 SUCCESS，否则从上次 RUNNING 处继续</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>TimeoutOrPlay</strong></td>
+          <td><span class="tag tag-ctrl">Fallback</span></td>
+          <td>内置</td>
+          <td>二选一：超时路径（左）优先，失败才走正常播放路径（右）</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>RepeatBranch</strong></td>
+          <td><span class="tag tag-ctrl">Fallback</span></td>
+          <td>内置</td>
+          <td>二选一：重复类型→重排，非重复→发结束信号</td>
+          <td>—</td>
+        </tr>
+        <tr style="background:#f0fdf4;">
+          <td>5</td>
+          <td><strong>HasPendingReminders</strong></td>
+          <td><span class="tag tag-cond">Condition</span></td>
+          <td>HasPendingReminders</td>
+          <td>扫描 JSON 数组，找 status∈{pending,sent,executing} 的项</td>
+          <td><span class="badge badge-in">pending_reminders</span></td>
+        </tr>
+        <tr style="background:#f0fdf4;">
+          <td>6</td>
+          <td><strong>CheckTimeCondition</strong></td>
+          <td><span class="tag tag-cond">Condition</span></td>
+          <td>CheckTimeCondition</td>
+          <td>解析 ISO8601 时间，判断 now ≥ reminder_time？</td>
+          <td><span class="badge badge-in">reminder_time</span></td>
+        </tr>
+        <tr style="background:#f0fdf4;">
+          <td>7</td>
+          <td><strong>CheckReminderTimeout</strong></td>
+          <td><span class="tag tag-cond">Condition</span></td>
+          <td>CheckReminderTimeout</td>
+          <td>判断 now &gt; reminder_time + 900s？SUCCESS=超时</td>
+          <td><span class="badge badge-in">reminder_time</span></td>
+        </tr>
+        <tr style="background:#f0fdf4;">
+          <td>8</td>
+          <td><strong>CheckPersonPresent</strong></td>
+          <td><span class="tag tag-cond">Condition</span></td>
+          <td>CheckPersonPresent</td>
+          <td>直读黑板 person_present，非0=有人</td>
+          <td>直读黑板（不走端口）</td>
+        </tr>
+        <tr style="background:#f0fdf4;">
+          <td>9</td>
+          <td><strong>CheckRepeating</strong></td>
+          <td><span class="tag tag-cond">Condition</span></td>
+          <td>CheckRepeating</td>
+          <td>判断 repeat_type 是否不等于 "none"</td>
+          <td><span class="badge badge-in">repeat_type</span></td>
+        </tr>
+        <tr style="background:#e3f2fd;">
+          <td>10</td>
+          <td><strong>LoadNextReminder</strong></td>
+          <td><span class="tag tag-act">SyncAction</span></td>
+          <td>LoadNextReminder</td>
+          <td>从队列取时间最早的一条，写入黑板各字段。不修改状态</td>
+          <td><span class="badge badge-in">pending_reminders</span> → <span class="badge badge-out">reminder_id,title,content,time,status,repeat_type</span></td>
+        </tr>
+        <tr style="background:#e3f2fd;">
+          <td>11</td>
+          <td><strong>MarkStatus</strong></td>
+          <td><span class="tag tag-act">SyncAction</span></td>
+          <td>MarkStatus</td>
+          <td>改 pending_reminders 中指定 reminder_id 的状态字段</td>
+          <td><span class="badge badge-in">pending_reminders,reminder_id,new_status</span></td>
+        </tr>
+        <tr style="background:#e3f2fd;">
+          <td>12</td>
+          <td><strong>ReportStatus</strong></td>
+          <td><span class="tag tag-act">SyncAction</span></td>
+          <td>ReportStatus</td>
+          <td>发布 reminder_response 到 /reminder/ws/result</td>
+          <td><span class="badge badge-in">reminder_id,report_status</span></td>
+        </tr>
+        <tr style="background:#e3f2fd;">
+          <td>13</td>
+          <td><strong>BuildReminderTts</strong></td>
+          <td><span class="tag tag-act">SyncAction</span></td>
+          <td>BuildReminderTts</td>
+          <td>拼"叮咚,提醒时间到啦,{title},{content},别忘了哦!"</td>
+          <td><span class="badge badge-in">reminder_title,content</span> → <span class="badge badge-out">tts_text</span></td>
+        </tr>
+        <tr style="background:#f3e5f5;">
+          <td>14</td>
+          <td><strong>PlayReminderAudio</strong></td>
+          <td><span class="tag tag-async">StatefulAction</span></td>
+          <td>PlayReminderAudio</td>
+          <td>异步生成 shell 脚本 → ros2 action send_goal /voice/speak</td>
+          <td><span class="badge badge-in">tts_text</span></td>
+        </tr>
+        <tr style="background:#e3f2fd;">
+          <td>15</td>
+          <td><strong>PublishResponse</strong></td>
+          <td><span class="tag tag-act">SyncAction</span></td>
+          <td>PublishResponse</td>
+          <td>发布 JSON 到 /robot/command_response</td>
+          <td><span class="badge badge-in">reminder_id,reminder_status</span></td>
+        </tr>
+        <tr style="background:#e3f2fd;">
+          <td>16</td>
+          <td><strong>RescheduleRepeating</strong></td>
+          <td><span class="tag tag-act">SyncAction</span></td>
+          <td>RescheduleRepeating</td>
+          <td>daily→+1d, weekly→+7d, monthly→+30d, status→sent</td>
+          <td><span class="badge badge-in">pending_reminders,reminder_id,reminder_time,repeat_type</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ TAB 3: 黑板通信 ============ -->
+<div id="tab-blackboard" class="tab-pane">
+  <div class="card">
+    <h2>🧠 黑板变量与读写关系</h2>
+    <table>
+      <thead>
+        <tr><th>黑板变量</th><th>C++ 类型</th><th>写入者</th><th>读取者</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>pending_reminders</code></td>
+          <td><span class="tag tag-act">string(JSON)</span></td>
+          <td><span class="badge badge-inout">订阅回调</span> / MarkStatus / RescheduleRepeating</td>
+          <td>HasPendingReminders / LoadNextReminder / MarkStatus / RescheduleRepeating</td>
+          <td>整个提醒队列，JSON 数组</td>
+        </tr>
+        <tr>
+          <td><code>reminder_id</code></td>
+          <td><span class="tag tag-act">string</span></td>
+          <td>LoadNextReminder</td>
+          <td>MarkStatus / ReportStatus / PublishResponse / RescheduleRepeating</td>
+          <td>当前处理的 command_id</td>
+        </tr>
+        <tr>
+          <td><code>reminder_title</code></td>
+          <td><span class="tag tag-act">string</span></td>
+          <td>LoadNextReminder</td>
+          <td>BuildReminderTts</td>
+          <td>提醒标题</td>
+        </tr>
+        <tr>
+          <td><code>reminder_content</code></td>
+          <td><span class="tag tag-act">string</span></td>
+          <td>LoadNextReminder</td>
+          <td>BuildReminderTts</td>
+          <td>提醒内容</td>
+        </tr>
+        <tr>
+          <td><code>reminder_time</code></td>
+          <td><span class="tag tag-act">string</span></td>
+          <td>LoadNextReminder / RescheduleRepeating</td>
+          <td>CheckTimeCondition / CheckReminderTimeout</td>
+          <td>ISO8601 格式</td>
+        </tr>
+        <tr>
+          <td><code>reminder_status</code></td>
+          <td><span class="tag tag-act">string</span></td>
+          <td>LoadNextReminder / MarkStatus / PlayReminderAudio</td>
+          <td>PublishResponse</td>
+          <td>received/executing/playing/completed/failed</td>
+        </tr>
+        <tr>
+          <td><code>repeat_type</code></td>
+          <td><span class="tag tag-act">string</span></td>
+          <td>LoadNextReminder</td>
+          <td>CheckRepeating / RescheduleRepeating</td>
+          <td>none/daily/weekly/monthly</td>
+        </tr>
+        <tr>
+          <td><code>tts_text</code></td>
+          <td><span class="tag tag-act">string</span></td>
+          <td>BuildReminderTts</td>
+          <td>PlayReminderAudio</td>
+          <td>拼接后的语音文本</td>
+        </tr>
+        <tr>
+          <td><code>person_present</code></td>
+          <td><span class="tag tag-cond">int</span></td>
+          <td>/person_present 订阅回调</td>
+          <td>CheckPersonPresent</td>
+          <td>0=没人, 1=有人</td>
+        </tr>
+        <tr>
+          <td><code>new_status</code></td>
+          <td><span class="tag tag-ctrl">string</span></td>
+          <td>XML 字面量传参</td>
+          <td>MarkStatus</td>
+          <td>目标状态（通过端口传入）</td>
+        </tr>
+        <tr>
+          <td><code>report_status</code></td>
+          <td><span class="tag tag-ctrl">string</span></td>
+          <td>XML 字面量传参</td>
+          <td>ReportStatus</td>
+          <td>要回报的状态（通过端口传入）</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>🔄 一条提醒的完整黑板数据流</h2>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+sequenceDiagram
+    participant Sub as 📡 /robot/command 订阅
+    participant BB as 🧠 黑板
+    participant Tree as 🌳 行为树
+
+    Sub->>BB: pending_reminders += 新提醒 (status=sent)
+
+    Note over Tree: === 每 tick ===
+
+    Tree->>BB: HasPendingReminders: 读 pending_reminders
+    BB-->>Tree: 有 pending/sent/executing 项
+
+    Tree->>BB: LoadNextReminder: 读 pending_reminders
+    BB-->>Tree: 最早一条
+    Tree->>BB: 写 reminder_id / title / content / time / repeat_type
+
+    Tree->>BB: CheckTimeCondition: 读 reminder_time
+    BB-->>Tree: now >= time → SUCCESS
+
+    Tree->>BB: MarkStatus: 读 pending_reminders + reminder_id
+    Tree->>BB: 写 pending_reminders[].status = executing
+
+    alt 超时路径
+        Tree->>BB: CheckReminderTimeout: 读 reminder_time
+        BB-->>Tree: 超时 → SUCCESS
+        Tree->>BB: MarkStatus: 写 status = failed
+    else 正常路径
+        Tree->>BB: CheckPersonPresent: 读 person_present
+        BB-->>Tree: 有人 → SUCCESS
+        Tree->>BB: BuildReminderTts: 读 title + content
+        Tree->>BB: 写 tts_text
+        Tree->>BB: PlayReminderAudio: 读 tts_text
+        Note over Tree: 调用 /voice/speak
+        Tree->>BB: MarkStatus: 写 status = completed
+        alt 重复类型
+            Tree->>BB: CheckRepeating: 读 repeat_type
+            BB-->>Tree: 是重复
+            Tree->>BB: RescheduleRepeating: 改 time +1d + status=sent
+        else 非重复
+            Tree->>BB: PublishResponse: 读 reminder_id + status
+        end
+    end
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 4: 完整流程 ============ -->
+<div id="tab-flow" class="tab-pane">
+  <div class="card">
+    <h2>🔄 一条提醒的完整生命周期</h2>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+flowchart TD
+    subgraph legend["图例"]
+        direction LR
+        S0(("开始")) -->|云端推送| S1["sent"]
+        S1 -->|MarkStatus| S2["executing"]
+        S2 -->|PlayReminderAudio| S3["playing"]
+        S3 --> S4["completed"]
+        S2 -.->|超时900s| S5["failed"]
+        S3 -.->|播放失败| S5
+        S4 -->|重复| S1
+        S4 -->|非重复| E0(("结束"))
+        S5 --> E0
+    end
+    style S1 fill:#fff3cd
+    style S2 fill:#cce5ff
+    style S3 fill:#d4edda
+    style S4 fill:#f8d7da
+    style S5 fill:#f8d7da
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔍 详细时序（一个完整 Tick 内）</h2>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+flowchart LR
+    START(["🌳 tick 开始"])
+
+    START --> HPR{"HasPendingReminders?"}
+    HPR -->|FAILURE| END(["等待下个 tick"])
+    HPR -->|SUCCESS| LNR["LoadNextReminder<br>取最早提醒→写黑板"]
+
+    LNR --> CTC{"CheckTimeCondition<br>时间到了?"}
+    CTC -->|FAILURE| END
+    CTC -->|SUCCESS| MS1["MarkStatus<br>status = executing"]
+
+    MS1 --> RS1["ReportStatus<br>发送 executing"]
+
+    RS1 --> TOP{"Fallback<br>TimeoutOrPlay"}
+
+    TOP -->|左分支| CRT{"CheckReminderTimeout<br>超时900s?"}
+    CRT -->|SUCCESS 超时| MSF["MarkStatus → failed"]
+    MSF --> RSF["ReportStatus → failed"]
+    RSF --> END
+
+    CRT -->|FAILURE 未超时| CPP{"CheckPersonPresent<br>有人?"}
+    CPP -->|FAILURE 无人| END
+    CPP -->|SUCCESS 有人| BRT["BuildReminderTts<br>拼 TTS 文本"]
+
+    BRT --> PRA["PlayReminderAudio<br>异步调用 /voice/speak"]
+    PRA -->|RUNNING| PRA_WAIT["等待播放完成..."]
+    PRA_WAIT -->|SUCCESS| MSC["MarkStatus → completed"]
+    MSC --> RSC["ReportStatus → completed"]
+
+    RSC --> RB{"Fallback<br>RepeatBranch"}
+    RB -->|左分支| CR2{"CheckRepeating<br>是重复?"}
+    CR2 -->|SUCCESS| RR["RescheduleRepeating<br>+1d/7d/30d"]
+    RR --> RSR["ReportStatus → sent"]
+    RSR --> END
+
+    CR2 -->|FAILURE| PR["PublishResponse<br>结束信号"]
+    PR --> END
+
+    PRA -->|FAILURE| END
+    CPP -->|SUCCESS| BRT
+
+    style START fill:#16213e,color:#fff
+    style END fill:#888,color:#fff
+    style HPR fill:#e8f5e9
+    style CTC fill:#e8f5e9
+    style CRT fill:#e8f5e9
+    style CPP fill:#e8f5e9
+    style CR2 fill:#e8f5e9
+    style PRA fill:#f3e5f5
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 5: 外部调用 ============ -->
+<div id="tab-external" class="tab-pane">
+  <div class="card">
+    <h2>📡 节点调用的外部系统</h2>
+    <table>
+      <thead>
+        <tr><th>节点</th><th>调用方式</th><th>调用目标</th><th>方向</th><th>协议</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>PlayReminderAudio</strong></td>
+          <td>std::system("bash /tmp/tts_xxx.sh") → <code>ros2 action send_goal</code></td>
+          <td><code>/voice/speak</code> Action Server<br>（voice_bridge_node → tts_node）</td>
+          <td><span style="color:#e94560;">出站</span></td>
+          <td>ROS2 Action</td>
+        </tr>
+        <tr>
+          <td><strong>ReportStatus</strong></td>
+          <td>rclcpp::Publisher::publish</td>
+          <td><code>/reminder/ws/result</code> Topic<br>（→ ws_daemon → 云端）</td>
+          <td><span style="color:#e94560;">出站</span></td>
+          <td>ROS2 Topic</td>
+        </tr>
+        <tr>
+          <td><strong>PublishResponse</strong></td>
+          <td>rclcpp::Publisher::publish</td>
+          <td><code>/robot/command_response</code> Topic<br>（→ aipet_reminder_node）</td>
+          <td><span style="color:#e94560;">出站</span></td>
+          <td>ROS2 Topic</td>
+        </tr>
+        <tr>
+          <td><strong>reminder_bt_driver_cpp</strong>（驱动）</td>
+          <td>rclcpp::Subscription 回调</td>
+          <td><code>/robot/command</code> Topic<br>（来自 aipet_reminder_node）</td>
+          <td><span style="color:#2d6a4f;">入站</span></td>
+          <td>ROS2 Topic</td>
+        </tr>
+        <tr>
+          <td><strong>reminder_bt_driver_cpp</strong>（驱动）</td>
+          <td>rclcpp::Subscription 回调</td>
+          <td><code>/person_present</code> Topic<br>（来自传感器检测节点）</td>
+          <td><span style="color:#2d6a4f;">入站</span></td>
+          <td>ROS2 Topic</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>🌐 完整上下行链路</h2>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+flowchart TD
+    subgraph down["⤵ 下行链路"]
+        direction LR
+        C1("☁️ 云端") -->|WebSocket| W1["📡 reminder_ws_daemon"]
+        W1 -->|/reminder/ws/delivery| A1["📨 aipet_reminder_node"]
+        A1 -->|/robot/command| B1["🌉 reminder_bridge_node"]
+        B1 -->|/perception/reminder| D1["🧠 reminder_bt_driver_cpp"]
+        D1 -->|write| BB["🧠 Blackboard<br>pending_reminders"]
+        BB -->|read| BT["🌳 ReminderBehavior"]
+    end
+
+    down ~~~ up
+
+    subgraph up["⤴ 上行链路"]
+        direction LR
+        BT2["🌳 ReminderBehavior"] -->|ReportStatus| R1["📤 /reminder/ws/result"]
+        R1 --> A2["📨 aipet_reminder_node"]
+        A2 --> W2["📡 reminder_ws_daemon"]
+        W2 -->|WebSocket| C2("☁️ 云端")
+
+        BT2 -->|PublishResponse| R2["📤 /robot/command_response"]
+        R2 --> A2
+
+        BT2 -->|PlayReminderAudio shell| V1["🔊 /voice/speak Action"]
+        V1 --> T1["🗣 tts_node"]
+    end
+
+    subgraph ext["📡 外部输入"]
+        direction LR
+        S1["📷 传感器"] -->|/person_present| D2["🧠 reminder_bt_driver_cpp"]
+        D2 -->|write| BB2["🧠 Blackboard<br>person_present"]
+    end
+
+    style C1 fill:#16213e,color:#fff
+    style C2 fill:#16213e,color:#fff
+    style W1 fill:#0f3460,color:#fff
+    style W2 fill:#0f3460,color:#fff
+    style A1 fill:#533483,color:#fff
+    style A2 fill:#533483,color:#fff
+    style D1 fill:#e94560,color:#fff
+    style D2 fill:#e94560,color:#fff
+    style BB fill:#2d6a4f,color:#fff
+    style BB2 fill:#2d6a4f,color:#fff
+    style BT fill:#f4a261,color:#fff
+    style BT2 fill:#f4a261,color:#fff
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎵 PlayReminderAudio 的内部调用细节</h2>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+sequenceDiagram
+    participant BT as 🌳 PlayReminderAudio
+    participant Shell as 🐚 /tmp/tts_xxx.sh
+    participant Voice as 🔊 voice_bridge_node
+    participant TTS as 🗣 tts_node
+
+    BT->>BT: onStart(): 读 tts_text<br>生成 shell 脚本
+    BT->>Shell: std::async: bash /tmp/tts_xxx.sh
+    Note over Shell: source /opt/ros/humble/setup.bash<br>timeout 30 ros2 action send_goal<br>  /voice/speak robot_voice_bridge/action/Speak<br>  '{text: "叮咚,提醒时间到啦,..."}'
+
+    Shell->>Voice: ROS2 Action Goal
+    Voice->>TTS: HTTP/TTS 引擎调用
+    TTS-->>Voice: 合成音频
+    Voice-->>Shell: Action Result
+    Shell-->>BT: exit code 返回
+
+    alt exit=0
+        BT->>BT: onRunning(): SUCCESS
+        BT->>BB: reminder_status=completed
+    else exit≠0
+        BT->>BT: onRunning(): FAILURE (exit=6)
+        BT->>BB: reminder_status=failed
+    end
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 6: 版本对比 ============ -->
+<div id="tab-compare" class="tab-pane">
+  <div class="card">
+    <h2>⚖️ board_backup vs board_package_v2 对比</h2>
+    <div class="compare-grid">
+      <div class="compare-col left">
+        <h4>✅ board_backup（旧版，17 节点）</h4>
+        <ul style="font-size:13px;line-height:2;padding-left:18px;">
+          <li>✅ <strong>CheckReminderTimeout</strong> — 900s 超时检测</li>
+          <li>✅ <strong>TimeoutOrPlay</strong> — Fallback 双路径</li>
+          <li>✅ <strong>CheckRepeating</strong> — 重复类型判断</li>
+          <li>✅ <strong>RescheduleRepeating</strong> — 重排时间</li>
+          <li>✅ <strong>RepeatBranch</strong> — 重复/非重复分支</li>
+          <li>🟢 失败后能自动跳出（超时→failed）</li>
+        </ul>
+      </div>
+      <div class="compare-col right">
+        <h4>❌ board_package_v2（新版，11 节点）</h4>
+        <ul style="font-size:13px;line-height:2;padding-left:18px;">
+          <li>❌ 无超时检测</li>
+          <li>❌ 纯线性 Sequence，无 Fallback 分支</li>
+          <li>❌ 无重复判断</li>
+          <li>❌ 无重排逻辑</li>
+          <li>❌ 无分支</li>
+          <li>🔴 PlayReminderAudio 失败后永久卡死</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📊 树结构差异</h2>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+flowchart TD
+    subgraph backup["board_backup ✅ (17 节点)"]
+        direction TB
+        R1["ReactiveSequence"] --> H1["HasPending"]
+        R1 --> S1["Sequence"]
+        S1 --> L1["LoadNext"]
+        S1 --> C1["CheckTime"]
+        S1 --> M1["MarkStatus"]
+        S1 --> Rpt1["ReportStatus"]
+        S1 --> FB1["Fallback TimeoutOrPlay"]
+        FB1 --> T1["TimeoutPath<br>超时→failed"]
+        FB1 --> N1["NormalPath<br>播报→completed→重复检测"]
+    end
+
+    backup ~~~ v2
+
+    subgraph v2["board_package_v2 ❌ (11 节点)"]
+        direction TB
+        R2["ReactiveSequence"] --> H2["HasPending"]
+        R2 --> S2["Sequence"]
+        S2 --> L2["LoadNext"]
+        S2 --> C2["CheckTime"]
+        S2 --> M2["MarkStatus"]
+        S2 --> Rpt2["ReportStatus"]
+        S2 --> P2["CheckPerson"]
+        S2 --> B2["BuildTts"]
+        S2 --> A2["PlayAudio ⚠️"]
+    end
+
+    style backup fill:#e8f5e9,stroke:#2e7d32
+    style v2 fill:#ffebee,stroke:#c62828
+    style FB1 fill:#fce4ec,stroke:#c62828
+    style A2 fill:#ffebee,stroke:#c62828,stroke-width:3px
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔑 卡死的根本原因</h2>
+    <div style="font-size:14px;line-height:2;">
+      <p style="margin-bottom:8px;"><strong>board_package_v2 被卡住的三个必要条件：</strong></p>
+      <ol style="padding-left:20px;">
+        <li>❌ <code>PlayReminderAudio</code> 调用 TTS 失败 → exit=6</li>
+        <li>❌ 没有 <code>CheckReminderTimeout</code> → 无超时逃生路径</li>
+        <li>❌ 没有 Fallback 分支 → 失败后 Sequence FAILURE → ReactiveSequence 重试 → 死循环</li>
+      </ol>
+      <p style="margin-top:8px;"><strong>board_backup 的应对：</strong></p>
+      <ul style="padding-left:20px;">
+        <li>✅ Fallback 优先尝试 TimeoutPath → 未超时 → 走 NormalPlayPath</li>
+        <li>✅ NormalPlayPath 失败 → Sequence FAILURE → ReactiveSequence 重试 → 再次进入 Fallback</li>
+        <li>✅ 直到超时 → TimeoutPath 标记 failed → 跳出循环</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'neutral',
+    securityLevel: 'loose',
+    sequence: { showSequenceNumbers: false, mirrorActors: false }
+  });
+</script>
+</body>
+</html>

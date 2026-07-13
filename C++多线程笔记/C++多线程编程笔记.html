@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C++ 多线程编程 — 从入门到实践</title>
+<style>
+  /* ===== 基础重置与变量 ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f1a;
+    --card-bg: #1a1a2e;
+    --card-bg-alt: #16213e;
+    --text: #e0e0e8;
+    --text-secondary: #a0a0b8;
+    --accent-1: #ff6b9d;
+    --accent-2: #c44dff;
+    --accent-3: #51cf66;
+    --accent-4: #339af0;
+    --accent-5: #ffa94d;
+    --accent-6: #ff6b6b;
+    --border: #2a2a40;
+    --code-bg: #0d0d1a;
+    --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-card-1: linear-gradient(135deg, #ff6b9d22, #c44dff22);
+    --gradient-card-2: linear-gradient(135deg, #339af022, #51cf6622);
+    --gradient-card-3: linear-gradient(135deg, #ffa94d22, #ff6b6b22);
+    --shadow: 0 8px 32px rgba(0,0,0,0.3);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  /* ===== 滚动条 ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #666; }
+
+  /* ===== 全局样式 ===== */
+  body {
+    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ===== 背景粒子动画 ===== */
+  #particles {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ===== Hero 区域 ===== */
+  .hero {
+    position: relative; z-index: 1;
+    text-align: center;
+    padding: 80px 20px 60px;
+    background: linear-gradient(180deg, #1a1a3e 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero .icon-row { font-size: 64px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #ff6b9d, #ffa94d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+  }
+  .hero .subtitle {
+    font-size: 1.2rem; color: var(--text-secondary);
+    max-width: 600px; margin: 0 auto;
+  }
+  .hero .meta {
+    display: flex; gap: 24px; justify-content: center; margin-top: 24px; flex-wrap: wrap;
+  }
+  .hero .meta span {
+    background: var(--card-bg); padding: 8px 20px; border-radius: 30px;
+    font-size: 0.9rem; color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+
+  /* ===== 内容容器 ===== */
+  .container {
+    position: relative; z-index: 1;
+    max-width: 1000px; margin: 0 auto; padding: 40px 24px 80px;
+  }
+
+  /* ===== 章节标题 ===== */
+  .section {
+    margin-bottom: 60px;
+    animation: fadeInUp 0.6s ease both;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .section:nth-child(2) { animation-delay: 0.1s; }
+  .section:nth-child(3) { animation-delay: 0.2s; }
+  .section:nth-child(4) { animation-delay: 0.3s; }
+  .section:nth-child(5) { animation-delay: 0.4s; }
+  .section:nth-child(6) { animation-delay: 0.5s; }
+  .section:nth-child(7) { animation-delay: 0.6s; }
+
+  .section-title {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 28px;
+  }
+  .section-title .num {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.3rem; color: #fff;
+    flex-shrink: 0;
+  }
+  .section-title .num.pink { background: linear-gradient(135deg, #ff6b9d, #c44dff); }
+  .section-title .num.green { background: linear-gradient(135deg, #51cf66, #20c997); }
+  .section-title .num.blue { background: linear-gradient(135deg, #339af0, #5c7cfa); }
+  .section-title .num.orange { background: linear-gradient(135deg, #ffa94d, #ff6b6b); }
+  .section-title .num.purple { background: linear-gradient(135deg, #9775fa, #da77f2); }
+  .section-title .num.cyan { background: linear-gradient(135deg, #22b8cf, #3bc9db); }
+  .section-title h2 { font-size: 1.6rem; font-weight: 700; }
+
+  /* ===== 卡片 ===== */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px; margin-bottom: 24px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .card:hover { border-color: #444; transform: translateY(-2px); }
+  .card h3 { font-size: 1.2rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card p, .card li { color: var(--text-secondary); margin-bottom: 8px; }
+  .card ul { padding-left: 20px; }
+  .card ul li { margin-bottom: 6px; }
+
+  /* 对比卡片 */
+  .card-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px; margin-bottom: 24px;
+  }
+
+  /* ===== 概念对比表格 ===== */
+  .vs-table {
+    display: grid; grid-template-columns: 1fr 60px 1fr;
+    gap: 0; margin: 24px 0; border-radius: var(--radius);
+    overflow: hidden; border: 1px solid var(--border);
+  }
+  .vs-table .vs-left, .vs-table .vs-right {
+    padding: 24px; text-align: center;
+  }
+  .vs-table .vs-left { background: linear-gradient(135deg, #339af022, #1a1a2e); }
+  .vs-table .vs-right { background: linear-gradient(135deg, #ff6b9d22, #1a1a2e); }
+  .vs-table .vs-mid {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--card-bg); font-size: 1.5rem; font-weight: 900;
+    color: var(--accent-2);
+  }
+  .vs-table .vs-header { font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; }
+  .vs-table .vs-desc { font-size: 0.9rem; color: var(--text-secondary); }
+
+  /* ===== 代码块 ===== */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden; margin: 16px 0;
+  }
+  .code-block .code-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px; background: #16162a;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem; color: var(--text-secondary);
+  }
+  .code-block .code-header .dots { display: flex; gap: 6px; }
+  .code-block .code-header .dots span {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .code-block .code-header .dots span:nth-child(1) { background: #ff6b6b; }
+  .code-block .code-header .dots span:nth-child(2) { background: #ffa94d; }
+  .code-block .code-header .dots span:nth-child(3) { background: #51cf66; }
+  .code-block pre {
+    padding: 20px; overflow-x: auto; font-size: 0.88rem;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    line-height: 1.7;
+  }
+  .code-block code { color: #e0e0e8; }
+  .code-block .output-label {
+    padding: 6px 16px; background: #16213e;
+    font-size: 0.8rem; color: var(--accent-5);
+    border-bottom: 1px solid var(--border);
+  }
+  .code-block .output {
+    padding: 12px 20px; color: #51cf66;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem; background: #0a2a0a33;
+  }
+
+  /* 语法高亮 */
+  .hl-kw   { color: #c44dff; font-weight: 600; }  /* 关键字 */
+  .hl-type { color: #51cf66; }                      /* 类型 */
+  .hl-func { color: #339af0; }                      /* 函数名 */
+  .hl-str  { color: #ffa94d; }                      /* 字符串 */
+  .hl-cmt  { color: #666; font-style: italic; }     /* 注释 */
+  .hl-num  { color: #ff6b9d; }                      /* 数字 */
+  .hl-pre  { color: #ff6b6b; }                      /* 预处理 */
+  .hl-op   { color: #9775fa; }                      /* 操作符 */
+  .hl-meta { color: #da77f2; }                      /* 元编程 */
+
+  /* ===== 知识点网格 ===== */
+  .concept-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px; margin: 20px 0;
+  }
+  .concept-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 20px;
+    transition: all 0.25s;
+    position: relative; overflow: hidden;
+  }
+  .concept-card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%;
+  }
+  .concept-card:nth-child(1)::before { background: var(--accent-1); }
+  .concept-card:nth-child(2)::before { background: var(--accent-2); }
+  .concept-card:nth-child(3)::before { background: var(--accent-3); }
+  .concept-card:nth-child(4)::before { background: var(--accent-4); }
+  .concept-card:nth-child(5)::before { background: var(--accent-5); }
+  .concept-card:nth-child(6)::before { background: var(--accent-6); }
+  .concept-card:hover { border-color: #555; transform: translateY(-3px); box-shadow: var(--shadow); }
+  .concept-card .icon { font-size: 2rem; margin-bottom: 8px; }
+  .concept-card h4 { font-size: 1rem; margin-bottom: 6px; }
+  .concept-card p { font-size: 0.85rem; color: var(--text-secondary); }
+
+  /* ===== 提示框 ===== */
+  .tip {
+    background: linear-gradient(135deg, #ffa94d15, #ffa94d05);
+    border-left: 4px solid var(--accent-5);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 16px 20px; margin: 20px 0;
+    font-size: 0.9rem; color: #ffc078;
+  }
+  .tip strong { color: var(--accent-5); }
+
+  .warn {
+    background: linear-gradient(135deg, #ff6b6b15, #ff6b6b05);
+    border-left: 4px solid var(--accent-6);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 16px 20px; margin: 20px 0;
+    font-size: 0.9rem;
+  }
+  .warn strong { color: var(--accent-6); }
+
+  /* ===== 流水线图 ===== */
+  .pipeline {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; flex-wrap: wrap; padding: 28px 0;
+  }
+  .pipeline .step {
+    background: var(--card-bg); border: 2px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px 20px;
+    text-align: center; min-width: 100px;
+    transition: all 0.3s;
+  }
+  .pipeline .step:hover { border-color: var(--accent-4); transform: scale(1.05); }
+  .pipeline .step .s-icon { font-size: 1.8rem; }
+  .pipeline .step .s-label { font-size: 0.85rem; margin-top: 6px; }
+  .pipeline .arrow { font-size: 1.5rem; margin: 0 12px; color: var(--text-secondary); }
+
+  /* ===== Tabs ===== */
+  .tab-buttons { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 8px 18px; border-radius: 24px; border: 1px solid var(--border);
+    background: var(--card-bg); color: var(--text-secondary);
+    cursor: pointer; font-size: 0.88rem;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .tab-btn:hover { border-color: #555; color: #fff; }
+  .tab-btn.active {
+    background: linear-gradient(135deg, #667eea44, #764ba244);
+    border-color: #667eea; color: #fff;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ===== 页脚 ===== */
+  .footer {
+    text-align: center; padding: 40px 20px;
+    color: var(--text-secondary); font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+  }
+  .footer a { color: var(--accent-4); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 640px) {
+    .container { padding: 20px 14px; }
+    .card { padding: 18px; }
+    .card-grid { grid-template-columns: 1fr; }
+    .concept-grid { grid-template-columns: 1fr; }
+    .vs-table { grid-template-columns: 1fr; }
+    .vs-table .vs-mid { padding: 8px; }
+    .pipeline { flex-direction: column; gap: 8px; }
+    .pipeline .arrow { transform: rotate(90deg); }
+    .code-block pre { font-size: 0.75rem; padding: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 背景粒子 -->
+<canvas id="particles"></canvas>
+
+<!-- ===== Hero ===== -->
+<header class="hero">
+  <div class="icon-row">🧵</div>
+  <h1>C++ 多线程编程</h1>
+  <p class="subtitle">从创建第一个线程到掌握同步原语——让程序"一心多用"的艺术</p>
+  <div class="meta">
+    <span>📚 来源：菜鸟教程</span>
+    <span>📅 2026-07-13</span>
+    <span>🔧 C++11 / C++17</span>
+    <span>🧠 AI 辅助笔记</span>
+  </div>
+</header>
+
+<!-- ===== 主内容区 ===== -->
+<main class="container">
+
+  <!-- 第0章：核心概念 -->
+  <section class="section">
+    <div class="section-title">
+      <span class="num pink">🧠</span>
+      <h2>先搞清楚：线程是什么？并发 vs 并行</h2>
+    </div>
+
+    <div class="card">
+      <h3>🪡 线程 (Thread) —— 程序的"分身术"</h3>
+      <p>
+        想象你在厨房做饭：你一个人同时<strong>切菜、煮汤、烤面包</strong>——这在单线程下是不可能的，
+        你只能按顺序一件件做。但如果叫来三个帮手（线程），每个人负责一个任务，厨房就"并发"运转起来了。
+      </p>
+      <p style="margin-top:8px;">
+        在线程的世界里，所有线程<strong>共享同一个"厨房"</strong>（进程的地址空间、堆内存、全局变量），
+        但每个线程有自己的"菜板"（栈、寄存器、程序计数器），互不干扰。
+      </p>
+    </div>
+
+    <!-- 并发 vs 并行对比 -->
+    <div class="vs-table">
+      <div class="vs-left">
+        <div class="vs-header">🏃 并发 Concurrency</div>
+        <div class="vs-desc">一个 CPU 核心<br>快速交替处理多个任务<br>看起来"同时"，其实是"轮流"</div>
+      </div>
+      <div class="vs-mid">VS</div>
+      <div class="vs-right">
+        <div class="vs-header">🚀 并行 Parallelism</div>
+        <div class="vs-desc">多个 CPU 核心<br>真正同时执行多个任务<br>物理上的"同时"</div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>💡 一句话总结：</strong>并发是"看起来一起做"，并行是"真的一起做"。
+      多线程可以在单核上实现并发，但要实现并行需要多核 CPU。
+    </div>
+  </section>
+
+  <!-- 第1章：核心组件速览 -->
+  <section class="section">
+    <div class="section-title">
+      <span class="num green">🎯</span>
+      <h2>C++ 多线程工具箱（6 大核心组件）</h2>
+    </div>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">🧵</div>
+        <h4>std::thread</h4>
+        <p>创建和管理线程。像"雇佣一个工人"，给它任务，它就开始干活。</p>
+        <code style="font-size:0.78rem;color:var(--accent-4);">&lt;thread&gt;</code>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔒</div>
+        <h4>std::mutex</h4>
+        <p>互斥锁——"卫生间门锁"。一次只让一个人进去，防止共享数据被同时篡改。</p>
+        <code style="font-size:0.78rem;color:var(--accent-4);">&lt;mutex&gt;</code>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🗝️</div>
+        <h4>lock_guard / unique_lock</h4>
+        <p>智能锁管家。RAII 风格，自动上锁/解锁，绝不忘记"关门"。</p>
+        <code style="font-size:0.78rem;color:var(--accent-4);">&lt;mutex&gt;</code>
+      </div>
+      <div class="concept-card">
+        <div class="icon">📡</div>
+        <h4>condition_variable</h4>
+        <p>条件变量——"传呼机"。一个线程等待通知，另一个线程发送通知，优雅协作。</p>
+        <code style="font-size:0.78rem;color:var(--accent-4);">&lt;condition_variable&gt;</code>
+      </div>
+      <div class="concept-card">
+        <div class="icon">⚛️</div>
+        <h4>std::atomic</h4>
+        <p>原子操作——不可分割。要么完全执行，要么完全不执行，没有中间态。</p>
+        <code style="font-size:0.78rem;color:var(--accent-4);">&lt;atomic&gt;</code>
+      </div>
+      <div class="concept-card">
+        <div class="icon">📬</div>
+        <h4>future / promise</h4>
+        <p>线程间"快递"——一个线程塞入值(promise)，另一个线程取出值(future)。</p>
+        <code style="font-size:0.78rem;color:var(--accent-4);">&lt;future&gt;</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第2章：创建线程 -->
+  <section class="section">
+    <div class="section-title">
+      <span class="num blue">1</span>
+      <h2>创建线程 —— 三种姿势，任你挑选</h2>
+    </div>
+
+    <p style="color:var(--text-secondary); margin-bottom:20px;">
+      头文件 <code style="color:var(--accent-4);background:#1a1a2e;padding:2px 8px;border-radius:4px;">#include &lt;thread&gt;</code>
+      编译参数 <code style="color:var(--accent-5);background:#1a1a2e;padding:2px 8px;border-radius:4px;">g++ -std=c++11 test.cpp</code>
+    </p>
+
+    <!-- Tab 切换三种方式 -->
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab(event, 'tab-func')">🔧 函数指针</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-obj')">📦 函数对象</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-lambda')">⚡ Lambda 表达式</button>
+    </div>
+
+    <div id="tab-func" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>方式一：传函数指针 —— 最经典</span>
+          <span></span>
+        </div>
+        <pre><code><span class="hl-pre">#include</span> <span class="hl-str">&lt;iostream&gt;</span>
+<span class="hl-pre">#include</span> <span class="hl-str">&lt;thread&gt;</span>
+
+<span class="hl-type">void</span> <span class="hl-func">printMessage</span>(<span class="hl-type">int</span> count) {
+    <span class="hl-kw">for</span> (<span class="hl-type">int</span> i = <span class="hl-num">0</span>; i &lt; count; ++i) {
+        std::cout &lt;&lt; <span class="hl-str">"线程: 你好！👋\n"</span>;
+    }
+}
+
+<span class="hl-type">int</span> <span class="hl-func">main</span>() {
+    <span class="hl-cmt">// 创建线程：把函数和参数传进去</span>
+    std::<span class="hl-type">thread</span> <span class="hl-func">t1</span>(printMessage, <span class="hl-num">5</span>);
+    t1.<span class="hl-func">join</span>();  <span class="hl-cmt">// 等待线程干完活再继续</span>
+    <span class="hl-kw">return</span> <span class="hl-num">0</span>;
+}</code></pre>
+        <div class="output-label">▶ 输出结果</div>
+        <div class="output">线程: 你好！👋
+线程: 你好！👋
+线程: 你好！👋
+线程: 你好！👋
+线程: 你好！👋</div>
+      </div>
+    </div>
+
+    <div id="tab-obj" class="tab-content">
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>方式二：传函数对象 —— 面向对象玩家最爱</span>
+          <span></span>
+        </div>
+        <pre><code><span class="hl-pre">#include</span> <span class="hl-str">&lt;iostream&gt;</span>
+<span class="hl-pre">#include</span> <span class="hl-str">&lt;thread&gt;</span>
+
+<span class="hl-kw">class</span> <span class="hl-type">PrintTask</span> {
+<span class="hl-kw">public</span>:
+    <span class="hl-cmt">// 重载 operator() —— 让对象像函数一样被调用</span>
+    <span class="hl-type">void</span> <span class="hl-func">operator</span>()(<span class="hl-type">int</span> count) <span class="hl-kw">const</span> {
+        <span class="hl-kw">for</span> (<span class="hl-type">int</span> i = <span class="hl-num">0</span>; i &lt; count; ++i) {
+            std::cout &lt;&lt; <span class="hl-str">"线程: 函数对象在工作！📦\n"</span>;
+        }
+    }
+};
+
+<span class="hl-type">int</span> <span class="hl-func">main</span>() {
+    std::<span class="hl-type">thread</span> <span class="hl-func">t2</span>(<span class="hl-func">PrintTask</span>(), <span class="hl-num">5</span>);
+    t2.<span class="hl-func">join</span>();
+    <span class="hl-kw">return</span> <span class="hl-num">0</span>;
+}</code></pre>
+      </div>
+    </div>
+
+    <div id="tab-lambda" class="tab-content">
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>方式三：Lambda 表达式 —— 现代 C++ 首选 ✨</span>
+          <span></span>
+        </div>
+        <pre><code><span class="hl-pre">#include</span> <span class="hl-str">&lt;iostream&gt;</span>
+<span class="hl-pre">#include</span> <span class="hl-str">&lt;thread&gt;</span>
+
+<span class="hl-type">int</span> <span class="hl-func">main</span>() {
+    <span class="hl-cmt">// Lambda 直接内联写在线程里，简洁优雅！</span>
+    std::<span class="hl-type">thread</span> <span class="hl-func">t3</span>([](<span class="hl-type">int</span> count) {
+        <span class="hl-kw">for</span> (<span class="hl-type">int</span> i = <span class="hl-num">0</span>; i &lt; count; ++i) {
+            std::cout &lt;&lt; <span class="hl-str">"线程: Lambda 起飞！⚡\n"</span>;
+        }
+    }, <span class="hl-num">5</span>);
+
+    t3.<span class="hl-func">join</span>();
+    <span class="hl-kw">return</span> <span class="hl-num">0</span>;
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>🌟 推荐：</strong>日常开发优先用 <strong>Lambda 表达式</strong>——代码紧凑、逻辑内聚，不需要额外定义函数或类。
+    </div>
+  </section>
+
+  <!-- 第3章：线程管理 -->
+  <section class="section">
+    <div class="section-title">
+      <span class="num orange">2</span>
+      <h2>线程管理 —— join() 与 detach() 的抉择</h2>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>🤝 join() —— "我等你"</h3>
+        <p>主线程调用 <code style="color:var(--accent-4);">t.join()</code> 后会<strong>阻塞等待</strong>，直到线程 t 执行完毕。</p>
+        <p style="margin-top:8px;">🖼️ 想象：你和朋友约好一起走，你在门口等他收拾完。</p>
+        <div class="code-block" style="margin-top:12px;">
+          <pre><code>std::<span class="hl-type">thread</span> t(task);
+t.<span class="hl-func">join</span>();   <span class="hl-cmt">// 阻塞，等 t 执行完</span>
+<span class="hl-cmt">// t 结束后才执行到这里</span></code></pre>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🕊️ detach() —— "你先走吧"</h3>
+        <p>调用 <code style="color:var(--accent-4);">t.detach()</code> 后线程<strong>独立运行</strong>于后台，主线程不再管它。</p>
+        <p style="margin-top:8px;">🖼️ 想象：你让快递员自己去送货，你继续做别的事。</p>
+        <div class="code-block" style="margin-top:12px;">
+          <pre><code>std::<span class="hl-type">thread</span> t(task);
+t.<span class="hl-func">detach</span>(); <span class="hl-cmt">// 线程分离，后台运行</span>
+<span class="hl-cmt">// 主线程立即继续，不等待 t</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn">
+      <strong>⚠️ 警告：</strong>如果线程对象销毁前既没有调用 <code>join()</code> 也没有调用 <code>detach()</code>，
+      程序会直接<strong>崩溃</strong>（std::terminate）！这是新手最容易犯的错误。
+    </div>
+  </section>
+
+  <!-- 第4章：线程传参 -->
+  <section class="section">
+    <div class="section-title">
+      <span class="num purple">3</span>
+      <h2>线程传参 —— 值传递 vs 引用传递</h2>
+    </div>
+
+    <div class="card">
+      <h3>📋 默认是值传递（拷贝）</h3>
+      <p>线程默认会<strong>拷贝一份参数</strong>传给线程函数，即使原函数签名用的是引用。这是为了防止主线程中的变量被销毁后，子线程访问悬空引用。</p>
+      <div class="code-block">
+        <pre><code>std::<span class="hl-type">thread</span> t(func, arg1, arg2);  <span class="hl-cmt">// arg1, arg2 会被拷贝！</span></code></pre>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>🔗 如需引用传递：用 std::ref()</h3>
+      <p>如果确实想让线程<strong>修改外部变量</strong>，需要用 <code>std::ref()</code> 包装一下：</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>引用传参示例</span>
+          <span></span>
+        </div>
+        <pre><code><span class="hl-pre">#include</span> <span class="hl-str">&lt;iostream&gt;</span>
+<span class="hl-pre">#include</span> <span class="hl-str">&lt;thread&gt;</span>
+
+<span class="hl-type">void</span> <span class="hl-func">increment</span>(<span class="hl-type">int</span>&amp; x) { ++x; }  <span class="hl-cmt">// 参数是引用</span>
+
+<span class="hl-type">int</span> <span class="hl-func">main</span>() {
+    <span class="hl-type">int</span> num = <span class="hl-num">0</span>;
+    std::<span class="hl-type">thread</span> t(increment, std::<span class="hl-func">ref</span>(num));  <span class="hl-cmt">// ← 关键！</span>
+    t.<span class="hl-func">join</span>();
+    std::cout &lt;&lt; num;  <span class="hl-cmt">// 输出 1 ✅ 主线程的 num 被修改了</span>
+    <span class="hl-kw">return</span> <span class="hl-num">0</span>;
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第5章：同步与互斥 -->
+  <section class="section">
+    <div class="section-title">
+      <span class="num cyan">4</span>
+      <h2>线程同步与互斥 —— 别让线程"打架"</h2>
+    </div>
+
+    <p style="color:var(--text-secondary); margin-bottom:24px;">
+      多个线程共享数据时如果没有保护，就会出现<strong>数据竞争 (Data Race)</strong>——
+      就像两个人同时在一张纸上写字，结果谁也看不清写了什么。
+      下面四种武器帮你解决这个问题：
+    </p>
+
+    <!-- 武器1: Mutex -->
+    <div class="card">
+      <h3>🔒 武器一：互斥量 Mutex —— "排队上厕所"</h3>
+      <p>简单粗暴：谁先锁上谁先用，其他人门口等着。</p>
+      <div class="code-block">
+        <pre><code><span class="hl-pre">#include</span> <span class="hl-str">&lt;mutex&gt;</span>
+
+std::<span class="hl-type">mutex</span> mtx;  <span class="hl-cmt">// 全局锁</span>
+
+<span class="hl-type">void</span> <span class="hl-func">safeWrite</span>() {
+    mtx.<span class="hl-func">lock</span>();      <span class="hl-cmt">// 🔐 上锁</span>
+    <span class="hl-cmt">// ... 安全地操作共享数据 ...</span>
+    mtx.<span class="hl-func">unlock</span>();    <span class="hl-cmt">// 🔓 解锁（千万别忘了！）</span>
+}</code></pre>
+      </div>
+      <div class="warn">
+        <strong>⚠️ 陷阱：</strong>如果 <code>lock()</code> 和 <code>unlock()</code> 之间的代码抛异常，
+        unlock 永远不会执行 → <strong>死锁</strong>。所以更推荐下面两种…
+      </div>
+    </div>
+
+    <!-- 武器2: lock_guard & unique_lock -->
+    <div class="card" style="margin-top:20px;">
+      <h3>🗝️ 武器二：lock_guard & unique_lock —— "自动锁"</h3>
+      <p>RAII 机制：构造时自动上锁，析构时自动解锁。<strong>绝不漏锁。</strong></p>
+      <div class="code-block">
+        <pre><code><span class="hl-type">void</span> <span class="hl-func">safeWriteGuard</span>() {
+    std::<span class="hl-type">lock_guard</span>&lt;std::<span class="hl-type">mutex</span>&gt; lk(mtx);  <span class="hl-cmt">// 自动上锁</span>
+    <span class="hl-cmt">// ... 安全操作 ...</span>
+}  <span class="hl-cmt">// ← 离开作用域，自动解锁！</span>
+
+<span class="hl-type">void</span> <span class="hl-func">safeWriteUnique</span>() {
+    std::<span class="hl-type">unique_lock</span>&lt;std::<span class="hl-type">mutex</span>&gt; ul(mtx);
+    <span class="hl-cmt">// ... 安全操作 ...</span>
+    ul.<span class="hl-func">unlock</span>();  <span class="hl-cmt">// unique_lock 还支持手动解锁！</span>
+    <span class="hl-cmt">// ... 做点不用锁的事 ...</span>
+}</code></pre>
+      </div>
+
+      <table style="width:100%; margin-top:16px; border-collapse:collapse; font-size:0.9rem;">
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="padding:10px;text-align:left;">特性</th>
+          <th style="padding:10px;text-align:center;">lock_guard</th>
+          <th style="padding:10px;text-align:center;">unique_lock</th>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px;">自动解锁</td>
+          <td style="text-align:center;color:var(--accent-3);">✅</td>
+          <td style="text-align:center;color:var(--accent-3);">✅</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px;">手动解锁</td>
+          <td style="text-align:center;color:var(--accent-6);">❌</td>
+          <td style="text-align:center;color:var(--accent-3);">✅</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px;">转移所有权</td>
+          <td style="text-align:center;color:var(--accent-6);">❌</td>
+          <td style="text-align:center;color:var(--accent-3);">✅</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px;">配合条件变量</td>
+          <td style="text-align:center;color:var(--accent-6);">❌</td>
+          <td style="text-align:center;color:var(--accent-3);">✅</td>
+        </tr>
+        <tr>
+          <td style="padding:10px;">性能开销</td>
+          <td style="text-align:center;">低</td>
+          <td style="text-align:center;">略高</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 武器3: 条件变量 -->
+    <div class="card" style="margin-top:20px;">
+      <h3>📡 武器三：条件变量 Condition Variable —— "传呼机模式"</h3>
+      <p>
+        生产者/消费者经典场景：一个线程说"数据准备好了"，另一个线程收到通知才开始干活。
+        <strong>避免了忙等待（busy-wait）</strong>，CPU 不用空转。
+      </p>
+      <div class="pipeline">
+        <div class="step">
+          <div class="s-icon">😴</div>
+          <div class="s-label">工作线程<br>cv.wait() 等待</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="step">
+          <div class="s-icon">📢</div>
+          <div class="s-label">主线程<br>cv.notify_one() 通知</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="step">
+          <div class="s-icon">🏃</div>
+          <div class="s-label">工作线程<br>被唤醒，干活！</div>
+        </div>
+      </div>
+      <div class="code-block">
+        <pre><code><span class="hl-pre">#include</span> <span class="hl-str">&lt;mutex&gt;</span>
+<span class="hl-pre">#include</span> <span class="hl-str">&lt;condition_variable&gt;</span>
+
+std::<span class="hl-type">mutex</span> mtx;
+std::<span class="hl-type">condition_variable</span> cv;
+<span class="hl-type">bool</span> ready = <span class="hl-kw">false</span>;  <span class="hl-cmt">// 条件标志</span>
+
+<span class="hl-type">void</span> <span class="hl-func">worker</span>() {
+    std::<span class="hl-type">unique_lock</span>&lt;std::<span class="hl-type">mutex</span>&gt; lk(mtx);
+    cv.<span class="hl-func">wait</span>(lk, []{ <span class="hl-kw">return</span> ready; });  <span class="hl-cmt">// 等！直到 ready==true</span>
+    <span class="hl-cmt">// 被唤醒，继续工作 🎉</span>
+}
+
+<span class="hl-type">void</span> <span class="hl-func">boss</span>() {
+    {
+        std::<span class="hl-type">lock_guard</span>&lt;std::<span class="hl-type">mutex</span>&gt; lk(mtx);
+        ready = <span class="hl-kw">true</span>;  <span class="hl-cmt">// 数据准备好了</span>
+    }  <span class="hl-cmt">// 解锁</span>
+    cv.<span class="hl-func">notify_one</span>();  <span class="hl-cmt">// 📢 "起床干活了！"</span>
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- 武器4: 原子操作 -->
+    <div class="card" style="margin-top:20px;">
+      <h3>⚛️ 武器四：原子操作 Atomic —— "最小的不可分割单元"</h3>
+      <p>
+        对于简单的计数器场景，用 mutex 太重了。<code>std::atomic</code> 利用 CPU 硬件指令保证操作不可分割，
+        <strong>无需加锁，性能极高</strong>。
+      </p>
+      <div class="code-block">
+        <pre><code><span class="hl-pre">#include</span> <span class="hl-str">&lt;atomic&gt;</span>
+
+std::<span class="hl-type">atomic</span>&lt;<span class="hl-type">int</span>&gt; counter(<span class="hl-num">0</span>);
+
+<span class="hl-type">void</span> <span class="hl-func">increment</span>() {
+    counter.<span class="hl-func">fetch_add</span>(<span class="hl-num">1</span>);  <span class="hl-cmt">// 原子+1，线程安全的！</span>
+    <span class="hl-cmt">// 等价于 counter++，但 counter++ 不是原子的！</span>
+}</code></pre>
+      </div>
+      <div class="tip">
+        <strong>💡 简单选择法：</strong>简单计数 → <code>std::atomic</code>；复杂共享数据 → <code>std::mutex</code>。
+      </div>
+    </div>
+  </section>
+
+  <!-- 第6章：综合实例 -->
+  <section class="section">
+    <div class="section-title">
+      <span class="num pink">5</span>
+      <h2>综合实战 —— 三个线程并发运行</h2>
+    </div>
+
+    <div class="card">
+      <p style="margin-bottom:16px;">以下演示如何用<strong>三种不同方式</strong>创建三个线程，让它们并发执行：</p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>完整示例：三种方式 + 线程管理</span>
+          <span></span>
+        </div>
+        <pre><code><span class="hl-pre">#include</span> <span class="hl-str">&lt;iostream&gt;</span>
+<span class="hl-pre">#include</span> <span class="hl-str">&lt;thread&gt;</span>
+<span class="hl-kw">using</span> <span class="hl-kw">namespace</span> std;
+
+<span class="hl-cmt">// 方式一：普通函数</span>
+<span class="hl-type">void</span> <span class="hl-func">foo</span>(<span class="hl-type">int</span> Z) {
+    <span class="hl-kw">for</span> (<span class="hl-type">int</span> i = <span class="hl-num">0</span>; i &lt; Z; i++)
+        cout &lt;&lt; <span class="hl-str">"🔧 函数指针方式\n"</span>;
+}
+
+<span class="hl-cmt">// 方式二：函数对象类</span>
+<span class="hl-kw">class</span> <span class="hl-type">ThreadObj</span> {
+<span class="hl-kw">public</span>:
+    <span class="hl-type">void</span> <span class="hl-func">operator</span>()(<span class="hl-type">int</span> x) <span class="hl-kw">const</span> {
+        <span class="hl-kw">for</span> (<span class="hl-type">int</span> i = <span class="hl-num">0</span>; i &lt; x; i++)
+            cout &lt;&lt; <span class="hl-str">"📦 函数对象方式\n"</span>;
+    }
+};
+
+<span class="hl-type">int</span> <span class="hl-func">main</span>() {
+    cout &lt;&lt; <span class="hl-str">"🚀 三个线程独立运行！\n"</span>;
+
+    <span class="hl-type">thread</span> th1(foo, <span class="hl-num">3</span>);                     <span class="hl-cmt">// 函数指针</span>
+    <span class="hl-type">thread</span> th2(ThreadObj(), <span class="hl-num">3</span>);            <span class="hl-cmt">// 函数对象</span>
+    <span class="hl-type">thread</span> th3([](<span class="hl-type">int</span> x) {                  <span class="hl-cmt">// Lambda</span>
+        <span class="hl-kw">for</span> (<span class="hl-type">int</span> i = <span class="hl-num">0</span>; i &lt; x; i++)
+            cout &lt;&lt; <span class="hl-str">"⚡ Lambda 方式\n"</span>;
+    }, <span class="hl-num">3</span>);
+
+    th1.<span class="hl-func">join</span>();  <span class="hl-cmt">// 等三个线程都完成</span>
+    th2.<span class="hl-func">join</span>();
+    th3.<span class="hl-func">join</span>();
+
+    <span class="hl-kw">return</span> <span class="hl-num">0</span>;
+}</code></pre>
+      </div>
+      <div class="tip" style="margin-top:16px;">
+        <strong>🎲 注意：</strong>由于线程调度由操作系统决定，每次运行的输出<strong>顺序可能不同</strong>。
+        三个线程的输出会<strong>交错出现</strong>——这正是并发的魅力（也是复杂性的来源）！
+      </div>
+    </div>
+  </section>
+
+  <!-- 第7章：线程局部存储 & 死锁 -->
+  <section class="section">
+    <div class="section-title">
+      <span class="num orange">6</span>
+      <h2>进阶话题：TLS 线程局部存储 & 死锁预防</h2>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>🧩 thread_local —— "每人一份"</h3>
+        <p>用 <code style="color:var(--accent-4);">thread_local</code> 关键字声明的变量，<strong>每个线程都有自己独立的一份拷贝</strong>。天然线程安全，无需加锁。</p>
+        <div class="code-block" style="margin-top:12px;">
+          <pre><code><span class="hl-kw">thread_local</span> <span class="hl-type">int</span> myData = <span class="hl-num">0</span>;
+
+<span class="hl-type">void</span> <span class="hl-func">worker</span>() {
+    myData = <span class="hl-num">42</span>;  <span class="hl-cmt">// 只改自己的，不影响别人</span>
+}</code></pre>
+        </div>
+      </div>
+      <div class="card">
+        <h3>💀 死锁 Deadlock —— "互相等待的僵局"</h3>
+        <p>线程 A 持有锁1等锁2，线程 B 持有锁2等锁1——<strong>谁也动不了</strong>。</p>
+        <p style="margin-top:8px; font-size:0.9rem;">🛡️ <strong>破解三招：</strong></p>
+        <ul style="margin-top:8px;">
+          <li>🔢 总是按<strong>相同顺序</strong>获取锁</li>
+          <li>⏱️ 使用 <strong>超时锁</strong>（try_lock_for）</li>
+          <li>🔍 使用<strong>死锁检测</strong>算法</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第8章：线程间通信 -->
+  <section class="section">
+    <div class="section-title">
+      <span class="num green">7</span>
+      <h2>线程间通信 —— future/promise 快递系统</h2>
+    </div>
+
+    <div class="card">
+      <h3>📬 std::promise → std::future：线程间的"快递包裹"</h3>
+      <p>
+        <strong>promise</strong> 是"发件人"，往里面塞值；
+        <strong>future</strong> 是"收件箱"，从中取值。完美的线程间值传递！
+      </p>
+      <div class="pipeline">
+        <div class="step">
+          <div class="s-icon">📮</div>
+          <div class="s-label">promise<br>set_value(10)</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="step">
+          <div class="s-icon">📬</div>
+          <div class="s-label">future<br>.get() = 10</div>
+        </div>
+      </div>
+      <div class="code-block">
+        <pre><code>std::<span class="hl-type">promise</span>&lt;<span class="hl-type">int</span>&gt; p;
+std::<span class="hl-type">future</span>&lt;<span class="hl-type">int</span>&gt; f = p.<span class="hl-func">get_future</span>();
+
+std::<span class="hl-type">thread</span> t([&amp;p] {
+    <span class="hl-cmt">// 做一些计算...</span>
+    p.<span class="hl-func">set_value</span>(<span class="hl-num">42</span>);  <span class="hl-cmt">// 📮 快递发出！</span>
+});
+
+<span class="hl-type">int</span> result = f.<span class="hl-func">get</span>();   <span class="hl-cmt">// 📬 收到快递！result = 42</span>
+t.<span class="hl-func">join</span>();</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第9章：C++17 并行算法 -->
+  <section class="section">
+    <div class="section-title">
+      <span class="num blue">🎁</span>
+      <h2>C++17 彩蛋 —— 并行算法，一行代码用满多核</h2>
+    </div>
+
+    <div class="card">
+      <p>C++17 在 <code style="color:var(--accent-4);">&lt;algorithm&gt;</code> 中引入了<strong>执行策略</strong>，让你一行代码就享受多核并行：</p>
+      <div class="code-block">
+        <pre><code><span class="hl-pre">#include</span> <span class="hl-str">&lt;algorithm&gt;</span>
+<span class="hl-pre">#include</span> <span class="hl-str">&lt;vector&gt;</span>
+<span class="hl-pre">#include</span> <span class="hl-str">&lt;execution&gt;</span>
+
+std::<span class="hl-type">vector</span>&lt;<span class="hl-type">int</span>&gt; vec = {<span class="hl-num">1</span>, <span class="hl-num">2</span>, <span class="hl-num">3</span>, <span class="hl-num">4</span>, <span class="hl-num">5</span>};
+
+<span class="hl-cmt">// par = parallel，自动并行执行！</span>
+std::<span class="hl-func">for_each</span>(std::execution::<span class="hl-type">par</span>,
+    vec.<span class="hl-func">begin</span>(), vec.<span class="hl-func">end</span>(),
+    [](<span class="hl-type">int</span>&amp; n) { n *= <span class="hl-num">2</span>; }
+);</code></pre>
+      </div>
+      <div class="tip">
+        <strong>📦 三种执行策略：</strong>
+        <code>seq</code>（顺序）、 <code>par</code>（并行）、 <code>par_unseq</code>（并行+向量化）。
+        适用于 for_each、sort、transform、reduce 等算法。
+      </div>
+    </div>
+  </section>
+
+  <!-- 总结 -->
+  <section class="section">
+    <div class="section-title">
+      <span class="num purple">📋</span>
+      <h2>一图总结：什么时候用什么？</h2>
+    </div>
+
+    <div class="card">
+      <table style="width:100%; border-collapse:collapse; font-size:0.92rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--border);">
+            <th style="padding:12px;text-align:left;">场景</th>
+            <th style="padding:12px;text-align:left;">用这个</th>
+            <th style="padding:12px;text-align:left;">理由</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:12px;">创建线程执行任务</td>
+            <td style="padding:12px;"><code style="color:var(--accent-4);">std::thread</code></td>
+            <td style="padding:12px;color:var(--text-secondary);">基础中的基础</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:12px;">简单计数器</td>
+            <td style="padding:12px;"><code style="color:var(--accent-3);">std::atomic</code></td>
+            <td style="padding:12px;color:var(--text-secondary);">无锁，极快</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:12px;">保护复杂共享数据</td>
+            <td style="padding:12px;"><code style="color:var(--accent-1);">std::mutex</code> + <code style="color:var(--accent-2);">lock_guard</code></td>
+            <td style="padding:12px;color:var(--text-secondary);">安全可靠</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:12px;">生产者-消费者模式</td>
+            <td style="padding:12px;"><code style="color:var(--accent-5);">condition_variable</code></td>
+            <td style="padding:12px;color:var(--text-secondary);">省 CPU，优雅等待</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:12px;">线程间传递结果</td>
+            <td style="padding:12px;"><code style="color:var(--accent-4);">promise/future</code></td>
+            <td style="padding:12px;color:var(--text-secondary);">一对一的快递</td>
+          </tr>
+          <tr>
+            <td style="padding:12px;">每个线程独立数据</td>
+            <td style="padding:12px;"><code style="color:var(--accent-2);">thread_local</code></td>
+            <td style="padding:12px;color:var(--text-secondary);">天生线程安全</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>📝 笔记基于 <a href="https://www.runoob.com/cplusplus/cpp-multithreading.html" target="_blank">菜鸟教程 - C++ 多线程</a> | 🎨 AI 辅助整理 | 2026-07-13</p>
+</footer>
+
+<!-- ===== 背景粒子动画脚本 ===== -->
+<script>
+// 粒子效果
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+class Particle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 2 + 0.5;
+    this.speedX = (Math.random() - 0.5) * 0.4;
+    this.speedY = (Math.random() - 0.5) * 0.4;
+    this.opacity = Math.random() * 0.4 + 0.1;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if (this.x < -10 || this.x > canvas.width + 10 ||
+        this.y < -10 || this.y > canvas.height + 10) {
+      this.reset();
+    }
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(150, 150, 220, ${this.opacity})`;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < 80; i++) {
+  particles.push(new Particle());
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animate);
+}
+animate();
+
+// Tab 切换
+function switchTab(event, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+</script>
+
+</body>
+</html>

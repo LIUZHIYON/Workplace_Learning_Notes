@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agency Agents — 智能代理全览手册</title>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #14141f;
+  --surface2: #1a1a2e;
+  --border: #252540;
+  --text: #e0e0f0;
+  --text2: #9898b8;
+  --text3: #686888;
+  --accent: #6366f1;
+  --accent2: #818cf8;
+  --accent3: #a5b4fc;
+  --glow: rgba(99,102,241,0.25);
+  --red: #f43f5e;
+  --orange: #f97316;
+  --amber: #f59e0b;
+  --green: #22c55e;
+  --teal: #14b8a6;
+  --cyan: #06b6d4;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --pink: #ec4899;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+/* Background animation */
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 80% 60% at 20% 0%, rgba(99,102,241,0.06), transparent 60%),
+  radial-gradient(ellipse 60% 70% at 80% 50%, rgba(139,92,246,0.04), transparent 60%),
+  radial-gradient(ellipse 50% 50% at 50% 100%, rgba(34,197,94,0.03), transparent 70%);
+  pointer-events:none;z-index:0}
+.container{max-width:1400px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+
+/* Hero */
+.hero{text-align:center;padding:80px 0 60px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:8px 20px;font-size:14px;color:var(--text2);margin-bottom:24px}
+.hero-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;letter-spacing:-0.03em;line-height:1.1;margin-bottom:16px}
+.hero h1 .grad{background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899,#f43f5e);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:1.15rem;color:var(--text2);max-width:650px;margin:0 auto;text-wrap:balance}
+
+/* Stats bar */
+.stats-bar{display:flex;justify-content:center;gap:48px;margin:40px 0;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-num{font-size:3rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--purple));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:0.85rem;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em}
+
+/* Search & Filter */
+.toolbar{position:sticky;top:0;z-index:100;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:16px 0;margin-bottom:32px}
+.toolbar-inner{display:flex;gap:12px;align-items:center;flex-wrap:wrap;max-width:1400px;margin:0 auto;padding:0 24px}
+.search-wrap{flex:1;min-width:240px;position:relative}
+.search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+.search-input{width:100%;padding:12px 16px 12px 44px;background:var(--surface2);border:1px solid var(--border);border-radius:100px;color:var(--text);font-size:0.95rem;outline:none;transition:var(--transition)}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+.category-filters{display:flex;gap:6px;flex-wrap:wrap}
+.cat-btn{padding:8px 16px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:0.8rem;cursor:pointer;transition:var(--transition);white-space:nowrap;font-weight:500}
+.cat-btn:hover{border-color:var(--accent3);color:var(--text)}
+.cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.cat-count{font-size:0.7rem;opacity:0.7;margin-left:4px}
+
+/* Category Section */
+.cat-section{margin-bottom:48px}
+.cat-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.cat-icon{font-size:2rem}
+.cat-title{font-size:1.5rem;font-weight:700;color:var(--text)}
+.cat-title-cn{font-size:0.85rem;color:var(--text3);margin-left:8px;font-weight:400}
+.cat-count-badge{font-size:0.8rem;color:var(--accent3);font-weight:600;margin-left:auto}
+
+/* Agent Grid */
+.agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.agent-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:var(--transition);position:relative;overflow:hidden;cursor:default}
+.agent-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.4s;border-radius:var(--radius);pointer-events:none}
+.agent-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.4),0 0 0 1px var(--accent) inset}
+.agent-card:hover::before{opacity:0.03;background:var(--accent)}
+.card-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.card-emoji{font-size:2.2rem;flex-shrink:0;line-height:1;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--surface2);border-radius:12px}
+.card-name{font-weight:700;font-size:1.05rem;color:var(--text);line-height:1.3}
+.card-filename{font-size:0.72rem;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono','Fira Code',monospace}
+.card-desc{font-size:0.88rem;color:var(--text2);line-height:1.55;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card-vibe{font-size:0.8rem;color:var(--accent3);font-style:italic;padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);border-left:3px solid var(--accent);line-height:1.45}
+.card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.card-tag{font-size:0.68rem;padding:3px 10px;border-radius:100px;background:rgba(99,102,241,0.1);color:var(--accent3);border:1px solid rgba(99,102,241,0.2)}
+.card-color-dot{width:10px;height:10px;border-radius:50%;position:absolute;top:16px;right:16px;opacity:0.6}
+
+/* Tool count highlight */
+.tools-badge{display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;color:var(--text3);margin-top:6px}
+.tools-badge svg{width:14px;height:14px}
+
+/* Footer */
+.footer{text-align:center;padding:60px 0 40px;color:var(--text3);font-size:0.85rem;border-top:1px solid var(--border);margin-top:40px}
+.footer strong{color:var(--text2)}
+
+/* Responsive */
+@media(max-width:768px){
+  .hero{padding:48px 0 32px}
+  .hero h1{font-size:2rem}
+  .stats-bar{gap:24px}
+  .stat-num{font-size:2rem}
+  .agent-grid{grid-template-columns:1fr}
+  .toolbar-inner{flex-direction:column;align-items:stretch}
+  .category-filters{overflow-x:auto;padding-bottom:8px}
+}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+/* Animations */
+.agent-card{animation:fadeUp 0.5s ease backwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* Print */
+@media print{
+  body{background:#fff;color:#111}
+  .agent-card{border:1px solid #ddd;break-inside:avoid}
+  .toolbar{display:none}
+}
+
+/* Modal for full description */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn 0.2s}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:640px;width:100%;max-height:80vh;overflow-y:auto;padding:32px;box-shadow:0 24px 80px rgba(0,0,0,0.6)}
+.modal h3{font-size:1.6rem;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.modal .modal-emoji{font-size:2.5rem}
+.modal .modal-desc{color:var(--text2);font-size:1rem;line-height:1.6;margin-bottom:16px}
+.modal .modal-vibe{padding:14px 16px;background:var(--surface2);border-radius:var(--radius-sm);border-left:3px solid var(--accent);font-style:italic;color:var(--accent3);margin-bottom:16px}
+.modal .modal-category{font-size:0.8rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:16px}
+.modal-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:1.2rem;transition:var(--transition);display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:var(--red);border-color:var(--red);color:#fff}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.hidden{display:none!important}
+.no-results{text-align:center;padding:60px 20px;color:var(--text3);grid-column:1/-1}
+.no-results .big-emoji{font-size:4rem;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero container">
+  <div class="hero-badge"><span class="dot"></span> Agency Agents v1.0 — 完整代理清单</div>
+  <h1><span class="grad">209个AI代理</span><br>一个平台，无限可能</h1>
+  <p>Agency Agents 是一套企业级AI代理生态系统，涵盖工程开发、市场营销、安全测试、游戏开发等17个专业领域。每个代理都是经过深度训练的领域专家，随时准备为你的业务赋能。</p>
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num">209</div><div class="stat-label">AI 代理总数</div></div>
+    <div class="stat-item"><div class="stat-num">16</div><div class="stat-label">专业领域</div></div>
+    <div class="stat-item"><div class="stat-num">17</div><div class="stat-label">类别分类</div></div>
+  </div>
+</section>
+
+<!-- TOOLBAR -->
+<div class="toolbar" id="toolbar">
+  <div class="toolbar-inner">
+    <div class="search-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="search" type="text" placeholder="搜索代理名称、描述、功能..." oninput="filterAgents()">
+    </div>
+    <div class="category-filters" id="catFilters"></div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="container" id="mainContent"></main>
+
+<!-- FOOTER -->
+<footer class="footer container">
+  <p>📋 <strong>Agency Agents</strong> — 企业级多代理协作平台 | 共 <strong>209</strong> 个专业AI代理 | 生成于 2026-07-13</p>
+  <p style="margin-top:8px">每个代理文件位于 <code>resources/corpus-baseline/&lt;category&gt;/</code> 目录下，包含完整的系统提示词、工作流程与能力定义。</p>
+</footer>
+
+<!-- Modal -->
+<div class="modal-overlay hidden" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox" onclick="event.stopPropagation()">
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// ===== ALL AGENT DATA =====
+const categories = [
+  {
+    id: "academic", icon: "🎓", title: "Academic · 学术研究", cn: "世界构建与学术分析",
+    color: "#D97706",
+    agents: [
+      {emoji:"🌍",name:"Anthropologist · 人类学家",file:"academic-anthropologist",desc:"文化系统、仪式、亲属关系和信仰体系专家——构建具有文化一致性、让人感觉真实存在而非凭空捏造的社会体系",vibe:"没有哪种文化是随机的——每一种实践都是你可能尚未察觉的问题的解决方案",color:"#D97706"},
+      {emoji:"🗺️",name:"Geographer · 地理学家",file:"academic-geographer",desc:"自然与人文地理学、气候系统、制图学和空间分析专家——构建地理上连贯的世界，让地形、气候、资源和聚落模式都经得起科学推敲",vibe:"地理决定命运——你身在何处，决定了你成为什么样的人",color:"#059669"},
+      {emoji:"📚",name:"Historian · 历史学家",file:"academic-historian",desc:"历史分析、时代分期、物质文化和史学史专家——基于一手和二手资料验证历史连贯性，用真实的时代细节丰富故事背景",vibe:"历史不会重复，但会押韵——而我熟知所有的韵脚",color:"#B45309"},
+      {emoji:"📜",name:"Narratologist · 叙事学家",file:"academic-narratologist",desc:"叙事理论、故事结构、角色弧光和文学分析专家——从普罗普到坎贝尔再到现代叙事学，用成熟的理论框架为你提供指导",vibe:"每一个故事都是一场论证——我帮你找到它真正在说什么",color:"#8B5CF6"},
+      {emoji:"🧠",name:"Psychologist · 心理学家",file:"academic-psychologist",desc:"人类行为、人格理论、动机和认知模式专家——基于临床和研究框架，构建心理上真实可信的角色和互动",vibe:"人们做事总有原因——我负责找到那个原因",color:"#EC4899"}
+    ]
+  },
+  {
+    id: "design", icon: "🎨", title: "Design · 设计创意", cn: "品牌、UI/UX与视觉传达",
+    color: "#8B5CF6",
+    agents: [
+      {emoji:"🎨",name:"Brand Guardian · 品牌守护者",file:"design-brand-guardian",desc:"品牌战略与守护专家，专注品牌识别开发、一致性维护和战略性品牌定位，是你品牌最坚定的捍卫者和最热情的倡导者",vibe:"你品牌最激烈的保护者和最热情的倡导者",color:"blue"},
+      {emoji:"📷",name:"Image Prompt Engineer · 图像提示工程师",file:"design-image-prompt-engineer",desc:"专业的AI图像生成提示词工程师，擅长将视觉概念转化为精准语言，通过生成式AI工具创作惊艳的专业级摄影作品",vibe:"将视觉概念转化为精准提示，生成令人惊叹的AI摄影作品",color:"amber"},
+      {emoji:"🌈",name:"Inclusive Visuals Specialist · 包容性视觉专家",file:"design-inclusive-visuals-specialist",desc:"对抗系统性AI偏见的代表性专家，生成文化准确、肯定且非刻板印象的图像和视频内容",vibe:"打破AI系统性偏见，生成文化准确的肯定性图像",color:"#4DB6AC"},
+      {emoji:"🎭",name:"Persona Walkthrough · 角色走查专家",file:"design-persona-walkthrough",desc:"从特定用户角色的心理视角模拟网页认知走查——捕捉每个滚动位置的情绪反应和理性思考，输出基于LIFT、Cialdini和Fogg框架的结构化转化率优化报告",vibe:"我成为你的用户，让你看到分析数据无法展示的东西",color:"#10B981"},
+      {emoji:"🎨",name:"UI Designer · UI设计师",file:"design-ui-designer",desc:"视觉设计系统和组件库专家——创造美观、一致、可访问的用户界面，提升用户体验并体现品牌身份",vibe:"创造美丽、一致、可访问的界面——让人感觉恰到好处",color:"purple"},
+      {emoji:"📐",name:"UX Architect · UX架构师",file:"design-ux-architect",desc:"技术架构与UX专家，为开发者提供坚实基础、CSS系统和清晰的实现指导",vibe:"为开发者提供坚实基础、CSS系统和清晰的实现路径",color:"purple"},
+      {emoji:"🔬",name:"UX Researcher · UX研究员",file:"design-ux-researcher",desc:"用户行为分析、可用性测试和数据驱动设计洞察专家——提供可操作的研究发现，提升产品可用性和用户满意度",vibe:"用真实用户数据验证设计决策，而非基于假设",color:"green"},
+      {emoji:"🎬",name:"Visual Storyteller · 视觉叙事师",file:"design-visual-storyteller",desc:"视觉传播专家，专注于创造引人入胜的视觉叙事、多媒体内容和品牌故事——将复杂信息转化为能够与受众建立情感连接的视觉故事",vibe:"将复杂信息转化为能打动人心的视觉叙事",color:"purple"},
+      {emoji:"✨",name:"Whimsy Injector · 趣味注入师",file:"design-whimsy-injector",desc:"为品牌体验注入个性、愉悦感和趣味元素的创意专家——通过意想不到的奇思妙想时刻，创造令人难忘的差异化互动",vibe:"注入意料之外的愉悦时刻，让品牌令人难以忘怀",color:"pink"}
+    ]
+  },
+  {
+    id: "engineering", icon: "⚙️", title: "Engineering · 工程开发", cn: "软件架构、AI/ML与DevOps全栈",
+    color: "#3b82f6",
+    agents: [
+      {emoji:"🧬",name:"AI Data Remediation Engineer · AI数据修复工程师",file:"engineering-ai-data-remediation-engineer",desc:"自愈数据管道专家——使用气隙本地SLM和语义聚类，自动检测、分类和修复大规模数据异常。专注于修复层，零数据丢失保障",vibe:"用外科级AI精度修复损坏的数据——不遗漏任何一行",color:"green"},
+      {emoji:"🤖",name:"AI Engineer · AI工程师",file:"engineering-ai-engineer",desc:"专业AI/ML工程师，专注机器学习模型开发、部署和生产系统集成。构建智能功能、数据管道和AI驱动的应用，强调实用可扩展方案",vibe:"将ML模型转化为真正可扩展的生产功能",color:"blue"},
+      {emoji:"⚡",name:"Autonomous Optimization Architect · 自主优化架构师",file:"engineering-autonomous-optimization-architect",desc:"智能系统治理器，持续对API进行影子测试以优化性能，同时执行严格的财务和安全性护栏，防止失控成本",vibe:"在不让你破产的前提下，让系统变得更快",color:"#673AB7"},
+      {emoji:"🏗️",name:"Backend Architect · 后端架构师",file:"engineering-backend-architect",desc:"可扩展系统设计、数据库架构、API开发和云基础设施高级专家——构建健壮、安全、高性能的服务端应用和微服务",vibe:"设计支撑一切的系统——数据库、API、云端、规模化",color:"blue"},
+      {emoji:"🧱",name:"CMS Developer · CMS开发者",file:"engineering-cms-developer",desc:"Drupal和WordPress专家，专注主题开发、自定义插件/模块、内容架构和代码优先的CMS实现",vibe:"",color:"blue"},
+      {emoji:"🧭",name:"Codebase Onboarding Engineer · 代码库入门工程师",file:"engineering-codebase-onboarding-engineer",desc:"帮助新工程师快速理解陌生代码库的专家——通过阅读源代码、追踪代码路径来陈述事实，不添加多余内容",vibe:"通过阅读代码、追踪路径、陈述事实，让新开发者更快上手",color:"teal"},
+      {emoji:"👁️",name:"Code Reviewer · 代码审查员",file:"engineering-code-reviewer",desc:"专业代码审查专家，提供建设性的、可操作的反馈，聚焦于正确性、可维护性、安全性和性能——而非风格偏好",vibe:"像导师一样审查代码，而非门卫——每条评论都是教学",color:"purple"},
+      {emoji:"🗄️",name:"Database Optimizer · 数据库优化师",file:"engineering-database-optimizer",desc:"数据库专家，专注Schema设计、查询优化、索引策略和性能调优，覆盖PostgreSQL、MySQL及Supabase、PlanetScale等现代数据库",vibe:"索引、查询计划、Schema设计——打造不会凌晨3点叫醒你的数据库",color:"amber"},
+      {emoji:"🔧",name:"Data Engineer · 数据工程师",file:"engineering-data-engineer",desc:"构建可靠数据管道、湖仓架构和可扩展数据基础设施的专家。精通ETL/ELT、Apache Spark、dbt、流处理系统和云数据平台",vibe:"构建将原始数据转化为可信分析资产的管道",color:"orange"},
+      {emoji:"⚙️",name:"DevOps Automator · DevOps自动化师",file:"engineering-devops-automator",desc:"基础设施自动化、CI/CD管道开发和云运维专家——自动化一切，让你的团队更快交付、睡得更安稳",vibe:"自动化基础设施，让团队交付更快、睡得更香",color:"orange"},
+      {emoji:"📧",name:"Email Intelligence Engineer · 邮件智能工程师",file:"engineering-email-intelligence-engineer",desc:"从原始邮件线程中提取结构化、可用于推理的数据——将混乱的MIME转化为AI代理和自动化系统可直接使用的上下文",vibe:"将混乱的MIME转化为可推理的上下文——原始邮件是噪音，你的代理需要信号",color:"indigo"},
+      {emoji:"🔩",name:"Embedded Firmware Engineer · 嵌入式固件工程师",file:"engineering-embedded-firmware-engineer",desc:"裸机和RTOS固件专家——ESP32/ESP-IDF、PlatformIO、Arduino、ARM Cortex-M、STM32、Nordic nRF5、FreeRTOS、Zephyr",vibe:"为不能承受崩溃的硬件编写生产级固件",color:"orange"},
+      {emoji:"🔗",name:"Feishu Integration Developer · 飞书集成开发者",file:"engineering-feishu-integration-developer",desc:"飞书（Lark）开放平台全栈集成专家——精通飞书机器人、小程序、审批流、Bitable、消息卡片、Webhooks、SSO认证和工作流自动化",vibe:"在飞书平台上构建企业级集成——机器人、审批、数据同步、SSO——让团队工作流自动运转",color:"blue"},
+      {emoji:"🔧",name:"Filament Optimization Specialist · Filament优化专家",file:"engineering-filament-optimization-specialist",desc:"重构和优化Filament PHP管理界面的专家，专注于有影响力的结构性改进而非表面修整",vibe:"务实的完美主义者——优化复杂的管理环境",color:"indigo"},
+      {emoji:"🖥️",name:"Frontend Developer · 前端开发者",file:"engineering-frontend-developer",desc:"现代Web技术专家，精通React/Vue/Angular框架、UI实现和性能优化",vibe:"以像素级精度构建响应式、可访问的Web应用",color:"cyan"},
+      {emoji:"🌿",name:"Git Workflow Master · Git工作流大师",file:"engineering-git-workflow-master",desc:"Git工作流、分支策略和版本控制最佳实践专家——涵盖Conventional Commits、Rebase、Worktrees和CI友好的分支管理",vibe:"干净的提交历史、原子化的提交、讲述故事的分支",color:"orange"},
+      {emoji:"🚨",name:"Incident Response Commander · 事故响应指挥官",file:"engineering-incident-response-commander",desc:"生产事故管理、结构化响应协调、事后复盘、SLO/SLI跟踪和值班流程设计专家",vibe:"将生产混乱转化为结构化的解决方案",color:"#e63946"},
+      {emoji:"🖧",name:"IT Service Manager · IT服务经理",file:"engineering-it-service-manager",desc:"ITIL 4框架专家——服务目录设计、事件和问题管理、变更控制、SLA治理、CMDB维护和持续服务改进",vibe:"IT存在的意义是服务业务——每一张工单、每一个SLA、每一个变更窗口都是对依赖技术工作的人们的承诺",color:"blue"},
+      {emoji:"🪡",name:"Minimal Change Engineer · 最小变更工程师",file:"engineering-minimal-change-engineer",desc:"专注于最小可行差异的工程专家——只修复被要求的，拒绝范围蔓延，宁愿写三行相似的代码也不做过早的抽象",vibe:"解决问题的最小差异——每一行多余的代码都是负债",color:"slate"},
+      {emoji:"📲",name:"Mobile App Builder · 移动应用构建师",file:"engineering-mobile-app-builder",desc:"原生iOS/Android开发和跨平台框架专家，快速交付原生品质的移动应用",vibe:"在iOS和Android上快速交付原生品质的应用",color:"purple"},
+      {emoji:"📜",name:"OrgScript Engineer · OrgScript工程师",file:"engineering-orgscript-engineer",desc:"设计、解析和实现OrgScript语法、AST验证和业务逻辑定义的专家",vibe:"面向流程、语义严格——专注于将人类流程转化为AI友好的逻辑",color:"green"},
+      {emoji:"🧬",name:"Prompt Engineer · 提示词工程师",file:"engineering-prompt-engineer",desc:"为LLM精心设计、测试和系统优化提示词的专家——将模糊指令转化为可靠的、生产级的AI行为",vibe:"我不写提示词，我写的是人类和模型之间的契约",color:"violet"},
+      {emoji:"⚡",name:"Rapid Prototyper · 快速原型师",file:"engineering-rapid-prototyper",desc:"超快概念验证开发和MVP创建专家，使用高效工具和框架——在会议结束前将想法变成可工作的原型",vibe:"在会议结束前将想法变成可工作的原型",color:"green"},
+      {emoji:"💎",name:"Senior Developer · 高级开发者",file:"engineering-senior-developer",desc:"高级全栈工匠——精通Laravel/Livewire/FluxUI、高级CSS、Three.js集成",vibe:"高级全栈工匠——Laravel、Livewire、Three.js、高级CSS",color:"green"},
+      {emoji:"🏛️",name:"Software Architect · 软件架构师",file:"engineering-software-architect",desc:"系统设计、领域驱动设计、架构模式和技术决策专家——设计能够比构建它们的团队更长寿的系统。每个决策都有权衡——明确说出来",vibe:"设计比构建团队活得更久的系统——每个决策都有权衡，请说出来",color:"indigo"},
+      {emoji:"⛓️",name:"Solidity Smart Contract Engineer · 智能合约工程师",file:"engineering-solidity-smart-contract-engineer",desc:"EVM智能合约架构、Gas优化、可升级代理模式、DeFi协议开发和安全优先的合约设计专家",vibe:"身经百战的Solidity开发者——以EVM为生命",color:"orange"},
+      {emoji:"🛡️",name:"SRE · 站点可靠性工程师",file:"engineering-sre",desc:"SLO、错误预算、可观测性、混沌工程和减少重复劳动的生产系统专家",vibe:"可靠性是一种功能特性——错误预算为迭代速度提供资金，明智地使用它们",color:"#e63946"},
+      {emoji:"📚",name:"Technical Writer · 技术文档撰写者",file:"engineering-technical-writer",desc:"开发者文档、API参考、README文件和教程专家——将复杂的工程概念转化为开发人员真正阅读和使用的清晰、准确、引人入胜的文档",vibe:"撰写开发者真正阅读和使用的文档",color:"teal"},
+      {emoji:"🎙️",name:"Voice AI Integration Engineer · 语音AI集成工程师",file:"engineering-voice-ai-integration-engineer",desc:"端到端语音转录管道专家——Whisper模型和云ASR服务，从原始音频到预处理、转录清理、字幕生成、说话人分离和结构化下游集成",vibe:"将原始音频转化为机器和人类都能真正使用的结构化生产级文本",color:"violet"},
+      {emoji:"💬",name:"WeChat Mini Program Developer · 微信小程序开发者",file:"engineering-wechat-mini-program-developer",desc:"微信小程序开发专家——精通WXML/WXSS/WXS、微信API集成、支付系统、订阅消息和完整的微信生态",vibe:"在微信生态中构建高性能小程序",color:"green"}
+    ]
+  },
+  {
+    id: "finance", icon: "💰", title: "Finance · 金融财务", cn: "会计、投资与税务策略",
+    color: "#22c55e",
+    agents: [
+      {emoji:"📒",name:"Bookkeeper & Controller · 簿记与财务控制",file:"finance-bookkeeper-controller",desc:"日常会计运营、财务对账、月末结账和内部控制专家——确保财务记录的准确性、完整性和及时性，同时保持GAAP合规和审计就绪",vibe:"每一分钱都有交代，每次结账都准时——财务信任的基石",color:"green"},
+      {emoji:"📊",name:"Financial Analyst · 财务分析师",file:"finance-financial-analyst",desc:"财务建模、预测、情景分析和数据驱动决策支持专家——将原始财务数据转化为推动战略规划、投资决策和运营优化的可行情报",vibe:"将电子表格变成战略——每个数字都在讲述故事，每个模型都在驱动决策",color:"green"},
+      {emoji:"📈",name:"FP&A Analyst · 财务规划与分析",file:"finance-fpa-analyst",desc:"预算编制、差异分析、滚动预测和战略决策支持专家——在数字和业务叙事之间架起桥梁，推动运营绩效和战略资源分配",vibe:"预算低语者——将计划转化为数字，将数字转化为行动",color:"green"},
+      {emoji:"🔍",name:"Investment Researcher · 投资研究员",file:"finance-investment-researcher",desc:"市场研究、尽职调查、投资组合分析和资产估值专家——通过严谨的基本面和技术分析识别投资机会、评估风险，支持数据驱动的投资组合决策",vibe:"比共识挖得更深——在脚注中找到Alpha，在叙事中找到风险",color:"green"},
+      {emoji:"🏛️",name:"Tax Strategist · 税务策略师",file:"finance-tax-strategist",desc:"税务优化、多司法管辖区合规、转让定价和战略税务规划专家——在复杂的税法中寻找每一美元的合法节省空间，同时确保完全合规",vibe:"在税法中找到每一美元的合法节省空间——合规是底线，优化是使命",color:"green"}
+    ]
+  },
+  {
+    id: "game-development", icon: "🎮", title: "Game Development · 游戏开发", cn: "Unity/Unreal/Godot/Roblox全方位",
+    color: "#f59e0b",
+    agents: [
+      {emoji:"🧩",name:"Blender Add-on Engineer · Blender插件工程师",file:"blender-addon-engineer",desc:"Blender工具开发专家——构建Python插件、资产验证器、导出器和管道自动化，将重复的DCC工作转化为可靠的一键式工作流",vibe:"将重复的Blender管道工作转化为艺术家真正使用的一键式工具",color:"blue"},
+      {emoji:"🎵",name:"Game Audio Engineer · 游戏音频工程师",file:"game-audio-engineer",desc:"交互式音频专家——精通FMOD/Wwise集成、自适应音乐系统、空间音频和跨引擎音频性能预算",vibe:"让每一声枪响、每一步脚步、每一个音乐提示都在游戏世界中栩栩如生",color:"indigo"},
+      {emoji:"🎮",name:"Game Designer · 游戏设计师",file:"game-designer",desc:"系统和机制架构师——精通GDD撰写、玩家心理学、经济平衡和游戏循环设计，覆盖所有引擎和类型",vibe:"用循环、杠杆和玩家动机来构建引人入胜的游戏玩法",color:"yellow"},
+      {emoji:"🎯",name:"Godot Gameplay Scripter · Godot玩法脚本师",file:"godot-gameplay-scripter",desc:"组合和信号完整性专家——精通GDScript 2.0、C#集成、基于节点的架构和类型安全的信号设计",vibe:"以软件架构师的纪律构建Godot 4游戏系统",color:"purple"},
+      {emoji:"🌐",name:"Godot Multiplayer Engineer · Godot多人工程师",file:"godot-multiplayer-engineer",desc:"Godot 4网络专家——精通MultiplayerAPI、场景复制、ENet/WebRTC传输、RPC和权限模型",vibe:"精通Godot的MultiplayerAPI，让实时网络代码感觉无缝",color:"violet"},
+      {emoji:"💎",name:"Godot Shader Developer · Godot着色器开发者",file:"godot-shader-developer",desc:"Godot 4视觉效果专家——精通Godot着色语言、VisualShader编辑器、CanvasItem和Spatial着色器、后处理和性能优化",vibe:"通过Godot着色语言扭曲光线和像素，创造惊艳效果",color:"purple"},
+      {emoji:"🗺️",name:"Level Designer · 关卡设计师",file:"level-designer",desc:"空间叙事和流程专家——精通布局理论、节奏架构、遭遇设计和环境叙事，覆盖所有游戏引擎",vibe:"将每个关卡视为一次精心设计的体验——空间讲述故事",color:"teal"},
+      {emoji:"📖",name:"Narrative Designer · 叙事设计师",file:"narrative-designer",desc:"故事系统和对话架构师——精通GDD对齐的叙事设计、分支对话、世界观架构和环境叙事",vibe:"架构故事系统——叙事和游戏玩法不可分割",color:"red"},
+      {emoji:"👤",name:"Roblox Avatar Creator · Roblox虚拟形象创建者",file:"roblox-avatar-creator",desc:"Roblox UGC和虚拟形象管道专家——精通Roblox虚拟形象系统、UGC物品创建、配饰绑定、纹理标准和创作者市场提交流程",vibe:"精通从绑定到创作者市场提交的UGC全流程",color:"fuchsia"},
+      {emoji:"🎪",name:"Roblox Experience Designer · Roblox体验设计师",file:"roblox-experience-designer",desc:"Roblox平台UX和变现专家——精通参与循环设计、DataStore驱动的进程系统、Roblox变现系统和玩家留存",vibe:"设计参与循环和变现系统，让玩家不断回归",color:"lime"},
+      {emoji:"🔧",name:"Roblox Systems Scripter · Roblox系统脚本师",file:"roblox-systems-scripter",desc:"Roblox平台工程专家——精通Luau、客户端-服务器安全模型、RemoteEvents/RemoteFunctions、DataStore和模块化架构",vibe:"用坚如磐石的Luau和客户端-服务器安全构建可扩展的Roblox体验",color:"rose"},
+      {emoji:"🎨",name:"Technical Artist · 技术美术",file:"technical-artist",desc:"美术到引擎的管道专家——精通着色器、VFX系统、LOD管道、性能预算和跨引擎资产优化",vibe:"艺术愿景和引擎现实之间的桥梁",color:"pink"},
+      {emoji:"🏛️",name:"Unity Architect · Unity架构师",file:"unity-architect",desc:"数据驱动的模块化专家——精通ScriptableObjects、解耦系统和单一职责组件设计",vibe:"设计数据驱动、解耦的Unity系统——可扩展而无混乱",color:"blue"},
+      {emoji:"🛠️",name:"Unity Editor Tool Developer · Unity编辑器工具开发者",file:"unity-editor-tool-developer",desc:"Unity编辑器自动化专家——精通自定义EditorWindows、PropertyDrawers、AssetPostprocessors、ScriptedImporters和管道自动化",vibe:"构建自定义Unity编辑器工具，每周节省团队数小时",color:"gray"},
+      {emoji:"🔗",name:"Unity Multiplayer Engineer · Unity多人工程师",file:"unity-multiplayer-engineer",desc:"网络化游戏专家——精通Netcode for GameObjects、Unity Gaming Services、客户端-服务器权限、延迟补偿和状态同步",vibe:"通过智能同步和预测让网络化的Unity游戏感觉像本地运行",color:"blue"},
+      {emoji:"✨",name:"Unity Shader Graph Artist · Unity着色器图美术",file:"unity-shader-graph-artist",desc:"视觉效果和材质专家——精通Unity Shader Graph、HLSL、URP/HDRP渲染管道和自定义渲染Pass",vibe:"通过Shader Graph和自定义渲染Pass创造实时视觉魔法",color:"cyan"},
+      {emoji:"🌐",name:"Unreal Multiplayer Architect · 虚幻多人架构师",file:"unreal-multiplayer-architect",desc:"虚幻引擎网络专家——精通Actor复制、GameMode/GameState架构、服务器权威游戏、网络预测和专用服务器设置",vibe:"架构服务器权威的虚幻多人游戏——感觉无延迟",color:"red"},
+      {emoji:"⚙️",name:"Unreal Systems Engineer · 虚幻系统工程师",file:"unreal-systems-engineer",desc:"性能和混合架构专家——精通C++/Blueprint连续体、Nanite几何、Lumen全局光照和Gameplay Ability System",vibe:"精通C++/Blueprint连续体——打造AAA级虚幻引擎项目",color:"orange"},
+      {emoji:"🎨",name:"Unreal Technical Artist · 虚幻技术美术",file:"unreal-technical-artist",desc:"虚幻引擎视觉管道专家——精通Material Editor、Niagara VFX、程序化内容生成和美术到引擎的管道",vibe:"将Niagara VFX、Material Editor和PCG融合为精致的UE5视觉效果",color:"orange"},
+      {emoji:"🌍",name:"Unreal World Builder · 虚幻世界构建师",file:"unreal-world-builder",desc:"开放世界和环境专家——精通UE5 World Partition、Landscape、程序化植被、HLOD和大规模关卡流送",vibe:"用World Partition、Nanite和程序化植被构建无缝开放世界",color:"green"}
+    ]
+  },
+  {
+    id: "marketing", icon: "📢", title: "Marketing · 市场营销", cn: "SEO/社交媒体/内容/电商全渠道",
+    color: "#ec4899",
+    agents: [
+      {emoji:"🏗️",name:"AEO Foundations Architect · AEO基础架构师",file:"marketing-aeo-foundations",desc:"AI引擎优化基础设施专家——实施llms.txt、AI感知的robots.txt、Token预算内容、结构化Markdown，确保AI爬虫和浏览代理能发现并解析你的内容",vibe:"每个人都会跳过的基础层——确保AI系统能真正发现、阅读和使用你的内容",color:"#059669"},
+      {emoji:"🤖",name:"Agentic Search Optimizer · 代理搜索优化师",file:"marketing-agentic-search-optimizer",desc:"WebMCP就绪和代理任务完成专家——审计AI代理是否能在你的网站上完成任务（预订、购买、注册、订阅），实施WebMCP模式并测量任务完成率",vibe:"当其他人都在优化被AI引用时，这个代理确保AI能在你的网站上真正完成任务",color:"#0891B2"},
+      {emoji:"🔮",name:"AI Citation Strategist · AI引用策略师",file:"marketing-ai-citation-strategist",desc:"AI推荐引擎优化专家——审计品牌在ChatGPT、Claude、Gemini和Perplexity中的可见性，找出竞争对手被引用的原因，提供获取AI引用的内容修复方案",vibe:"找出AI为什么推荐你的竞争对手，重新调整信号让它推荐你",color:"#6D28D9"},
+      {emoji:"📱",name:"App Store Optimizer · 应用商店优化师",file:"marketing-app-store-optimizer",desc:"应用商店营销专家——专注ASO、转化率优化和应用可发现性，让你的应用被找到、被下载、被喜爱",vibe:"让你的应用在商店中被发现、被下载、被热爱",color:"blue"},
+      {emoji:"🇨🇳",name:"Baidu SEO Specialist · 百度SEO专家",file:"marketing-baidu-seo-specialist",desc:"百度搜索优化专家——专注中国搜索引擎排名、百度生态集成、ICP合规、中文关键词研究和移动优先索引",vibe:"掌握百度算法，让你的品牌在中国搜索生态中排名靠前",color:"blue"},
+      {emoji:"🎬",name:"Bilibili Content Strategist · B站内容策略师",file:"marketing-bilibili-content-strategist",desc:"B站营销专家——专注UP主成长、弹幕文化、B站算法优化、社区建设和品牌内容策略",vibe:"说流利的弹幕语言，在B站上发展你的品牌",color:"pink"},
+      {emoji:"📘",name:"Book Co-Author · 书籍合著者",file:"marketing-book-co-author",desc:"为创始人、专家和运营者提供战略性思想领导力书籍合著——将语音笔记、碎片和定位转化为结构化的第一人称章节",vibe:"将粗糙的专业知识转化为可引用、可记忆、可信赖的著作",color:"#8B5E3C"},
+      {emoji:"📸",name:"Carousel Growth Engine · 轮播增长引擎",file:"marketing-carousel-growth-engine",desc:"自主TikTok和Instagram轮播生成专家——分析网站URL，通过Gemini图像生成创建病毒式6页轮播，直接发布到Feed并自动匹配热门音乐",vibe:"",color:"#FF0050"},
+      {emoji:"🛒",name:"China E-Commerce Operator · 中国电商运营师",file:"marketing-china-ecommerce-operator",desc:"淘宝、天猫、拼多多和京东生态运营专家——深度精通产品Listing优化、直播电商、店铺运营、618/双11大促和跨平台策略",vibe:"像原生运营商一样运营你的淘宝、天猫、拼多多和京东店铺",color:"red"},
+      {emoji:"🇨🇳",name:"China Market Localization Strategist · 中国市场本地化策略师",file:"marketing-china-market-localization-strategist",desc:"全栈中国市场本地化专家——将实时趋势信号转化为可执行的市场进入策略，覆盖抖音、小红书、微信、B站等平台",vibe:"将中国混乱的趋势格局转化为精准制导的营销机器——数据进，收入出",color:"#E60012"},
+      {emoji:"✍️",name:"Content Creator · 内容创作者",file:"marketing-content-creator",desc:"多平台内容策略和创作专家——制定编辑日历、创作引人入胜的文案、管理品牌叙事，优化各数字渠道的参与度",vibe:"在受众停留的每个平台上创作引人入胜的故事（支持WebFetch/WebSearch等工具）",color:"teal"},
+      {emoji:"🌏",name:"Cross-Border E-Commerce · 跨境电商专家",file:"marketing-cross-border-ecommerce",desc:"全漏斗跨境电商策略师——覆盖Amazon、Shopee、Lazada、AliExpress、Temu和TikTok Shop运营，国际物流、海外仓、合规税务、多语言Listing优化和品牌全球化",vibe:"将你的产品从中国工厂带到全球畅销榜",color:"blue"},
+      {emoji:"🎵",name:"Douyin Strategist · 抖音策略师",file:"marketing-douyin-strategist",desc:"短视频营销专家——深度精通抖音平台推荐算法机制、病毒视频策划、直播电商工作流和内容矩阵策略驱动的全漏斗品牌增长",vibe:"掌握抖音算法，让你的短视频真正被看到",color:"#000000"},
+      {emoji:"📧",name:"Email Marketing Strategist · 邮件营销策略师",file:"marketing-email-strategist",desc:"CRM驱动的邮件营销专家——生命周期自动化、分段架构、送达率优化。基于2025-2026基准和AI个性化设计各类邮件序列",vibe:"将混乱的联系人列表转化为分段的、自动化的收入引擎",color:"green"},
+      {emoji:"🎙️",name:"Global Podcast Strategist · 全球播客策略师",file:"marketing-global-podcast-strategist",desc:"播客增长专家——专注节目定位、受众发展、内容策略和变现，将原始想法转化为在Spotify、Apple Podcasts和YouTube上持续增长的权威音频品牌",vibe:"将对话转化为社群，将剧集转化为增长引擎",color:"purple"},
+      {emoji:"🚀",name:"Growth Hacker · 增长黑客",file:"marketing-growth-hacker",desc:"通过数据驱动实验实现快速用户获取的增长策略专家——开发病毒循环、优化转化漏斗、寻找可扩展的增长渠道",vibe:"找到还没被利用的增长渠道——然后大规模扩展它（支持WebFetch/WebSearch等工具）",color:"green"},
+      {emoji:"📸",name:"Instagram Curator · Instagram策展人",file:"marketing-instagram-curator",desc:"Instagram营销专家——专注视觉叙事、社区建设和多格式内容优化，掌握美学发展并驱动有意义的互动",vibe:"掌握网格美学，将浏览者转化为积极参与的社区",color:"#E4405F"},
+      {emoji:"🎥",name:"Kuaishou Strategist · 快手策略师",file:"marketing-kuaishou-strategist",desc:"快手营销策略专家——专注中国下沉市场短视频内容、直播电商运营、社区信任建设和草根受众增长",vibe:"在快手上发展草根受众并驱动直播电商",color:"orange"},
+      {emoji:"💼",name:"LinkedIn Content Creator · LinkedIn内容创作者",file:"marketing-linkedin-content-creator",desc:"LinkedIn内容策略专家——专注思想领导力、个人品牌建设和高参与度专业内容。掌握LinkedIn算法和文化，为创始人、求职者和开发者创造入站机会",vibe:"将专业知识转化为令人停下滑动的优质内容——让对的人找到你",color:"#0A66C2"},
+      {emoji:"🎙️",name:"Livestream Commerce Coach · 直播电商教练",file:"marketing-livestream-commerce-coach",desc:"资深直播电商教练——专注主播培训和直播间运营，覆盖抖音、快手、淘宝直播和视频号，涵盖脚本设计、产品排序、付费与自然流量平衡和转化成交技术",vibe:"将你的直播主播从笨拙的初学者训练成百万销售额的达人",color:"#E63946"},
+      {emoji:"📡",name:"Multi-Platform Publisher · 多平台发布器",file:"marketing-multi-platform-publisher",desc:"中文博客一键多平台发布编排器——通过Wechatsync将单篇文章分发到知乎/小红书/CSDN/B站/公众号/掘金，支持草稿优先、速率控制和风险规避",vibe:"一篇文章，全平台覆盖，安全地——中文内容创作者的流量调度员",color:"#FF6B35"},
+      {emoji:"🎧",name:"Podcast Strategist · 播客策略师（中国）",file:"marketing-podcast-strategist",desc:"中国播客市场的内容策略和运营专家——深度精通小宇宙、喜马拉雅等主流音频平台，覆盖节目定位、音频制作、受众增长、多平台分发和变现",vibe:"引导你的播客从概念到忠实听众——在中国蓬勃发展的音频领域",color:"purple"},
+      {emoji:"📣",name:"PR & Communications Manager · 公关传播经理",file:"marketing-pr-communications-manager",desc:"战略公关和传播专家——媒体关系、新闻稿、危机传播、高管思想领导力、品牌声誉管理和整合传播规划",vibe:"声誉需要数年建立，数分钟即可失去——每条消息都是保护或侵蚀品牌",color:"blue"},
+      {emoji:"🔒",name:"Private Domain Operator · 私域运营师",file:"marketing-private-domain-operator",desc:"企业微信私域生态建设专家——深度精通SCRM系统、分层社群运营、小程序电商集成、用户生命周期管理和全漏斗转化优化",vibe:"从首次接触到终身价值，构建你的微信私域流量帝国",color:"#1A73E8"},
+      {emoji:"💬",name:"Reddit Community Builder · Reddit社区建设者",file:"marketing-reddit-community-builder",desc:"Reddit营销专家——专注真实的社区参与、价值驱动的内容创作和长期关系建设，以地道的方式建立社区信任",vibe:"说流利的Reddit语言，以真实的方式建立社区信任",color:"#FF4500"},
+      {emoji:"🔍",name:"SEO Specialist · SEO专家",file:"marketing-seo-specialist",desc:"搜索引擎优化策略专家——技术SEO、内容优化、链接权威建设和有机搜索增长。通过数据驱动的搜索策略推动可持续流量（支持WebFetch/WebSearch等工具）",vibe:"通过技术SEO和内容策略推动可持续的有机流量",color:"#4285F4"},
+      {emoji:"🎬",name:"Short-Video Editing Coach · 短视频剪辑教练",file:"marketing-short-video-editing-coach",desc:"全流程短视频剪辑教练——精通剪映Pro、Premiere Pro、DaVinci Resolve和Final Cut Pro，涵盖构图与镜头语言、调色、音频工程、动态图形与VFX、字幕设计等",vibe:"将原始素材转化为让人停下滑动的专业级短视频",color:"#7B2D8E"},
+      {emoji:"📣",name:"Social Media Strategist · 社交媒体策略师",file:"marketing-social-media-strategist",desc:"LinkedIn、Twitter等专业平台社交媒体策略专家——创建跨平台营销活动、建设社区、管理实时互动并制定思想领导力策略（支持WebFetch/WebSearch等工具）",vibe:"编排跨平台营销活动——建设社区、驱动互动",color:"blue"},
+      {emoji:"🎵",name:"TikTok Strategist · TikTok策略师",file:"marketing-tiktok-strategist",desc:"TikTok营销专家——专注病毒式内容创作、算法优化和社区建设。掌握TikTok独特的文化和功能以推动品牌增长",vibe:"驾驭算法，通过真实的TikTok文化建设社区",color:"#000000"},
+      {emoji:"🐦",name:"Twitter Engager · Twitter互动师",file:"marketing-twitter-engager",desc:"Twitter营销专家——专注实时互动、思想领导力建设和社区驱动增长，每次280个字符地建立品牌权威",vibe:"每次280个字符地建立思想领导力和品牌权威",color:"#1DA1F2"},
+      {emoji:"🎬",name:"Video Optimization Specialist · 视频优化专家",file:"marketing-video-optimization-specialist",desc:"YouTube算法优化、受众留存、章节划分、缩略图概念和跨平台视频联合发布策略专家",vibe:"精力充沛、数据驱动、策略性——极度专注于受众留存",color:"red"},
+      {emoji:"📱",name:"WeChat Official Account Manager · 公众号运营",file:"marketing-wechat-official-account",desc:"微信公众号策略专家——内容营销、订阅者互动和转化优化。掌握多格式内容，通过持续的价值交付建立忠实社区",vibe:"通过持续的价值交付发展忠实的微信订阅者社区",color:"#09B83E"},
+      {emoji:"🔥",name:"Weibo Strategist · 微博策略师",file:"marketing-weibo-strategist",desc:"新浪微博全谱系运营专家——深度精通热门话题机制、超话社区管理、舆论监测、粉丝经济策略和微博广告",vibe:"让你的品牌登上微博热搜并保持讨论热度",color:"#FF8200"},
+      {emoji:"🌸",name:"Xiaohongshu Specialist · 小红书专家",file:"marketing-xiaohongshu-specialist",desc:"小红书营销专家——专注生活方式内容、趋势驱动策略和真实社区互动。掌握微内容创作，通过美学叙事驱动病毒式增长",vibe:"在小红书上掌握生活方式内容和美学叙事",color:"#FF1B6D"},
+      {emoji:"🤖",name:"X/Twitter Intelligence Analyst · X/Twitter情报分析师",file:"marketing-x-twitter-intelligence-analyst",desc:"X/Twitter社交情报专家——研究、趋势检测、账户监控和基于证据的受众洞察，使用公共信号和结构化数据工作流",vibe:"",color:"#111111"},
+      {emoji:"🧠",name:"Zhihu Strategist · 知乎策略师",file:"marketing-zhihu-strategist",desc:"知乎营销专家——专注思想领导力、社区公信力和知识驱动的互动。掌握问答策略，通过真实的专业知识分享建立品牌权威",vibe:"在知乎上通过专业知识分享建立品牌权威",color:"#0084FF"}
+    ]
+  },
+  {
+    id: "paid-media", icon: "💵", title: "Paid Media · 付费媒体", cn: "PPC/程序化广告/创意与追踪",
+    color: "#f97316",
+    agents: [
+      {emoji:"📋",name:"Paid Media Auditor · 付费媒体审计师",file:"paid-media-auditor",desc:"全面审计Google Ads、Microsoft Ads和Meta账户——覆盖200+检查点，包括账户结构、追踪、出价、创意、受众和竞争定位。产出可操作的审计报告和优先级建议",vibe:"",color:"orange"},
+      {emoji:"✍️",name:"Ad Creative Strategist · 广告创意策略师",file:"paid-media-creative-strategist",desc:"付费媒体创意专家——专注广告文案撰写、RSA优化、资产组设计和跨Google、Meta、Microsoft及程序化平台的创意测试框架",vibe:"",color:"orange"},
+      {emoji:"📱",name:"Paid Social Strategist · 付费社交策略师",file:"paid-media-paid-social-strategist",desc:"跨平台付费社交广告专家——覆盖Meta、LinkedIn、TikTok、Pinterest、X和Snapchat。设计从潜在客户开发到再营销的全漏斗社交广告方案",vibe:"",color:"orange"},
+      {emoji:"💰",name:"PPC Campaign Strategist · PPC广告策略师",file:"paid-media-ppc-strategist",desc:"大规模搜索、购物和Performance Max广告架构高级策略师——设计$10K到$10M+月预算的账户结构、预算分配框架和出价策略",vibe:"",color:"orange"},
+      {emoji:"📺",name:"Programmatic & Display Buyer · 程序化与展示广告买家",file:"paid-media-programmatic-buyer",desc:"展示广告和程序化媒体购买专家——覆盖托管版位、Google Display Network、DV360、Trade Desk平台以及ABM展示策略",vibe:"",color:"orange"},
+      {emoji:"🔍",name:"Search Query Analyst · 搜索查询分析师",file:"paid-media-search-query-analyst",desc:"搜索词分析、否定关键词架构和查询意图映射专家——将原始搜索查询数据转化为可操作的优化方案，消除浪费并放大高意图流量",vibe:"",color:"orange"},
+      {emoji:"📡",name:"Tracking & Measurement Specialist · 追踪与测量专家",file:"paid-media-tracking-specialist",desc:"转化追踪架构、标签管理和归因建模专家——覆盖Google Tag Manager、GA4、Google Ads、Meta CAPI、LinkedIn Insight Tag和服务器端实现",vibe:"",color:"orange"}
+    ]
+  },
+  {
+    id: "product", icon: "🧭", title: "Product · 产品管理", cn: "策略/反馈/趋势/行为科学",
+    color: "#3b82f6",
+    agents: [
+      {emoji:"🧠",name:"Behavioral Nudge Engine · 行为助推引擎",file:"product-behavioral-nudge-engine",desc:"行为心理学专家——调整软件交互节奏和风格，以最大化用户动机和成功",vibe:"通过行为心理学调整软件交互，最大化用户动机",color:"#FF8A65"},
+      {emoji:"🔍",name:"Feedback Synthesizer · 反馈综合师",file:"product-feedback-synthesizer",desc:"收集、分析和综合来自多渠道的用户反馈，提取可操作的产品洞察。将定性反馈转化为定量优先级和战略建议（支持WebFetch/WebSearch等工具）",vibe:"将一千个用户声音提炼成你需要构建的五件事",color:"blue"},
+      {emoji:"🧭",name:"Product Manager · 产品经理",file:"product-manager",desc:"全生命周期产品领导——从发现和策略到路线图、利益相关者协调、市场进入和成果衡量。连接业务目标、用户需求和技术现实（支持WebFetch/WebSearch等工具）",vibe:"交付正确的事，而不仅仅是下一件事——成果痴迷、用户扎根、对专注力保持外交式无情",color:"blue"},
+      {emoji:"🎯",name:"Sprint Prioritizer · Sprint优先级师",file:"product-sprint-prioritizer",desc:"敏捷Sprint规划、功能优先级排序和资源分配专家——通过数据驱动的优先级框架最大化团队速度和业务价值交付（支持WebFetch/WebSearch等工具）",vibe:"通过数据驱动的优先级排序和无情的专注最大化Sprint价值",color:"green"},
+      {emoji:"🔭",name:"Trend Researcher · 趋势研究员",file:"product-trend-researcher",desc:"市场情报分析专家——识别新兴趋势、竞争分析和机会评估。提供推动产品策略和创新决策的可行情报（支持WebFetch/WebSearch等工具）",vibe:"在新兴趋势成为主流之前发现它们",color:"purple"}
+    ]
+  },
+  {
+    id: "project-management", icon: "📋", title: "Project Management · 项目管理", cn: "敏捷/协调/运营/记录",
+    color: "#8b5cf6",
+    agents: [
+      {emoji:"🧪",name:"Experiment Tracker · 实验追踪师",file:"project-management-experiment-tracker",desc:"实验设计、执行追踪和数据驱动决策专家——管理A/B测试、功能实验和假设验证，通过系统化的实验和严格分析",vibe:"设计实验、追踪结果、让数据做决定",color:"purple"},
+      {emoji:"📋",name:"Jira Workflow Steward · Jira工作流管家",file:"project-management-jira-workflow-steward",desc:"交付运营专家——在软件团队中执行Jira关联的Git工作流、可追踪的提交、结构化的PR和发布安全的分支策略",vibe:"执行可追踪的提交、结构化的PR和发布安全的分支策略",color:"orange"},
+      {emoji:"📋",name:"Meeting Notes Specialist · 会议记录专家",file:"project-management-meeting-notes-specialist",desc:"从会议转录或粗糙笔记中提取结构化决策、行动项和开放问题，形成清晰的4段式摘要（支持Read/Write/Edit工具）",vibe:"精准提取器——在噪音中找到信号，从不虚构不存在的内容",color:"blue"},
+      {emoji:"🐑",name:"Project Shepherd · 项目牧羊人",file:"project-management-project-shepherd",desc:"跨职能项目协调、时间线管理和利益相关者对齐专家——管理资源、风险和跨团队沟通，将项目从概念引导至完成",vibe:"将跨职能的混乱引导为准时、按范围的交付",color:"blue"},
+      {emoji:"🏭",name:"Studio Operations · 工作室运营",file:"project-management-studio-operations",desc:"日常工作室效率、流程优化和资源协调专家——确保运营顺畅，维持生产力标准，为所有团队提供成功所需的工具和流程",vibe:"保持工作室平稳运行——流程、工具和人员协调一致",color:"green"},
+      {emoji:"🎬",name:"Studio Producer · 工作室制作人",file:"project-management-studio-producer",desc:"高级战略领导——创意和技术项目编排、资源分配和多项目组合管理。将创意愿景与业务目标对齐，同时管理复杂的跨职能计划",vibe:"将创意愿景与业务目标对齐——跨复杂计划",color:"gold"},
+      {emoji:"📝",name:"Senior Project Manager · 高级项目经理",file:"project-manager-senior",desc:"将规格转化为任务并记住之前的项目——专注现实范围、无后台进程、精确的规格要求",vibe:"将规格转化为任务——现实范围、不镀金、不幻想",color:"blue"}
+    ]
+  },
+  {
+    id: "sales", icon: "🤝", title: "Sales · 销售体系", cn: "客户策略/教练/提案/管道分析",
+    color: "#22c55e",
+    agents: [
+      {emoji:"🗺️",name:"Account Strategist · 客户策略师",file:"sales-account-strategist",desc:"售后客户策略专家——落地与扩展执行、利益相关者映射、QBR促进和净收入留存。通过系统的扩展规划将已成交订单转化为长期平台关系",vibe:"绘制组织架构、找到空白地带、将客户转化为平台",color:"#2E7D32"},
+      {emoji:"🏋️",name:"Sales Coach · 销售教练",file:"sales-coach",desc:"销售辅导专家——专注销售人员发展、管道审查引导、通话辅导、交易策略和预测准确性。通过结构化辅导方法论和行为反馈提升每个销售人员和每笔交易",vibe:"提出让销售代表重新思考整笔交易的问题",color:"#E65100"},
+      {emoji:"♟️",name:"Deal Strategist · 交易策略师",file:"sales-deal-strategist",desc:"高级交易策略师——MEDDPICC资格认证、竞争定位和复杂B2B销售周期赢单规划。对机会进行评分、暴露管道风险、制定能通过预测审查的交易策略",vibe:"像外科医生一样审核交易资格——消灭盲目乐观",color:"#1B4D3E"},
+      {emoji:"🔍",name:"Discovery Coach · 需求发现教练",file:"sales-discovery-coach",desc:"辅导销售团队掌握精英级需求发现方法论——问题设计、现状映射、差距量化和能揭示真实购买动机的通话结构",vibe:"比所有人都多问一个问题——那个问题就是成交的关键",color:"#5C7CFA"},
+      {emoji:"🛠️",name:"Sales Engineer · 销售工程师",file:"sales-engineer",desc:"高级售前工程师——技术发现、Demo工程、POC范围定义、竞争对比卡和将产品能力与业务成果连接。赢得技术决策以确保交易能够成交",vibe:"在交易进入采购流程之前就赢得技术决策",color:"#2E5090"},
+      {emoji:"🧲",name:"Offer & Lead Gen Strategist · 优惠与线索策略师",file:"sales-offer-lead-gen-strategist",desc:"漏斗顶部架构师——设计无法抗拒的优惠和引流磁石，规模化吸引合格买家。专注价值等式优惠构建、引流磁石类型学和多渠道线索生成",vibe:"构建买家无法忽视的东西——然后倍增传播它的渠道",color:"#F59E0B"},
+      {emoji:"🎯",name:"Outbound Strategist · 外拓策略师",file:"sales-outbound-strategist",desc:"基于信号的外拓专家——设计多渠道潜在客户开发序列、定义ICP，通过研究驱动的个性化构建管道——而非数量",vibe:"在竞争对手察觉之前，将购买信号转化为已预订的会议",color:"#E8590C"},
+      {emoji:"📊",name:"Pipeline Analyst · 管道分析师",file:"sales-pipeline-analyst",desc:"收入运营分析师——管道健康诊断、交易速度分析、预测准确性和数据驱动的销售辅导。将CRM数据转化为可操作的管道情报",vibe:"在你意识到之前就告诉你预测是错的",color:"#059669"},
+      {emoji:"🏹",name:"Proposal Strategist · 提案策略师",file:"sales-proposal-strategist",desc:"战略提案架构师——将RFP和销售机会转化为令人信服的赢单叙事。专注赢单主题开发、竞争定位、执行摘要撰写和构建说服而非仅仅合规的提案",vibe:"将RFP回应转化为买家放不下的故事",color:"#2563EB"}
+    ]
+  },
+  {
+    id: "security", icon: "🛡️", title: "Security · 安全防护", cn: "渗透测试/架构/审计/威胁情报",
+    color: "#f43f5e",
+    agents: [
+      {emoji:"🔐",name:"Application Security Engineer · 应用安全工程师",file:"security-appsec-engineer",desc:"AppSec专家——通过威胁建模、安全代码审查、SAST/DAST集成和开发者安全教育，让安全代码成为默认标准",vibe:"让开发者在不经意间就写出安全代码",color:"#059669"},
+      {emoji:"🛡️",name:"Security Architect · 安全架构师",file:"security-architect",desc:"威胁建模、安全设计架构、信任边界分析、纵深防御和基于风险的安全审查专家——设计安全蓝图而非修复Bug",vibe:"设计在对抗压力下屹立不倒的安全架构和威胁模型——这是蓝图，不是Bug修复",color:"red"},
+      {emoji:"🛡️",name:"Blockchain Security Auditor · 区块链安全审计师",file:"security-blockchain-security-auditor",desc:"智能合约安全审计专家——漏洞检测、形式化验证、漏洞利用分析和全面的DeFi协议与区块链应用审计报告",vibe:"在攻击者之前找到你智能合约中的漏洞",color:"red"},
+      {emoji:"☁️",name:"Cloud Security Architect · 云安全架构师",file:"security-cloud-security-architect",desc:"云原生安全专家——设计零信任架构，在AWS、Azure和GCP上实施纵深防御，从第一天起保护基础设施即代码管道",vibe:"构建'默认即安全'不只是PPT标题的云基础设施",color:"#3b82f6"},
+      {emoji:"📋",name:"Compliance Auditor · 合规审计师",file:"security-compliance-auditor",desc:"SOC 2、ISO 27001、HIPAA和PCI-DSS技术合规审计专家——从就绪评估到证据收集再到认证",vibe:"从就绪评估到SOC 2认证——全程陪伴",color:"orange"},
+      {emoji:"🚨",name:"Incident Responder · 事故响应员",file:"security-incident-responder",desc:"数字取证和事故响应专家——主导入侵调查、遏制活跃威胁、协调危机响应，并撰写防止再次发生的事后分析",vibe:"当所有人都在逃离入侵现场时，逆行而上",color:"#f59e0b"},
+      {emoji:"🗡️",name:"Penetration Tester · 渗透测试员",file:"security-penetration-tester",desc:"进攻性安全专家——执行授权的渗透测试、红队行动和漏洞评估，覆盖网络、Web应用和云基础设施",vibe:"闯入你的系统，让真正的攻击者无从下手",color:"#dc2626"},
+      {emoji:"🛡️",name:"Senior SecOps Engineer · 高级安全运维工程师",file:"security-senior-secops",desc:"防御性应用安全专家——扫描每个代码提交中的密钥和敏感数据暴露，然后根据组织安全标准实施或审计安全控制",vibe:"在你阅读需求之前，我已经扫描了你的代码中的密钥——安全不是阶段，是第零行",color:"#E67E22"},
+      {emoji:"🎯",name:"Threat Detection Engineer · 威胁检测工程师",file:"security-threat-detection-engineer",desc:"检测工程专家——SIEM规则开发、MITRE ATT&CK覆盖映射、威胁狩猎、告警调优和安全运营团队的检测即代码管道",vibe:"构建在攻击者绕过预防措施后捕获他们的检测层",color:"#7b2d8e"},
+      {emoji:"🔍",name:"Threat Intelligence Analyst · 威胁情报分析师",file:"security-threat-intelligence-analyst",desc:"网络威胁情报专家——追踪对手组织、将攻击活动映射到MITRE ATT&CK、制作可操作的情报报告并构建检测规则来捕获真正的威胁",vibe:"比对手更早知道对手会做什么",color:"#7c3aed"}
+    ]
+  },
+  {
+    id: "spatial-computing", icon: "🥽", title: "Spatial Computing · 空间计算", cn: "XR/VR/AR/Vision Pro/Metal",
+    color: "#06b6d4",
+    agents: [
+      {emoji:"🍎",name:"macOS Spatial/Metal Engineer · macOS空间/Metal工程师",file:"macos-spatial-metal-engineer",desc:"原生Swift和Metal专家——为macOS和Vision Pro构建高性能3D渲染系统和空间计算体验",vibe:"将Metal推向极限——为macOS和Vision Pro打造3D渲染",color:"metallic-blue"},
+      {emoji:"🖥️",name:"Terminal Integration Specialist · 终端集成专家",file:"terminal-integration-specialist",desc:"终端仿真、文本渲染优化和SwiftTerm集成——现代Swift应用的终端体验专家",vibe:"精通现代Swift应用中的终端仿真和文本渲染",color:"green"},
+      {emoji:"🥽",name:"visionOS Spatial Engineer · visionOS空间工程师",file:"visionos-spatial-engineer",desc:"原生visionOS空间计算、SwiftUI体积界面设计和Liquid Glass设计实现",vibe:"为visionOS构建原生体积界面和Liquid Glass体验",color:"indigo"},
+      {emoji:"🕹️",name:"XR Cockpit Interaction Specialist · XR驾驶舱交互专家",file:"xr-cockpit-interaction-specialist",desc:"设计和开发XR环境中沉浸式驾驶舱控制系统的专家",vibe:"设计在XR中感觉自然的沉浸式驾驶舱控制系统",color:"orange"},
+      {emoji:"🌐",name:"XR Immersive Developer · XR沉浸式开发者",file:"xr-immersive-developer",desc:"WebXR和沉浸式技术专家——专注基于浏览器的AR/VR/XR应用开发",vibe:"构建突破WebXR极限的基于浏览器的AR/VR/XR体验",color:"neon-cyan"},
+      {emoji:"🫧",name:"XR Interface Architect · XR界面架构师",file:"xr-interface-architect",desc:"空间交互设计师和沉浸式AR/VR/XR环境界面策略师",vibe:"设计空间界面——让交互感觉像本能，而非指令",color:"neon-green"}
+    ]
+  },
+  {
+    id: "specialized", icon: "🏢", title: "Specialized · 行业专精", cn: "法律/医疗/HR/供应链/多元领域",
+    color: "#14b8a6",
+    agents: [
+      {emoji:"💸",name:"Accounts Payable Agent · 应付账款代理",file:"accounts-payable-agent",desc:"自主支付处理专家——执行供应商付款、承包商发票和定期账单，覆盖任何支付渠道：加密货币、法币、稳定币",vibe:"跨越任何支付渠道转移资金——加密、法币、稳定币——让你无需亲自动手",color:"green"},
+      {emoji:"🔐",name:"Agentic Identity & Trust Architect · 代理身份与信任架构师",file:"agentic-identity-trust",desc:"为在多代理环境中运行的自主AI代理设计身份、认证和信任验证系统——确保代理能证明自己的身份、权限和操作记录",vibe:"确保每个AI代理都能证明自己是谁、有权做什么以及实际做了什么",color:"#2d5a27"},
+      {emoji:"🎛️",name:"Agents Orchestrator · 代理编排器",file:"agents-orchestrator",desc:"自主管道管理器——编排整个开发工作流。你是这个过程的总指挥",vibe:"指挥整条开发管道——从规格到交付",color:"cyan"},
+      {emoji:"⚙️",name:"Automation Governance Architect · 自动化治理架构师",file:"automation-governance-architect",desc:"以治理为先的业务自动化架构师（n8n优先）——在实施前审计价值、风险和维护性",vibe:"冷静、怀疑、运营导向——偏好可靠系统而非自动化炒作",color:"cyan"},
+      {emoji:"♟️",name:"Business Strategist · 商业策略师",file:"business-strategist",desc:"高级管理咨询专家——竞争分析、市场进入策略、商业模式设计、增长规划、组织战略和战略决策",vibe:"没有执行的战略是幻觉。没有战略的执行是混乱。最好的策略师在你所在之处和你需要去的地方之间架桥",color:"indigo"},
+      {emoji:"🔄",name:"Change Management Consultant · 变革管理顾问",file:"change-management-consultant",desc:"使用ADKAR、Kotter和Prosci框架引导组织完成技术实施、重组、文化转型和并购整合——管理阻力、建立采纳、确保变革在上线后持续有效",vibe:"变革不因糟糕的技术或战略而失败——它因人们不采纳而失败。每一次转型最终都是人的项目",color:"amber"},
+      {emoji:"📚",name:"Corporate Training Designer · 企业培训设计师",file:"corporate-training-designer",desc:"企业培训系统设计和课程开发专家——培训需求分析、教学设计方法论、混合式学习方案设计、内训师培养、领导力项目和培训效果评估",vibe:"设计驱动真实行为改变的培训项目——好的培训是由学员做了什么来衡量的，而非讲师说了什么",color:"orange"},
+      {emoji:"🎧",name:"Customer Service · 客户服务",file:"customer-service",desc:"适用于任何行业的友好专业客户服务专家——处理咨询、投诉、账户支持、FAQ和无缝升级，带着温暖、效率和真诚的客户满意承诺",vibe:"每一次客户互动都是将问题转化为忠诚的机会——用心、快速、人性化地处理",color:"teal"},
+      {emoji:"🌟",name:"Customer Success Manager · 客户成功经理",file:"customer-success-manager",desc:"战略客户成功专家——入职引导、健康评分、QBR促进、流失预防、扩展识别和续约管理",vibe:"客户成功不是被动应对问题的部门——而是预防问题的学科。最好的CSM比客户更了解他们的目标",color:"green"},
+      {emoji:"🗄️",name:"Data Consolidation Agent · 数据整合代理",file:"data-consolidation-agent",desc:"将提取的销售数据整合到实时报告仪表板中，包含区域、销售人员和管道摘要",vibe:"将分散的销售数据整合到实时报告仪表板中",color:"#38a169"},
+      {emoji:"🏛️",name:"Government Digital Presales Consultant · 政府数字化售前顾问",file:"government-digital-presales-consultant",desc:"中国政府数字化市场（ToG）售前专家——精通政策解读、方案设计、投标文件编制、POC验证和合规要求（等保/密评/信创国产化）",vibe:"在中国政府IT采购迷宫中导航——从政策信号到中标——帮助你的团队拿下数字化项目",color:"#8B0000"},
+      {emoji:"📝",name:"Grant Writer · 资助申请书撰写者",file:"grant-writer",desc:"为公益组织、研究机构和社会企业提供专业资助申请书撰写——涵盖资助方研究、意向书撰写、完整提案开发和预算叙述",vibe:"每一笔资助都是你的使命与资助方优先事项之间的对话。最好的撰写者不乞求——他们构建一个令人信服的案例",color:"purple"},
+      {emoji:"🏥",name:"Healthcare Customer Service · 医疗客户服务",file:"healthcare-customer-service",desc:"富有同理心的医疗客户服务专家——患者支持、账单查询、预约管理、保险问题、投诉解决和无缝升级",vibe:"每位患者都值得被倾听、尊重和支持——尤其是当他们害怕、困惑或沮丧的时候",color:"teal"},
+      {emoji:"⚕️",name:"Healthcare Marketing Compliance · 医疗营销合规专家",file:"healthcare-marketing-compliance",desc:"中国医疗营销合规专家——精通广告法、医疗广告管理办法、药品管理法及相关法规——覆盖药品、医疗器械、医美、保健品和互联网医疗",vibe:"在严格监管的中国医疗营销领域保持合法——审查内容、标记违规、在合规边界内寻找创意空间",color:"#2E8B57"},
+      {emoji:"🏨",name:"Hospitality Guest Services · 酒店客户服务",file:"hospitality-guest-services",desc:"酒店、度假村、餐厅和活动场所综合客户服务专家——预订、入住/退房、礼宾服务、投诉解决、忠诚计划和离店后跟进",vibe:"款待不是交易——它是一种感受。每一次客户互动都是创造回忆、赢得回头客和五星好评的机会",color:"teal"},
+      {emoji:"🤝",name:"HR Onboarding · HR入职引导",file:"hr-onboarding",desc:"全面HR入职专家——员工入职引导、文档管理、合规追踪、福利登记、文化融入和新员工支持",vibe:"前90天决定了新员工是成为长期贡献者还是遗憾流失。从第一天起就做好",color:"green"},
+      {emoji:"🕸️",name:"Identity Graph Operator · 身份图谱操作员",file:"identity-graph-operator",desc:"运营多个AI代理共享的身份图谱——确保多代理系统中的每个代理对'这个实体是谁'获得相同的规范答案，即使在并发写入下也保持确定性",vibe:"确保多代理系统中的每个代理对'这是谁'获得相同的规范答案",color:"#C5A572"},
+      {emoji:"🌐",name:"Language Translator · 语言翻译",file:"language-translator",desc:"实时西班牙语↔英语翻译专家——具备文化背景、地区方言意识、旅行短语指导和日常、商务及紧急情况下语气恰当的沟通能力",vibe:"以精准、文化尊重和曾在两个世界生活过的母语者流畅度桥接语言",color:"teal"},
+      {emoji:"⏱️",name:"Legal Billing & Time Tracking · 法律计费与工时追踪",file:"legal-billing-time-tracking",desc:"综合法律计费和工时追踪专家——精确时间记录、发票生成、计费叙事撰写、收款管理、信托账户合规和计费分析",vibe:"每六分钟未计费的时间都是流失的收入。每段不清晰的计费说明都是等待发生的客户争议。捕捉一切",color:"green"},
+      {emoji:"📋",name:"Legal Client Intake · 法律客户接待",file:"legal-client-intake",desc:"综合法律客户接待专家——资质评估、案件信息收集、咨询安排、利益冲突检查和为律师准备就绪的接待摘要",vibe:"与潜在客户的第一次对话为整个律师-客户关系定下基调。做好它——温暖、专业、彻底",color:"blue"},
+      {emoji:"⚖️",name:"Legal Document Review · 法律文书审查",file:"legal-document-review",desc:"综合法律文书审查专家——合同、诉讼文件和房地产协议——摘要文档、标记风险条款、比较合同版本和检查合规性",vibe:"法律文件中的每一个字都很重要。每一个遗漏的条款都是责任。每一个早期发现的风险都让客户得到保护",color:"blue"},
+      {emoji:"🏦",name:"Loan Officer Assistant · 贷款官助理",file:"loan-officer-assistant",desc:"抵押贷款和借贷专业人员的综合助理——涵盖借款人接待、资格预审、文件收集、管道管理、合规追踪、利率报价和交割协调",vibe:"每一笔贷款都是某人的梦想——一个家、一个企业、一个崭新的开始。用精准、合规和对申请人真正关怀的态度推进",color:"blue"},
+      {emoji:"🔎",name:"LSP/Index Engineer · LSP/索引工程师",file:"lsp-index-engineer",desc:"语言服务器协议专家——通过LSP客户端编排和语义索引构建统一的代码智能系统",vibe:"通过LSP编排和语义索引构建统一的代码智能",color:"orange"},
+      {emoji:"🏥",name:"Medical Billing & Coding · 医疗计费与编码专家",file:"medical-billing-coding-specialist",desc:"ICD-10-CM/PCS、CPT和HCPCS编码专家——索赔提交、拒付管理、收入周期优化、合规审计和医保合同分析",vibe:"每一份未提交的索赔都是流失的收入。每一次未挑战的拒付都是放弃的钱。收入周期永不停止",color:"blue"},
+      {emoji:"🌱",name:"Personal Growth Mentor · 个人成长导师",file:"personal-growth-mentor",desc:"跨领域个人发展导师——目标清晰化、习惯设计、战略决策和问责——没有空洞的励志鸡汤",vibe:"系统胜过口号。清晰先于行动。执行超越灵感",color:"teal"},
+      {emoji:"🏠",name:"Real Estate Buyer & Seller · 房地产买卖代理",file:"real-estate-buyer-seller",desc:"综合房地产代理助手——买方代理、卖方代理、房源管理、报价谈判、交易协调和交割支持",vibe:"每一笔交易都是某人最大的财务决策。每位客户都值得一个有条理、响应迅速、真诚关注他们结果的代理",color:"teal"},
+      {emoji:"🎯",name:"Recruitment Specialist · 招聘专家",file:"recruitment-specialist",desc:"招聘运营和人才获取专家——精通中国主流招聘平台、人才评估框架和劳动法合规。帮助企业高效吸引、筛选和留住顶尖人才",vibe:"在中国招聘平台上构建你的全周期招聘引擎——从寻源到入职到合规",color:"blue"},
+      {emoji:"📤",name:"Report Distribution Agent · 报告分发代理",file:"report-distribution-agent",desc:"根据区域参数自动将整合后的销售报告分发给相应的销售人员",vibe:"自动将整合后的销售报告交付给正确的销售代表",color:"#d69e2e"},
+      {emoji:"🛒",name:"Retail Customer Returns · 零售客户退货处理",file:"retail-customer-returns",desc:"综合零售退货处理专家——跨实体店、线上和全渠道零售的退货、换货和退款处理，在保持客户忠诚度的同时最大化回收",vibe:"退货不是失败——它是机会。以速度、公平和真诚关怀处理，你会将失望的客户变成忠诚的客户",color:"amber"},
+      {emoji:"📊",name:"Sales Data Extraction Agent · 销售数据提取代理",file:"sales-data-extraction-agent",desc:"专门监控Excel文件并提取关键销售指标（MTD、YTD、年度）用于内部实时报告",vibe:"监控你的Excel文件并提取关键的销售指标",color:"#2b6cb0"},
+      {emoji:"🎯",name:"Sales Outreach · 销售外拓",file:"sales-outreach",desc:"咨询式B2B销售外拓专家——冷潜在客户开发、线索跟进、异议处理、提案撰写和管道管理",vibe:"最好的销售人员不推销——他们帮助人们购买。每次外拓都是对话的开始，而非推销",color:"amber"},
+      {emoji:"🧭",name:"Chief of Staff · 幕僚长",file:"specialized-chief-of-staff",desc:"创始人和高管的总协调人——过滤噪音、掌控流程、执行一致性、路由决策、定位产出以产生影响",vibe:"我不拥有任何职能——我拥有所有职能之间的空间",color:"#6B7280"},
+      {emoji:"🏗️",name:"Civil Engineer · 土木工程师",file:"specialized-civil-engineer",desc:"覆盖全球标准的土木与结构工程师——Eurocode、DIN、ACI、AISC、ASCE、AS/NZS、CSA、GB、IS、AIJ等。专注结构分析、岩土设计、施工文档和建筑规范合规",vibe:"设计跨越国界的结构——从地震频发的东京到风力肆虐的迪拜，始终合规且可建造",color:"yellow"},
+      {emoji:"🌍",name:"Cultural Intelligence Strategist · 文化智能策略师",file:"specialized-cultural-intelligence-strategist",desc:"CQ专家——检测无形的排斥、研究全球背景、确保软件在跨身份群体中真实共鸣",vibe:"检测无形的排斥——确保你的软件跨文化真实共鸣",color:"#FFA000"},
+      {emoji:"🗣️",name:"Developer Advocate · 开发者布道师",file:"specialized-developer-advocate",desc:"开发者关系专家——建设开发者社区、创作技术内容、优化开发者体验（DX），通过真实的工程互动驱动平台采用",vibe:"通过真实的互动桥接你的产品团队和开发者社区",color:"purple"},
+      {emoji:"📄",name:"Document Generator · 文档生成器",file:"specialized-document-generator",desc:"专业文档创建专家——使用代码方式生成专业的PDF、PPTX、DOCX和XLSX文件，具备适当的格式、图表和数据可视化",vibe:"用代码生成专业文档——PDF、幻灯片、电子表格和报告",color:"blue"},
+      {emoji:"🇫🇷",name:"French Consulting Market Navigator · 法国咨询市场导航员",file:"specialized-french-consulting-market",desc:"导航法国ESN/SI自由职业生态——利润模型、平台机制（Malt、collective.work）、portage salarial、费率定位和付款周期现实",vibe:"解码不透明的法国咨询食物链——让自由职业者不再白白损失金钱",color:"#002395"},
+      {emoji:"🇰🇷",name:"Korean Business Navigator · 韩国商业导航员",file:"specialized-korean-business-navigator",desc:"面向外国专业人士的韩国商业文化——품의决策流程、nunchi阅读、KakaoTalk商务礼仪、层级导航和关系优先的交易机制",vibe:"连接西方直接性和韩国关系动态的桥梁——读懂房间，不毁掉交易",color:"#003478"},
+      {emoji:"🔌",name:"MCP Builder · MCP构建者",file:"specialized-mcp-builder",desc:"Model Context Protocol开发专家——设计、构建和测试MCP服务器，用自定义工具、资源和提示扩展AI代理的能力",vibe:"构建让AI代理在现实世界中真正有用的工具",color:"indigo"},
+      {emoji:"🔬",name:"Model QA Specialist · 模型QA专家",file:"specialized-model-qa",desc:"独立模型QA专家——端到端审计ML和统计模型：从文档审查和数据重建到复制、校准测试、可解释性分析和审计级报告",vibe:"端到端审计ML模型——从数据重建到校准测试",color:"#B22222"},
+      {emoji:"💰",name:"Pricing Analyst · 定价分析师",file:"specialized-pricing-analyst",desc:"专业定价分析师——通过市场研究、竞争对手分析、成本结构评估和利润优化制定最优定价模型（支持WebFetch/WebSearch等工具）",vibe:"找到价值捕获与价值交付交汇的价格点——然后用数据证明它",color:"gold"},
+      {emoji:"☁️",name:"Salesforce Architect · Salesforce架构师",file:"specialized-salesforce-architect",desc:"Salesforce平台解决方案架构——多云设计、集成模式、Governor Limits、部署策略和企业级数据模型治理",vibe:"将混乱的Salesforce组织转化为可扩展的架构——一次一个Governor Limit",color:"#00A1E0"},
+      {emoji:"🗺️",name:"Workflow Architect · 工作流架构师",file:"specialized-workflow-architect",desc:"工作流设计专家——为每个系统、用户旅程和代理交互映射完整的工作流树：快乐路径、分支条件、失败模式、恢复路径、交接契约和可观测状态",vibe:"系统可能走的每一条路径——在写任何一行代码之前就映射、命名和规格化",color:"orange"},
+      {emoji:"🎓",name:"Study Abroad Advisor · 留学顾问",file:"study-abroad-advisor",desc:"全谱系留学规划专家——覆盖美英加澳欧洲香港新加坡，精通本科、硕士和博士申请策略、选校、文书辅导、背景提升和签证准备",vibe:"引导中国学生完成整个留学旅程——从选校到文书到签证——数据驱动，零焦虑贩卖",color:"#1B4D3E"},
+      {emoji:"🔗",name:"Supply Chain Strategist · 供应链策略师",file:"supply-chain-strategist",desc:"供应链管理和采购策略专家——精通供应商开发、战略寻源、质量控制和供应链数字化。扎根中国制造业生态，帮助企业构建高效、有韧性和可持续的供应链",vibe:"在中国制造业生态中构建你的采购引擎和供应链韧性——从供应商寻源到风险管理",color:"blue"},
+      {emoji:"🗃️",name:"ZK Steward · ZK知识管家",file:"zk-steward",desc:"以Luhmann的Zettelkasten精神运营的知识库管家——默认视角为Luhmann，按任务切换领域专家（Feynman、Munger、Ogilvy等）。执行原子化笔记、连接性和验证循环",vibe:"以Luhmann的Zettelkasten为渠道——构建互联的、经过验证的知识库",color:"teal"}
+    ]
+  },
+  {
+    id: "support", icon: "🔧", title: "Support · 运营支持", cn: "报告/合规/财务/基础设施",
+    color: "#14b8a6",
+    agents: [
+      {emoji:"📊",name:"Analytics Reporter · 分析报告师",file:"support-analytics-reporter",desc:"将原始数据转化为可操作业务洞察的数据分析师——创建仪表板、执行统计分析、追踪KPI，通过数据可视化和报告提供战略决策支持",vibe:"将原始数据转化为驱动你下一次决策的洞察",color:"teal"},
+      {emoji:"📝",name:"Executive Summary Generator · 高管摘要生成器",file:"support-executive-summary-generator",desc:"顾问级AI专家——像高级策略顾问一样思考和沟通。使用McKinsey SCQA、BCG金字塔原理和Bain框架为C-suite决策者将复杂业务输入转化为简洁可执行的高管摘要",vibe:"像麦肯锡顾问一样思考，为C-suite写作",color:"purple"},
+      {emoji:"💰",name:"Finance Tracker · 财务追踪器",file:"support-finance-tracker",desc:"财务分析师和财务控制专家——财务规划、预算管理和业务绩效分析。维护财务健康、优化现金流并提供战略性财务洞察",vibe:"保持账目清晰、现金流畅通、预测诚实",color:"green"},
+      {emoji:"🏢",name:"Infrastructure Maintainer · 基础设施维护员",file:"support-infrastructure-maintainer",desc:"基础设施专家——系统可靠性、性能优化和技术运维管理。维护支撑业务运营的健壮、可扩展基础设施",vibe:"保持灯亮、服务器运转、告警静默",color:"orange"},
+      {emoji:"⚖️",name:"Legal Compliance Checker · 法律合规检查员",file:"support-legal-compliance-checker",desc:"法律和合规专家——确保业务运营、数据处理和内容创建符合跨多个司法管辖区的相关法律、法规和行业标准",vibe:"确保你的运营在每个重要的司法管辖区都合规",color:"red"},
+      {emoji:"💬",name:"Support Responder · 支持响应员",file:"support-support-responder",desc:"客户支持专家——卓越的客户服务、问题解决和用户体验优化。专注多渠道支持和将支持互动转化为积极的品牌体验",vibe:"将沮丧的用户转化为忠诚的拥护者，一次一个互动",color:"blue"}
+    ]
+  },
+  {
+    id: "testing", icon: "🧪", title: "Testing · 测试质量", cn: "API/性能/无障碍/工作流优化",
+    color: "#f97316",
+    agents: [
+      {emoji:"♿",name:"Accessibility Auditor · 无障碍审计师",file:"testing-accessibility-auditor",desc:"无障碍专家——根据WCAG标准审计界面，使用辅助技术进行测试，确保包容性设计。默认立场：如果没有用屏幕阅读器测试过，就不是无障碍的",vibe:"如果没有用屏幕阅读器测试过，就不是无障碍的",color:"#0077B6"},
+      {emoji:"🔌",name:"API Tester · API测试员",file:"testing-api-tester",desc:"API测试专家——全面的API验证、性能测试和跨所有系统及第三方集成的质量保证",vibe:"在你用户之前把你的API搞坏",color:"purple"},
+      {emoji:"📸",name:"Evidence Collector · 证据收集员",file:"testing-evidence-collector",desc:"痴迷截图、不容幻想的QA专家——默认寻找3-5个问题，一切都需要视觉证据",vibe:"痴迷截图的QA——没有视觉证据绝不批准任何东西",color:"orange"},
+      {emoji:"⏱️",name:"Performance Benchmarker · 性能基准测试员",file:"testing-performance-benchmarker",desc:"性能测试和优化专家——衡量、分析和改进跨所有应用和基础设施的系统性能",vibe:"测量一切、优化重要的、证明改进",color:"orange"},
+      {emoji:"🧐",name:"Reality Checker · 现实检验员",file:"testing-reality-checker",desc:"阻止幻想式审批——基于证据的认证。默认判定为'需要改进'，需要压倒性证据才能认定为生产就绪",vibe:"默认为'需要改进'——需要压倒性证据才能认定为生产就绪",color:"red"},
+      {emoji:"📋",name:"Test Results Analyzer · 测试结果分析师",file:"testing-test-results-analyzer",desc:"测试分析专家——全面的测试结果评估、质量指标分析和从测试活动中生成可操作的洞察",vibe:"像侦探阅读证据一样阅读测试结果——什么都逃不过",color:"indigo"},
+      {emoji:"🔧",name:"Tool Evaluator · 工具评估师",file:"testing-tool-evaluator",desc:"技术评估专家——评估、测试和推荐工具、软件和平台，用于业务使用和生产力优化",vibe:"测试和推荐正确的工具——让你的团队不浪费时间在错误的工具上",color:"teal"},
+      {emoji:"⚡",name:"Workflow Optimizer · 工作流优化师",file:"testing-workflow-optimizer",desc:"流程改进专家——分析、优化和自动化跨所有业务职能的工作流，实现最大生产力和效率",vibe:"找到瓶颈、修复流程、自动化剩余部分",color:"green"}
+    ]
+  }
+];
+
+// ===== RENDER =====
+const mainContent = document.getElementById('mainContent');
+const catFilters = document.getElementById('catFilters');
+
+// Count total
+const totalAgents = categories.reduce((sum, c) => sum + c.agents.length, 0);
+
+// Category name mapping
+const catNames = {
+  academic: '学术研究', design: '设计创意', engineering: '工程开发',
+  finance: '金融财务', 'game-development': '游戏开发', marketing: '市场营销',
+  'paid-media': '付费媒体', product: '产品管理', 'project-management': '项目管理',
+  sales: '销售体系', security: '安全防护', 'spatial-computing': '空间计算',
+  specialized: '行业专精', support: '运营支持', testing: '测试质量'
+};
+
+// Render filter buttons
+catFilters.innerHTML = '<button class="cat-btn active" onclick="filterCategory(\'all\')">全部<span class="cat-count">(' + totalAgents + ')</span></button>' +
+  categories.map(c => '<button class="cat-btn" onclick="filterCategory(\'' + c.id + '\')">' + c.icon + ' ' + catNames[c.id] + '<span class="cat-count">(' + c.agents.length + ')</span></button>').join('');
+
+// Render all cards
+function renderAll() {
+  mainContent.innerHTML = categories.map(c => `
+    <section class="cat-section" data-category="${c.id}">
+      <div class="cat-header">
+        <span class="cat-icon">${c.icon}</span>
+        <span class="cat-title">${c.title}</span>
+        <span class="cat-title-cn">${c.cn}</span>
+        <span class="cat-count-badge">${c.agents.length} 代理</span>
+      </div>
+      <div class="agent-grid">
+        ${c.agents.map((a, i) => `
+          <div class="agent-card" data-category="${c.id}" data-search="${a.name.toLowerCase()} ${a.desc.toLowerCase()} ${a.file.toLowerCase()} ${catNames[c.id] || ''}" style="animation-delay:${i*0.03}s" onclick="openModal('${c.id}','${a.file}','${a.emoji}','${a.name.replace(/'/g,"&#39;")}','${a.desc.replace(/'/g,"&#39;").replace(/"/g,'&quot;')}','${(a.vibe||'').replace(/'/g,"&#39;").replace(/"/g,'&quot;')}','${catNames[c.id]||''}')">
+            ${a.color ? '<div class="card-color-dot" style="background:' + a.color + '"></div>' : ''}
+            <div class="card-top">
+              <span class="card-emoji">${a.emoji}</span>
+              <div>
+                <div class="card-name">${a.name}</div>
+                <div class="card-filename">${a.file}.md</div>
+              </div>
+            </div>
+            <div class="card-desc">${a.desc}</div>
+            ${a.vibe ? '<div class="card-vibe">💡 ' + a.vibe + '</div>' : ''}
+            <div class="card-tags"><span class="card-tag">${c.icon} ${catNames[c.id] || c.id}</span></div>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+  `).join('');
+
+  // Stagger animation
+  document.querySelectorAll('.agent-card').forEach((card, i) => {
+    card.style.animationDelay = (i % 20) * 0.03 + 's';
+  });
+}
+
+renderAll();
+
+// ===== SEARCH =====
+function filterAgents() {
+  const query = document.getElementById('search').value.toLowerCase().trim();
+  const activeCat = document.querySelector('.cat-btn.active')?.dataset?.cat || 'all';
+  applyFilters(query, activeCat);
+}
+
+function filterCategory(catId) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  event.target.closest('.cat-btn').classList.add('active');
+  const query = document.getElementById('search').value.toLowerCase().trim();
+  applyFilters(query, catId);
+}
+
+function applyFilters(query, catId) {
+  let visibleCount = 0;
+  document.querySelectorAll('.cat-section').forEach(section => {
+    const sectionCat = section.dataset.category;
+    let sectionVisible = false;
+    section.querySelectorAll('.agent-card').forEach(card => {
+      const cardCat = card.dataset.category;
+      const matchCat = catId === 'all' || cardCat === catId;
+      const matchSearch = !query || card.dataset.search.includes(query);
+      const show = matchCat && matchSearch;
+      card.classList.toggle('hidden', !show);
+      if (show) { sectionVisible = true; visibleCount++; }
+    });
+    section.classList.toggle('hidden', !sectionVisible);
+  });
+
+  // Show no results
+  if (visibleCount === 0) {
+    if (!document.getElementById('noResults')) {
+      const nr = document.createElement('div');
+      nr.id = 'noResults';
+      nr.className = 'no-results';
+      nr.innerHTML = '<div class="big-emoji">🔍</div><h3>没有找到匹配的代理</h3><p>试试其他关键词或切换分类筛选</p>';
+      mainContent.appendChild(nr);
+    }
+  } else {
+    const nr = document.getElementById('noResults');
+    if (nr) nr.remove();
+  }
+}
+
+// ===== MODAL =====
+function openModal(catId, file, emoji, name, desc, vibe, catName) {
+  const overlay = document.getElementById('modalOverlay');
+  const content = document.getElementById('modalContent');
+  content.innerHTML = `
+    <div style="margin-bottom:16px;font-size:0.78rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em">${catName} / ${file}.md</div>
+    <h3><span class="modal-emoji">${emoji}</span> ${name}</h3>
+    <div class="modal-desc">${desc}</div>
+    ${vibe ? '<div class="modal-vibe">💡 ' + vibe + '</div>' : ''}
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);font-size:0.82rem;color:var(--text3)">
+      📂 文件位置：<code style="color:var(--accent3)">resources/corpus-baseline/${catId}/${file}.md</code><br>
+      🏷️ 所属类别：${catName}
+    </div>
+  `;
+  overlay.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+// ESC key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('modalOverlay').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+});
+
+// ===== Scroll shadow for toolbar =====
+window.addEventListener('scroll', () => {
+  const toolbar = document.getElementById('toolbar');
+  if (window.scrollY > 10) {
+    toolbar.style.boxShadow = '0 4px 24px rgba(0,0,0,0.3)';
+  } else {
+    toolbar.style.boxShadow = 'none';
+  }
+});
+</script>
+
+</body>
+</html>

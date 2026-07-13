@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agency Agents 完整图鉴 · 209个AI角色总览</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap');
+  
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #0f1628;
+    --bg3: #151e34;
+    --border: #1e2d4a;
+    --text: #c8d6e5;
+    --text-dim: #6b7d95;
+    --accent: #00e5ff;
+    --accent-dim: rgba(0,229,255,0.12);
+    --card-bg: rgba(15,22,40,0.6);
+    --card-hover: rgba(20,32,56,0.8);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans SC', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: 
+      linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none; z-index:0;
+  }
+
+  .hero {
+    position: relative; z-index:1;
+    text-align: center; padding: 50px 20px 30px;
+    background: linear-gradient(180deg, rgba(0,229,255,0.06) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 {
+    font-size: 2.6em; font-weight: 900;
+    background: linear-gradient(135deg, #00e5ff, #b388ff, #ff9100);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
+  }
+  .hero .subtitle {
+    font-size: 1.05em; color: var(--text-dim); margin-top: 8px;
+    font-weight: 300; letter-spacing: 4px;
+  }
+  .hero .stats {
+    display: flex; justify-content: center; gap: 40px; margin-top: 18px;
+  }
+  .hero .stat-item {
+    text-align: center;
+  }
+  .hero .stat-num {
+    font-size: 2em; font-weight: 700; color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .hero .stat-label {
+    font-size: 0.85em; color: var(--text-dim); margin-top: 2px;
+  }
+
+  .search-bar {
+    position: relative; z-index:1;
+    max-width: 500px; margin: 20px auto;
+    padding: 0 20px;
+  }
+  .search-bar input {
+    width: 100%; padding: 12px 20px; border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg2); color: var(--text);
+    font-size: 1em; font-family: inherit;
+    outline: none; transition: all 0.3s;
+  }
+  .search-bar input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-dim);
+  }
+  .search-bar input::placeholder {
+    color: var(--text-dim);
+  }
+
+  .nav-container {
+    position: relative; z-index:1;
+    padding: 0 15px; max-width: 1200px; margin: 0 auto;
+  }
+  .nav-scroll {
+    display: flex; gap: 8px; overflow-x: auto; padding: 10px 0 15px;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+  }
+  .nav-scroll::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    flex-shrink: 0; padding: 8px 18px; border-radius: 20px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text-dim); font-size: 0.88em; font-family: inherit;
+    cursor: pointer; transition: all 0.3s; white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--text); background: var(--accent-dim); }
+  .nav-btn.active {
+    border-color: var(--accent); background: var(--accent-dim);
+    color: var(--accent); font-weight: 500;
+  }
+  .badge {
+    background: rgba(255,255,255,0.08); padding: 1px 8px; border-radius: 10px;
+    font-size: 0.78em; font-family: 'JetBrains Mono', monospace;
+  }
+  .nav-btn.active .badge { background: rgba(0,229,255,0.2); }
+
+  .content {
+    position: relative; z-index:1;
+    max-width: 1300px; margin: 0 auto; padding: 10px 15px 60px;
+  }
+
+  .category-section { display: none; }
+  .category-section.show.active { display: block; animation: fadeIn 0.4s ease; }
+
+  @keyframes fadeIn {
+    from { opacity:0; transform:translateY(12px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  .category-header {
+    margin: 10px 0 20px; padding: 15px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .category-header h2 {
+    font-size: 1.5em; font-weight: 700;
+  }
+  .category-header h2 .subtitle {
+    font-weight: 300; color: var(--text-dim); font-size: 0.7em;
+  }
+  .category-count {
+    color: var(--text-dim); font-size: 0.85em; margin-top: 4px;
+  }
+
+  .agent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .agent-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 16px;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+    cursor: default;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .agent-card:hover {
+    border-color: var(--accent);
+    background: var(--card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,229,255,0.08);
+  }
+
+  .card-emoji {
+    font-size: 2em; flex-shrink: 0;
+    width: 48px; text-align: center;
+    line-height: 1;
+  }
+
+  .card-body { flex:1; min-width:0; }
+  .card-title {
+    font-size: 1em; font-weight: 600; color: #e8f0f8;
+    line-height: 1.3;
+  }
+  .card-en-name {
+    font-size: 0.75em; color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 2px; opacity: 0.7;
+  }
+  .card-desc {
+    font-size: 0.83em; color: var(--text-dim);
+    line-height: 1.6; margin-top: 6px;
+  }
+
+  .footer {
+    text-align: center; padding: 30px; color: var(--text-dim);
+    font-size: 0.8em; border-top: 1px solid var(--border);
+    position: relative; z-index:1;
+  }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 1.8em; }
+    .hero .stats { gap: 20px; }
+    .agent-grid { grid-template-columns: 1fr; }
+    .nav-btn { font-size: 0.8em; padding: 6px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>✦ Agency Agents 完整图鉴 ✦</h1>
+  <p class="subtitle">AI 角色卡片 · 全面认识每一个专家身份</p>
+  <div class="stats">
+    <div class="stat-item"><div class="stat-num">209</div><div class="stat-label">AI 角色</div></div>
+    <div class="stat-item"><div class="stat-num">15</div><div class="stat-label">专业领域</div></div>
+  </div>
+</div>
+
+<div class="search-bar">
+  <input type="text" id="searchInput" placeholder="🔍 搜索角色名称或关键词...">
+</div>
+
+<div class="nav-container">
+  <div class="nav-scroll" id="navTabs">
+    <button class="nav-btn active" data-cat="academic">🎓 学术研究<span class="badge">5</span></button>
+<button class="nav-btn" data-cat="design">🎨 设计创意<span class="badge">9</span></button>
+<button class="nav-btn" data-cat="engineering">⚙️ 工程技术<span class="badge">30</span></button>
+<button class="nav-btn" data-cat="finance">💰 金融财务<span class="badge">5</span></button>
+<button class="nav-btn" data-cat="game-development">🎮 游戏开发<span class="badge">20</span></button>
+<button class="nav-btn" data-cat="marketing">📣 市场营销<span class="badge">36</span></button>
+<button class="nav-btn" data-cat="paid-media">📺 付费媒体<span class="badge">7</span></button>
+<button class="nav-btn" data-cat="product">📱 产品管理<span class="badge">5</span></button>
+<button class="nav-btn" data-cat="project-management">📋 项目管理<span class="badge">7</span></button>
+<button class="nav-btn" data-cat="sales">🤝 销售商务<span class="badge">9</span></button>
+<button class="nav-btn" data-cat="security">🔒 安全防护<span class="badge">10</span></button>
+<button class="nav-btn" data-cat="spatial-computing">🥽 空间计算<span class="badge">6</span></button>
+<button class="nav-btn" data-cat="specialized">🧩 专业领域<span class="badge">46</span></button>
+<button class="nav-btn" data-cat="support">🛟 支持服务<span class="badge">6</span></button>
+<button class="nav-btn" data-cat="testing">🧪 测试质检<span class="badge">8</span></button>
+
+  </div>
+</div>
+
+<div class="content" id="content">
+  <div class="category-section show active" id="cat-academic">
+        <div class="category-header">
+            <h2>🎓 学术研究 <span class="subtitle">— 学术专家</span></h2>
+            <p class="category-count">共 5 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="academic">
+            <div class="card-emoji">🌍</div>
+            <div class="card-body">
+                <h3 class="card-title">人类学家</h3>
+                <div class="card-en-name">Anthropologist</div>
+                <p class="card-desc">研究文化体系、仪式、亲属关系、信仰系统和民族志方法——构建有文化底蕴、真实可信的虚构社会</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="academic">
+            <div class="card-emoji">🗺️</div>
+            <div class="card-body">
+                <h3 class="card-title">地理学家</h3>
+                <div class="card-en-name">Geographer</div>
+                <p class="card-desc">研究自然与人文地理、气候系统、制图学和空间分析——构建地理逻辑自洽的世界，让地形、气候、资源和聚落模式符合科学规律</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="academic">
+            <div class="card-emoji">📚</div>
+            <div class="card-body">
+                <h3 class="card-title">历史学家</h3>
+                <div class="card-en-name">Historian</div>
+                <p class="card-desc">研究历史分析、断代、物质文化和史学——验证历史连贯性，用一手和二手资料中的真实时代细节丰富设定</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="academic">
+            <div class="card-emoji">📜</div>
+            <div class="card-body">
+                <h3 class="card-title">叙事学家</h3>
+                <div class="card-en-name">Narratologist</div>
+                <p class="card-desc">研究叙事理论、故事结构、角色弧光和文学分析——从普罗普到坎贝尔到现代叙事学的框架指导创作</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="academic">
+            <div class="card-emoji">🧠</div>
+            <div class="card-body">
+                <h3 class="card-title">心理学家</h3>
+                <div class="card-en-name">Psychologist</div>
+                <p class="card-desc">研究人类行为、人格理论、动机和认知模式——基于临床和研究框架塑造心理可信的角色与互动</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-design">
+        <div class="category-header">
+            <h2>🎨 设计创意 <span class="subtitle">— 设计专家</span></h2>
+            <p class="category-count">共 9 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="design">
+            <div class="card-emoji">🎨</div>
+            <div class="card-body">
+                <h3 class="card-title">品牌守护者</h3>
+                <div class="card-en-name">Brand Guardian</div>
+                <p class="card-desc">品牌策略专家，专注于品牌形象打造、一致性维护和战略定位</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="design">
+            <div class="card-emoji">📷</div>
+            <div class="card-body">
+                <h3 class="card-title">图像提示词工程师</h3>
+                <div class="card-en-name">Image Prompt Engineer</div>
+                <p class="card-desc">AI图像提示词专家，擅长将视觉概念转化为精准语言，通过生成式AI工具创作令人惊叹的专业级摄影作品</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="design">
+            <div class="card-emoji">🌈</div>
+            <div class="card-body">
+                <h3 class="card-title">包容性视觉专家</h3>
+                <div class="card-en-name">Inclusive Visuals Specialist</div>
+                <p class="card-desc">破除AI系统性偏见的代表专家，生成文化准确、正面肯定、无刻板印象的图像和视频</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="design">
+            <div class="card-emoji">🎭</div>
+            <div class="card-body">
+                <h3 class="card-title">角色体验分析师</h3>
+                <div class="card-en-name">Persona Walkthrough Specialist</div>
+                <p class="card-desc">从特定用户角色的心理视角模拟网页认知走查，捕捉每处滚动位置的情感和理性反应，输出转化率优化报告</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="design">
+            <div class="card-emoji">🎨</div>
+            <div class="card-body">
+                <h3 class="card-title">UI设计师</h3>
+                <div class="card-en-name">UI Designer</div>
+                <p class="card-desc">UI设计专家，精通视觉设计体系、组件库和像素级界面创作，打造美观、一致、可访问的用户界面</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="design">
+            <div class="card-emoji">📐</div>
+            <div class="card-body">
+                <h3 class="card-title">UX架构师</h3>
+                <div class="card-en-name">UX Architect</div>
+                <p class="card-desc">技术架构与UX专家，为开发者提供坚实的设计基础、CSS系统和清晰的实施指导</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="design">
+            <div class="card-emoji">🔬</div>
+            <div class="card-body">
+                <h3 class="card-title">UX研究员</h3>
+                <div class="card-en-name">UX Researcher</div>
+                <p class="card-desc">UX研究专家，专注于用户行为分析、可用性测试和数据驱动的设计洞察，提供可行的研究结论提升产品体验</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="design">
+            <div class="card-emoji">🎬</div>
+            <div class="card-body">
+                <h3 class="card-title">视觉叙事师</h3>
+                <div class="card-en-name">Visual Storyteller</div>
+                <p class="card-desc">视觉传播专家，专注于通过设计创造引人入胜的视觉叙事、多媒体内容和品牌故事，将复杂信息转化为打动人心的视觉故事</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="design">
+            <div class="card-emoji">✨</div>
+            <div class="card-body">
+                <h3 class="card-title">趣味注入师</h3>
+                <div class="card-en-name">Whimsy Injector</div>
+                <p class="card-desc">创意专家，专注于为品牌体验增添个性、愉悦和趣味元素，通过意想不到的奇思妙想创造令人难忘的互动</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-engineering">
+        <div class="category-header">
+            <h2>⚙️ 工程技术 <span class="subtitle">— 工程专家</span></h2>
+            <p class="category-count">共 30 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🧬</div>
+            <div class="card-body">
+                <h3 class="card-title">AI数据修复工程师</h3>
+                <div class="card-en-name">AI Data Remediation Engineer</div>
+                <p class="card-desc">自愈数据管道专家，使用本地SLM和语义聚类自动检测、分类和修复数据异常。专注于修复层：拦截脏数据、生成修复逻辑、保证零数据丢失</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🤖</div>
+            <div class="card-body">
+                <h3 class="card-title">AI工程师</h3>
+                <div class="card-en-name">AI Engineer</div>
+                <p class="card-desc">AI/ML工程专家，专注于机器学习模型开发、部署和生产集成，构建智能功能、数据管道和AI驱动应用</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">⚡</div>
+            <div class="card-body">
+                <h3 class="card-title">自主优化架构师</h3>
+                <div class="card-en-name">Autonomous Optimization Architect</div>
+                <p class="card-desc">智能系统调控师，持续对API进行性能影子测试，同时严格执行财务和安全护栏，防止成本失控</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🏗️</div>
+            <div class="card-body">
+                <h3 class="card-title">后端架构师</h3>
+                <div class="card-en-name">Backend Architect</div>
+                <p class="card-desc">高级后端架构师，专注于可扩展系统设计、数据库架构、API开发和云基础设施，构建稳健、安全、高性能的服务器端应用和微服务</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🧱</div>
+            <div class="card-body">
+                <h3 class="card-title">CMS开发者</h3>
+                <div class="card-en-name">CMS Developer</div>
+                <p class="card-desc">Drupal和WordPress专家，擅长主题开发、自定义插件/模块、内容架构和代码优先的CMS实施</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">👁️</div>
+            <div class="card-body">
+                <h3 class="card-title">代码审查员</h3>
+                <div class="card-en-name">Code Reviewer</div>
+                <p class="card-desc">代码审查专家，提供建设性、可操作的反馈，关注正确性、可维护性、安全性和性能，而非代码风格偏好</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🧭</div>
+            <div class="card-body">
+                <h3 class="card-title">代码库上手引导师</h3>
+                <div class="card-en-name">Codebase Onboarding Engineer</div>
+                <p class="card-desc">开发者上手引导专家，通过阅读源代码、追踪代码路径、只陈述代码中的事实，帮助新工程师快速理解陌生的代码库</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🔧</div>
+            <div class="card-body">
+                <h3 class="card-title">数据工程师</h3>
+                <div class="card-en-name">Data Engineer</div>
+                <p class="card-desc">数据工程专家，专注于构建可靠的数据管道、湖仓架构和可扩展的数据基础设施，精通ETL/ELT、Spark、dbt等</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🗄️</div>
+            <div class="card-body">
+                <h3 class="card-title">数据库优化师</h3>
+                <div class="card-en-name">Database Optimizer</div>
+                <p class="card-desc">数据库专家，专注于PostgreSQL、MySQL等数据库的Schema设计、查询优化、索引策略和性能调优</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">⚙️</div>
+            <div class="card-body">
+                <h3 class="card-title">DevOps自动化工程师</h3>
+                <div class="card-en-name">DevOps Automator</div>
+                <p class="card-desc">DevOps工程专家，专注于基础设施自动化、CI/CD管道开发和云运维</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">📧</div>
+            <div class="card-body">
+                <h3 class="card-title">邮件情报工程师</h3>
+                <div class="card-en-name">Email Intelligence Engineer</div>
+                <p class="card-desc">邮件情报工程专家，擅长从原始邮件线程中提取结构化的、可供推理的数据，供AI代理和自动化系统使用</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🔩</div>
+            <div class="card-body">
+                <h3 class="card-title">嵌入式固件工程师</h3>
+                <div class="card-en-name">Embedded Firmware Engineer</div>
+                <p class="card-desc">嵌入式固件专家，精通ESP32、ARM Cortex-M、STM32等平台的裸机和RTOS固件开发</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🔗</div>
+            <div class="card-body">
+                <h3 class="card-title">飞书集成开发者</h3>
+                <div class="card-en-name">Feishu Integration Developer</div>
+                <p class="card-desc">飞书开放平台全栈集成专家，精通飞书机器人、小程序、审批流程、多维表格、消息卡片、Webhook、SSO认证和工作流自动化</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🔧</div>
+            <div class="card-body">
+                <h3 class="card-title">Filament优化专家</h3>
+                <div class="card-en-name">Filament Optimization Specialist</div>
+                <p class="card-desc">Filament PHP管理界面优化专家，专注于重构和优化管理后台，追求最大可用性和效率，不只是表面美化</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🖥️</div>
+            <div class="card-body">
+                <h3 class="card-title">前端开发者</h3>
+                <div class="card-en-name">Frontend Developer</div>
+                <p class="card-desc">前端开发专家，精通现代Web技术、React/Vue/Angular框架、UI实现和性能优化</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🌿</div>
+            <div class="card-body">
+                <h3 class="card-title">Git工作流大师</h3>
+                <div class="card-en-name">Git Workflow Master</div>
+                <p class="card-desc">Git工作流大师，精通分支策略和版本控制最佳实践，包括约定式提交、变基、worktrees和CI友好的分支管理</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🚨</div>
+            <div class="card-body">
+                <h3 class="card-title">应急响应指挥官</h3>
+                <div class="card-en-name">Incident Response Commander</div>
+                <p class="card-desc">应急响应指挥官，专注于生产事故管理、结构化响应协调、事后复盘、SLO/SLI跟踪和值班流程设计</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🖧</div>
+            <div class="card-body">
+                <h3 class="card-title">IT服务经理</h3>
+                <div class="card-en-name">IT Service Manager</div>
+                <p class="card-desc">IT服务管理专家，使用ITIL 4框架进行服务目录设计、事件和问题管理、变更控制、SLA治理等，确保IT交付可靠可衡量的业务价值</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🪡</div>
+            <div class="card-body">
+                <h3 class="card-title">最小变更工程师</h3>
+                <div class="card-en-name">Minimal Change Engineer</div>
+                <p class="card-desc">最小变更工程专家，只修复被要求的内容，拒绝范围蔓延，宁可写三行相似的代码也不做过早抽象——防止修bug的PR变成重构雪崩</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">📲</div>
+            <div class="card-body">
+                <h3 class="card-title">移动应用构建师</h3>
+                <div class="card-en-name">Mobile App Builder</div>
+                <p class="card-desc">移动应用开发专家，精通原生iOS/Android开发和跨平台框架</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">📜</div>
+            <div class="card-body">
+                <h3 class="card-title">OrgScript工程师</h3>
+                <div class="card-en-name">OrgScript Engineer</div>
+                <p class="card-desc">OrgScript工程专家，专注于设计、解析和实现OrgScript语法、AST验证和业务逻辑定义</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🧬</div>
+            <div class="card-body">
+                <h3 class="card-title">提示词工程师</h3>
+                <div class="card-en-name">Prompt Engineer</div>
+                <p class="card-desc">提示词工程专家，擅长为LLM编写、测试和系统优化提示词，将模糊指令转化为可靠的、生产级AI行为</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">⚡</div>
+            <div class="card-body">
+                <h3 class="card-title">快速原型师</h3>
+                <div class="card-en-name">Rapid Prototyper</div>
+                <p class="card-desc">快速原型师，专注于使用高效工具和框架进行超快速的概念验证开发和MVP创建</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">💎</div>
+            <div class="card-body">
+                <h3 class="card-title">高级开发者</h3>
+                <div class="card-en-name">Senior Developer</div>
+                <p class="card-desc">高级开发专家，精通Laravel/Livewire/FluxUI、高级CSS和Three.js集成</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🏛️</div>
+            <div class="card-body">
+                <h3 class="card-title">软件架构师</h3>
+                <div class="card-en-name">Software Architect</div>
+                <p class="card-desc">软件架构师，专注于系统设计、领域驱动设计、架构模式和技术决策，构建可扩展、可维护的系统</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">⛓️</div>
+            <div class="card-body">
+                <h3 class="card-title">Solidity智能合约工程师</h3>
+                <div class="card-en-name">Solidity Smart Contract Engineer</div>
+                <p class="card-desc">Solidity智能合约专家，精通EVM合约架构、Gas优化、可升级代理模式、DeFi协议开发和安全性优先的合约设计</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🛡️</div>
+            <div class="card-body">
+                <h3 class="card-title">站点可靠性工程师</h3>
+                <div class="card-en-name">SRE (Site Reliability Engineer)</div>
+                <p class="card-desc">站点可靠性工程师（SRE），专注于SLO、错误预算、可观测性、混沌工程和减少生产系统的琐碎工作</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">📚</div>
+            <div class="card-body">
+                <h3 class="card-title">技术写作师</h3>
+                <div class="card-en-name">Technical Writer</div>
+                <p class="card-desc">技术写作专家，擅长开发者文档、API参考文档、README文件和教程，将复杂工程概念转化为清晰准确的文档</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">🎙️</div>
+            <div class="card-body">
+                <h3 class="card-title">语音AI集成工程师</h3>
+                <div class="card-en-name">Voice AI Integration Engineer</div>
+                <p class="card-desc">语音AI集成专家，使用Whisper系列模型和云端ASR服务构建端到端的语音转录管道，从原始音频到结构化输出</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="engineering">
+            <div class="card-emoji">💬</div>
+            <div class="card-body">
+                <h3 class="card-title">微信小程序开发者</h3>
+                <div class="card-en-name">WeChat Mini Program Developer</div>
+                <p class="card-desc">微信小程序开发专家，精通WXML/WXSS/WXS、微信API集成、支付系统、订阅消息和微信全生态</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-finance">
+        <div class="category-header">
+            <h2>💰 金融财务 <span class="subtitle">— 金融专家</span></h2>
+            <p class="category-count">共 5 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="finance">
+            <div class="card-emoji">📒</div>
+            <div class="card-body">
+                <h3 class="card-title">记账与审计师</h3>
+                <div class="card-en-name">Bookkeeper & Controller</div>
+                <p class="card-desc">Expert bookkeeper and controller specializing in day-to-day accounting operations, financial reconciliations, month-end close processes, and internal controls. Ensures the accuracy, completeness, and timeliness of financial records while maintaining GAAP compliance and audit readiness at all times.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="finance">
+            <div class="card-emoji">📊</div>
+            <div class="card-body">
+                <h3 class="card-title">财务分析师</h3>
+                <div class="card-en-name">Financial Analyst</div>
+                <p class="card-desc">Expert financial analyst specializing in financial modeling, forecasting, scenario analysis, and data-driven decision support. Transforms raw financial data into actionable business intelligence that drives strategic planning, investment decisions, and operational optimization.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="finance">
+            <div class="card-emoji">📈</div>
+            <div class="card-body">
+                <h3 class="card-title">FP&A Analyst</h3>
+                <div class="card-en-name">FP&A Analyst</div>
+                <p class="card-desc">Expert Financial Planning & Analysis (FP&A) analyst specializing in budgeting, variance analysis, financial planning, rolling forecasts, and strategic decision support. Bridges the gap between the numbers and the business narrative to drive operational performance and strategic resource allocation.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="finance">
+            <div class="card-emoji">🔍</div>
+            <div class="card-body">
+                <h3 class="card-title">投资研究员</h3>
+                <div class="card-en-name">Investment Researcher</div>
+                <p class="card-desc">Expert investment researcher specializing in market research, due diligence, portfolio analysis, and asset valuation. Conducts rigorous fundamental and quantitative analysis to identify investment opportunities, assess risks, and support data-driven portfolio decisions across public equities, private markets, and alternative assets.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="finance">
+            <div class="card-emoji">🏛️</div>
+            <div class="card-body">
+                <h3 class="card-title">税务策略师</h3>
+                <div class="card-en-name">Tax Strategist</div>
+                <p class="card-desc">Expert tax strategist specializing in tax optimization, multi-jurisdictional compliance, transfer pricing, and strategic tax planning. Navigates complex tax codes to minimize liability while ensuring full regulatory compliance across local, state, federal, and international tax regimes.</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-game-development">
+        <div class="category-header">
+            <h2>🎮 游戏开发 <span class="subtitle">— 游戏开发专家</span></h2>
+            <p class="category-count">共 20 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🧩</div>
+            <div class="card-body">
+                <h3 class="card-title">Blender Add-on Engineer</h3>
+                <div class="card-en-name">Blender Add-on Engineer</div>
+                <p class="card-desc">Blender tooling specialist - Builds Python add-ons, asset validators, exporters, and pipeline automations that turn repetitive DCC work into reliable one-click workflows</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🎵</div>
+            <div class="card-body">
+                <h3 class="card-title">游戏音频工程师</h3>
+                <div class="card-en-name">Game Audio Engineer</div>
+                <p class="card-desc">Interactive audio specialist - Masters FMOD/Wwise integration, adaptive music systems, spatial audio, and audio performance budgeting across all game engines</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🎮</div>
+            <div class="card-body">
+                <h3 class="card-title">游戏设计师</h3>
+                <div class="card-en-name">Game Designer</div>
+                <p class="card-desc">Systems and mechanics architect - Masters GDD authorship, player psychology, economy balancing, and gameplay loop design across all engines and genres</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🎯</div>
+            <div class="card-body">
+                <h3 class="card-title">Godot游戏脚本师</h3>
+                <div class="card-en-name">Godot Gameplay Scripter</div>
+                <p class="card-desc">Composition and signal integrity specialist - Masters GDScript 2.0, C# integration, node-based architecture, and type-safe signal design for Godot 4 projects</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🌐</div>
+            <div class="card-body">
+                <h3 class="card-title">Godot多人游戏工程师</h3>
+                <div class="card-en-name">Godot Multiplayer Engineer</div>
+                <p class="card-desc">Godot 4 networking specialist - Masters the MultiplayerAPI, scene replication, ENet/WebRTC transport, RPCs, and authority models for real-time multiplayer games</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">💎</div>
+            <div class="card-body">
+                <h3 class="card-title">Godot着色器开发者</h3>
+                <div class="card-en-name">Godot Shader Developer</div>
+                <p class="card-desc">Godot 4 visual effects specialist - Masters the Godot Shading Language (GLSL-like), VisualShader editor, CanvasItem and Spatial shaders, post-processing, and performance optimization for 2D/3D effects</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🗺️</div>
+            <div class="card-body">
+                <h3 class="card-title">关卡设计师</h3>
+                <div class="card-en-name">Level Designer</div>
+                <p class="card-desc">Spatial storytelling and flow specialist - Masters layout theory, pacing architecture, encounter design, and environmental narrative across all game engines</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">📖</div>
+            <div class="card-body">
+                <h3 class="card-title">叙事设计师</h3>
+                <div class="card-en-name">Narrative Designer</div>
+                <p class="card-desc">Story systems and dialogue architect - Masters GDD-aligned narrative design, branching dialogue, lore architecture, and environmental storytelling across all game engines</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">👤</div>
+            <div class="card-body">
+                <h3 class="card-title">Roblox虚拟形象创作者</h3>
+                <div class="card-en-name">Roblox Avatar Creator</div>
+                <p class="card-desc">Roblox UGC and avatar pipeline specialist - Masters Roblox's avatar system, UGC item creation, accessory rigging, texture standards, and the Creator Marketplace submission pipeline</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🎪</div>
+            <div class="card-body">
+                <h3 class="card-title">Roblox体验设计师</h3>
+                <div class="card-en-name">Roblox Experience Designer</div>
+                <p class="card-desc">Roblox platform UX and monetization specialist - Masters engagement loop design, DataStore-driven progression, Roblox monetization systems (Passes, Developer Products, UGC), and player retention for Roblox experiences</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🔧</div>
+            <div class="card-body">
+                <h3 class="card-title">Roblox系统脚本师</h3>
+                <div class="card-en-name">Roblox Systems Scripter</div>
+                <p class="card-desc">Roblox platform engineering specialist - Masters Luau, the client-server security model, RemoteEvents/RemoteFunctions, DataStore, and module architecture for scalable Roblox experiences</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🎨</div>
+            <div class="card-body">
+                <h3 class="card-title">技术美术师</h3>
+                <div class="card-en-name">Technical Artist</div>
+                <p class="card-desc">Art-to-engine pipeline specialist - Masters shaders, VFX systems, LOD pipelines, performance budgeting, and cross-engine asset optimization</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🏛️</div>
+            <div class="card-body">
+                <h3 class="card-title">Unity架构师</h3>
+                <div class="card-en-name">Unity Architect</div>
+                <p class="card-desc">Data-driven modularity specialist - Masters ScriptableObjects, decoupled systems, and single-responsibility component design for scalable Unity projects</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🛠️</div>
+            <div class="card-body">
+                <h3 class="card-title">Unity编辑器工具开发者</h3>
+                <div class="card-en-name">Unity Editor Tool Developer</div>
+                <p class="card-desc">Unity editor automation specialist - Masters custom EditorWindows, PropertyDrawers, AssetPostprocessors, ScriptedImporters, and pipeline automation that saves teams hours per week</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🔗</div>
+            <div class="card-body">
+                <h3 class="card-title">Unity多人游戏工程师</h3>
+                <div class="card-en-name">Unity Multiplayer Engineer</div>
+                <p class="card-desc">Networked gameplay specialist - Masters Netcode for GameObjects, Unity Gaming Services (Relay/Lobby), client-server authority, lag compensation, and state synchronization</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">✨</div>
+            <div class="card-body">
+                <h3 class="card-title">Unity着色器图美术师</h3>
+                <div class="card-en-name">Unity Shader Graph Artist</div>
+                <p class="card-desc">Visual effects and material specialist - Masters Unity Shader Graph, HLSL, URP/HDRP rendering pipelines, and custom pass authoring for real-time visual effects</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🌐</div>
+            <div class="card-body">
+                <h3 class="card-title">Unreal多人架构师</h3>
+                <div class="card-en-name">Unreal Multiplayer Architect</div>
+                <p class="card-desc">Unreal Engine networking specialist - Masters Actor replication, GameMode/GameState architecture, server-authoritative gameplay, network prediction, and dedicated server setup for UE5</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">⚙️</div>
+            <div class="card-body">
+                <h3 class="card-title">Unreal系统工程师</h3>
+                <div class="card-en-name">Unreal Systems Engineer</div>
+                <p class="card-desc">Performance and hybrid architecture specialist - Masters C++/Blueprint continuum, Nanite geometry, Lumen GI, and Gameplay Ability System for AAA-grade Unreal Engine projects</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🎨</div>
+            <div class="card-body">
+                <h3 class="card-title">Unreal技术美术师</h3>
+                <div class="card-en-name">Unreal Technical Artist</div>
+                <p class="card-desc">Unreal Engine visual pipeline specialist - Masters the Material Editor, Niagara VFX, Procedural Content Generation, and the art-to-engine pipeline for UE5 projects</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="game-development">
+            <div class="card-emoji">🌍</div>
+            <div class="card-body">
+                <h3 class="card-title">Unreal世界构建师</h3>
+                <div class="card-en-name">Unreal World Builder</div>
+                <p class="card-desc">Open-world and environment specialist - Masters UE5 World Partition, Landscape, procedural foliage, HLOD, and large-scale level streaming for seamless open-world experiences</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-marketing">
+        <div class="category-header">
+            <h2>📣 市场营销 <span class="subtitle">— 营销专家</span></h2>
+            <p class="category-count">共 36 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🏗️</div>
+            <div class="card-body">
+                <h3 class="card-title">AEO Foundations Architect</h3>
+                <div class="card-en-name">AEO Foundations Architect</div>
+                <p class="card-desc">Expert in AI Engine Optimization infrastructure — implements llms.txt, AI-aware robots.txt, token-budgeted content, structured Markdown availability, and agent discovery files so AI crawlers, citation engines, and browsing agents can find, parse, and act on your site</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🤖</div>
+            <div class="card-body">
+                <h3 class="card-title">智能搜索优化师</h3>
+                <div class="card-en-name">Agentic Search Optimizer</div>
+                <p class="card-desc">Expert in WebMCP readiness and agentic task completion — audits whether AI agents can actually accomplish tasks on your site (book, buy, register, subscribe), implements WebMCP declarative and imperative patterns, and measures task completion rates across AI browsing agents</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🔮</div>
+            <div class="card-body">
+                <h3 class="card-title">AI引用策略师</h3>
+                <div class="card-en-name">AI Citation Strategist</div>
+                <p class="card-desc">Expert in AI recommendation engine optimization (AEO/GEO) — audits brand visibility across ChatGPT, Claude, Gemini, and Perplexity, identifies why competitors get cited instead, and delivers content fixes that improve AI citations</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">📱</div>
+            <div class="card-body">
+                <h3 class="card-title">应用商店优化师</h3>
+                <div class="card-en-name">App Store Optimizer</div>
+                <p class="card-desc">Expert app store marketing specialist focused on App Store Optimization (ASO), conversion rate optimization, and app discoverability</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🇨🇳</div>
+            <div class="card-body">
+                <h3 class="card-title">百度SEO专家</h3>
+                <div class="card-en-name">Baidu SEO Specialist</div>
+                <p class="card-desc">Expert Baidu search optimization specialist focused on Chinese search engine ranking, Baidu ecosystem integration, ICP compliance, Chinese keyword research, and mobile-first indexing for the China market.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🎬</div>
+            <div class="card-body">
+                <h3 class="card-title">B站内容策略师</h3>
+                <div class="card-en-name">Bilibili Content Strategist</div>
+                <p class="card-desc">Expert Bilibili marketing specialist focused on UP主 growth, danmaku culture mastery, B站 algorithm optimization, community building, and branded content strategy for China's leading video community platform.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">📘</div>
+            <div class="card-body">
+                <h3 class="card-title">书籍合著者</h3>
+                <div class="card-en-name">Book Co-Author</div>
+                <p class="card-desc">Strategic thought-leadership book collaborator for founders, experts, and operators turning voice notes, fragments, and positioning into structured first-person chapters.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🎠</div>
+            <div class="card-body">
+                <h3 class="card-title">轮播增长引擎</h3>
+                <div class="card-en-name">Carousel Growth Engine</div>
+                <p class="card-desc">Autonomous TikTok and Instagram carousel generation specialist. Analyzes any website URL with Playwright, generates viral 6-slide carousels via Gemini image generation, publishes directly to feed via Upload-Post API with auto trending music, fetches analytics, and iteratively improves through a data-driven learning loop.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🛒</div>
+            <div class="card-body">
+                <h3 class="card-title">China E-Commerce Operator</h3>
+                <div class="card-en-name">China E-Commerce Operator</div>
+                <p class="card-desc">Expert China e-commerce operations specialist covering Taobao, Tmall, Pinduoduo, and JD ecosystems with deep expertise in product listing optimization, live commerce, store operations, 618/Double 11 campaigns, and cross-platform strategy.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🇨🇳</div>
+            <div class="card-body">
+                <h3 class="card-title">中国市场本地化策略师</h3>
+                <div class="card-en-name">China Market Localization Strategist</div>
+                <p class="card-desc">Full-stack China market localization expert who transforms real-time trend signals into executable go-to-market strategies across Douyin, Xiaohongshu, WeChat, Bilibili, and beyond</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">✍️</div>
+            <div class="card-body">
+                <h3 class="card-title">内容创作者</h3>
+                <div class="card-en-name">Content Creator</div>
+                <p class="card-desc">Expert content strategist and creator for multi-platform campaigns. Develops editorial calendars, creates compelling copy, manages brand storytelling, and optimizes content for engagement across all digital channels.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🌏</div>
+            <div class="card-body">
+                <h3 class="card-title">Cross-Border E-Commerce Specialist</h3>
+                <div class="card-en-name">Cross-Border E-Commerce Specialist</div>
+                <p class="card-desc">Full-funnel cross-border e-commerce strategist covering Amazon, Shopee, Lazada, AliExpress, Temu, and TikTok Shop operations, international logistics and overseas warehousing, compliance and taxation, multilingual listing optimization, brand globalization, and DTC independent site development.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🎵</div>
+            <div class="card-body">
+                <h3 class="card-title">抖音策略师</h3>
+                <div class="card-en-name">Douyin Strategist</div>
+                <p class="card-desc">Short-video marketing expert specializing in the Douyin platform, with deep expertise in recommendation algorithm mechanics, viral video planning, livestream commerce workflows, and full-funnel brand growth through content matrix strategies.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">📧</div>
+            <div class="card-body">
+                <h3 class="card-title">Email Marketing Strategist</h3>
+                <div class="card-en-name">Email Marketing Strategist</div>
+                <p class="card-desc">Expert email marketing strategist for CRM-driven campaigns, lifecycle automation, segmentation architecture, and deliverability. Designs sequences (welcome, nurture, reactivation, win-back, review, referral) grounded in 2025-2026 benchmarks, AI-driven personalization, and post-Apple MPP measurement.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🎙️</div>
+            <div class="card-body">
+                <h3 class="card-title">全球播客策略师</h3>
+                <div class="card-en-name">Global Podcast Strategist</div>
+                <p class="card-desc">Expert podcast growth specialist focused on show positioning, audience development, content strategy, and monetisation. Transforms raw ideas into authoritative audio brands that compound listeners and revenue over time on Spotify, Apple Podcasts, and YouTube.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🚀</div>
+            <div class="card-body">
+                <h3 class="card-title">增长黑客</h3>
+                <div class="card-en-name">Growth Hacker</div>
+                <p class="card-desc">Expert growth strategist specializing in rapid user acquisition through data-driven experimentation. Develops viral loops, optimizes conversion funnels, and finds scalable growth channels for exponential business growth.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">📸</div>
+            <div class="card-body">
+                <h3 class="card-title">Instagram策展人</h3>
+                <div class="card-en-name">Instagram Curator</div>
+                <p class="card-desc">Expert Instagram marketing specialist focused on visual storytelling, community building, and multi-format content optimization. Masters aesthetic development and drives meaningful engagement.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🎥</div>
+            <div class="card-body">
+                <h3 class="card-title">快手策略师</h3>
+                <div class="card-en-name">Kuaishou Strategist</div>
+                <p class="card-desc">Expert Kuaishou marketing strategist specializing in short-video content for China's lower-tier city markets, live commerce operations, community trust building, and grassroots audience growth on 快手.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">💼</div>
+            <div class="card-body">
+                <h3 class="card-title">LinkedIn内容创作者</h3>
+                <div class="card-en-name">LinkedIn Content Creator</div>
+                <p class="card-desc">Expert LinkedIn content strategist focused on thought leadership, personal brand building, and high-engagement professional content. Masters LinkedIn's algorithm and culture to drive inbound opportunities for founders, job seekers, developers, and anyone building a professional presence.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🎙️</div>
+            <div class="card-body">
+                <h3 class="card-title">直播电商教练</h3>
+                <div class="card-en-name">Livestream Commerce Coach</div>
+                <p class="card-desc">Veteran livestream e-commerce coach specializing in host training and live room operations across Douyin, Kuaishou, Taobao Live, and Channels, covering script design, product sequencing, paid-vs-organic traffic balancing, conversion closing techniques, and real-time data-driven optimization.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">📡</div>
+            <div class="card-body">
+                <h3 class="card-title">多平台发布者</h3>
+                <div class="card-en-name">Multi-Platform Publisher</div>
+                <p class="card-desc">Expert orchestrator for one-click Chinese blog publishing. Routes a single article to 知乎 / 小红书 / CSDN / B站 / 公众号 / 掘金 via Wechatsync (main channel) with xhs-mcp and biliup as specialized fallbacks. Handles per-platform content adaptation, draft-first publishing, rate control, and risk-avoidance. Does NOT auto-publish — always stops at draft for human review.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🎧</div>
+            <div class="card-body">
+                <h3 class="card-title">播客策略师</h3>
+                <div class="card-en-name">Podcast Strategist</div>
+                <p class="card-desc">Content strategy and operations expert for the Chinese podcast market, with deep expertise in Xiaoyuzhou, Ximalaya, and other major audio platforms, covering show positioning, audio production, audience growth, multi-platform distribution, and monetization to help podcast creators build sticky audio content brands.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">📣</div>
+            <div class="card-body">
+                <h3 class="card-title">公关传播经理</h3>
+                <div class="card-en-name">PR & Communications Manager</div>
+                <p class="card-desc">Strategic public relations and communications specialist for media relations, press releases, crisis communications, executive thought leadership, brand reputation management, and integrated communications planning — building and protecting reputations through earned media, storytelling, and proactive narrative control</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🔒</div>
+            <div class="card-body">
+                <h3 class="card-title">私域运营师</h3>
+                <div class="card-en-name">Private Domain Operator</div>
+                <p class="card-desc">Expert in building enterprise WeChat (WeCom) private domain ecosystems, with deep expertise in SCRM systems, segmented community operations, Mini Program commerce integration, user lifecycle management, and full-funnel conversion optimization.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">💬</div>
+            <div class="card-body">
+                <h3 class="card-title">Reddit社区构建者</h3>
+                <div class="card-en-name">Reddit Community Builder</div>
+                <p class="card-desc">Expert Reddit marketing specialist focused on authentic community engagement, value-driven content creation, and long-term relationship building. Masters Reddit culture navigation.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🔍</div>
+            <div class="card-body">
+                <h3 class="card-title">SEO专家</h3>
+                <div class="card-en-name">SEO Specialist</div>
+                <p class="card-desc">Expert search engine optimization strategist specializing in technical SEO, content optimization, link authority building, and organic search growth. Drives sustainable traffic through data-driven search strategies.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🎬</div>
+            <div class="card-body">
+                <h3 class="card-title">Short-Video Editing Coach</h3>
+                <div class="card-en-name">Short-Video Editing Coach</div>
+                <p class="card-desc">Hands-on short-video editing coach covering the full post-production pipeline, with mastery of CapCut Pro, Premiere Pro, DaVinci Resolve, and Final Cut Pro across composition and camera language, color grading, audio engineering, motion graphics and VFX, subtitle design, multi-platform export optimization, editing workflow efficiency, and AI-assisted editing.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">📣</div>
+            <div class="card-body">
+                <h3 class="card-title">社交媒体策略师</h3>
+                <div class="card-en-name">Social Media Strategist</div>
+                <p class="card-desc">Expert social media strategist for LinkedIn, Twitter, and professional platforms. Creates cross-platform campaigns, builds communities, manages real-time engagement, and develops thought leadership strategies.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🎵</div>
+            <div class="card-body">
+                <h3 class="card-title">TikTok策略师</h3>
+                <div class="card-en-name">TikTok Strategist</div>
+                <p class="card-desc">Expert TikTok marketing specialist focused on viral content creation, algorithm optimization, and community building. Masters TikTok's unique culture and features for brand growth.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🐦</div>
+            <div class="card-body">
+                <h3 class="card-title">Twitter互动师</h3>
+                <div class="card-en-name">Twitter Engager</div>
+                <p class="card-desc">Expert Twitter marketing specialist focused on real-time engagement, thought leadership building, and community-driven growth. Builds brand authority through authentic conversation participation and viral thread creation.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🎬</div>
+            <div class="card-body">
+                <h3 class="card-title">视频优化专家</h3>
+                <div class="card-en-name">Video Optimization Specialist</div>
+                <p class="card-desc">Video marketing strategist specializing in YouTube algorithm optimization, audience retention, chaptering, thumbnail concepts, and cross-platform video syndication.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">📱</div>
+            <div class="card-body">
+                <h3 class="card-title">微信公众号运营师</h3>
+                <div class="card-en-name">WeChat Official Account Manager</div>
+                <p class="card-desc">Expert WeChat Official Account (OA) strategist specializing in content marketing, subscriber engagement, and conversion optimization. Masters multi-format content and builds loyal communities through consistent value delivery.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🔥</div>
+            <div class="card-body">
+                <h3 class="card-title">微博策略师</h3>
+                <div class="card-en-name">Weibo Strategist</div>
+                <p class="card-desc">Full-spectrum operations expert for Sina Weibo, with deep expertise in trending topic mechanics, Super Topic community management, public sentiment monitoring, fan economy strategies, and Weibo advertising, helping brands achieve viral reach and sustained growth on China's leading public discourse platform.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🛰️</div>
+            <div class="card-body">
+                <h3 class="card-title">X/Twitter情报分析师</h3>
+                <div class="card-en-name">X/Twitter Intelligence Analyst</div>
+                <p class="card-desc">Social intelligence specialist for X/Twitter research, trend detection, account monitoring, and evidence-backed audience insights using public signals and structured data workflows.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🌸</div>
+            <div class="card-body">
+                <h3 class="card-title">小红书专家</h3>
+                <div class="card-en-name">Xiaohongshu Specialist</div>
+                <p class="card-desc">Expert Xiaohongshu marketing specialist focused on lifestyle content, trend-driven strategies, and authentic community engagement. Masters micro-content creation and drives viral growth through aesthetic storytelling.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="marketing">
+            <div class="card-emoji">🧠</div>
+            <div class="card-body">
+                <h3 class="card-title">知乎策略师</h3>
+                <div class="card-en-name">Zhihu Strategist</div>
+                <p class="card-desc">Expert Zhihu marketing specialist focused on thought leadership, community credibility, and knowledge-driven engagement. Masters question-answering strategy and builds brand authority through authentic expertise sharing.</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-paid-media">
+        <div class="category-header">
+            <h2>📺 付费媒体 <span class="subtitle">— 付费媒体专家</span></h2>
+            <p class="category-count">共 7 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="paid-media">
+            <div class="card-emoji">📋</div>
+            <div class="card-body">
+                <h3 class="card-title">付费媒体审计师</h3>
+                <div class="card-en-name">Paid Media Auditor</div>
+                <p class="card-desc">Comprehensive paid media auditor who systematically evaluates Google Ads, Microsoft Ads, and Meta accounts across 200+ checkpoints spanning account structure, tracking, bidding, creative, audiences, and competitive positioning. Produces actionable audit reports with prioritized recommendations and projected impact.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="paid-media">
+            <div class="card-emoji">✍️</div>
+            <div class="card-body">
+                <h3 class="card-title">Ad Creative Strategist</h3>
+                <div class="card-en-name">Ad Creative Strategist</div>
+                <p class="card-desc">Paid media creative specialist focused on ad copywriting, RSA optimization, asset group design, and creative testing frameworks across Google, Meta, Microsoft, and programmatic platforms. Bridges the gap between performance data and persuasive messaging.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="paid-media">
+            <div class="card-emoji">📱</div>
+            <div class="card-body">
+                <h3 class="card-title">付费社交策略师</h3>
+                <div class="card-en-name">Paid Social Strategist</div>
+                <p class="card-desc">Cross-platform paid social advertising specialist covering Meta (Facebook/Instagram), LinkedIn, TikTok, Pinterest, X, and Snapchat. Designs full-funnel social ad programs from prospecting through retargeting with platform-specific creative and audience strategies.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="paid-media">
+            <div class="card-emoji">💰</div>
+            <div class="card-body">
+                <h3 class="card-title">PPC Campaign Strategist</h3>
+                <div class="card-en-name">PPC Campaign Strategist</div>
+                <p class="card-desc">Senior paid media strategist specializing in large-scale search, shopping, and performance max campaign architecture across Google, Microsoft, and Amazon ad platforms. Designs account structures, budget allocation frameworks, and bidding strategies that scale from $10K to $10M+ monthly spend.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="paid-media">
+            <div class="card-emoji">📺</div>
+            <div class="card-body">
+                <h3 class="card-title">Programmatic & Display Buyer</h3>
+                <div class="card-en-name">Programmatic & Display Buyer</div>
+                <p class="card-desc">Display advertising and programmatic media buying specialist covering managed placements, Google Display Network, DV360, trade desk platforms, partner media (newsletters, sponsored content), and ABM display strategies via platforms like Demandbase and 6Sense.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="paid-media">
+            <div class="card-emoji">🔍</div>
+            <div class="card-body">
+                <h3 class="card-title">搜索词分析师</h3>
+                <div class="card-en-name">Search Query Analyst</div>
+                <p class="card-desc">Specialist in search term analysis, negative keyword architecture, and query-to-intent mapping. Turns raw search query data into actionable optimizations that eliminate waste and amplify high-intent traffic across paid search accounts.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="paid-media">
+            <div class="card-emoji">📡</div>
+            <div class="card-body">
+                <h3 class="card-title">Tracking & Measurement Specialist</h3>
+                <div class="card-en-name">Tracking & Measurement Specialist</div>
+                <p class="card-desc">Expert in conversion tracking architecture, tag management, and attribution modeling across Google Tag Manager, GA4, Google Ads, Meta CAPI, LinkedIn Insight Tag, and server-side implementations. Ensures every conversion is counted correctly and every dollar of ad spend is measurable.</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-product">
+        <div class="category-header">
+            <h2>📱 产品管理 <span class="subtitle">— 产品专家</span></h2>
+            <p class="category-count">共 5 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="product">
+            <div class="card-emoji">🧠</div>
+            <div class="card-body">
+                <h3 class="card-title">Behavioral Nudge Engine</h3>
+                <div class="card-en-name">Behavioral Nudge Engine</div>
+                <p class="card-desc">Behavioral psychology specialist that adapts software interaction cadences and styles to maximize user motivation and success.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="product">
+            <div class="card-emoji">🔍</div>
+            <div class="card-body">
+                <h3 class="card-title">反馈综合分析师</h3>
+                <div class="card-en-name">Feedback Synthesizer</div>
+                <p class="card-desc">Expert in collecting, analyzing, and synthesizing user feedback from multiple channels to extract actionable product insights. Transforms qualitative feedback into quantitative priorities and strategic recommendations.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="product">
+            <div class="card-emoji">🧭</div>
+            <div class="card-body">
+                <h3 class="card-title">产品经理</h3>
+                <div class="card-en-name">Product Manager</div>
+                <p class="card-desc">Holistic product leader who owns the full product lifecycle — from discovery and strategy through roadmap, stakeholder alignment, go-to-market, and outcome measurement. Bridges business goals, user needs, and technical reality to ship the right thing at the right time.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="product">
+            <div class="card-emoji">🎯</div>
+            <div class="card-body">
+                <h3 class="card-title">Sprint优先级规划师</h3>
+                <div class="card-en-name">Sprint Prioritizer</div>
+                <p class="card-desc">Expert product manager specializing in agile sprint planning, feature prioritization, and resource allocation. Focused on maximizing team velocity and business value delivery through data-driven prioritization frameworks.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="product">
+            <div class="card-emoji">🔭</div>
+            <div class="card-body">
+                <h3 class="card-title">趋势研究员</h3>
+                <div class="card-en-name">Trend Researcher</div>
+                <p class="card-desc">Expert market intelligence analyst specializing in identifying emerging trends, competitive analysis, and opportunity assessment. Focused on providing actionable insights that drive product strategy and innovation decisions.</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-project-management">
+        <div class="category-header">
+            <h2>📋 项目管理 <span class="subtitle">— 项目管理专家</span></h2>
+            <p class="category-count">共 7 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="project-management">
+            <div class="card-emoji">🧪</div>
+            <div class="card-body">
+                <h3 class="card-title">实验追踪师</h3>
+                <div class="card-en-name">Experiment Tracker</div>
+                <p class="card-desc">Expert project manager specializing in experiment design, execution tracking, and data-driven decision making. Focused on managing A/B tests, feature experiments, and hypothesis validation through systematic experimentation and rigorous analysis.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="project-management">
+            <div class="card-emoji">📋</div>
+            <div class="card-body">
+                <h3 class="card-title">Jira工作流管理员</h3>
+                <div class="card-en-name">Jira Workflow Steward</div>
+                <p class="card-desc">Expert delivery operations specialist who enforces Jira-linked Git workflows, traceable commits, structured pull requests, and release-safe branch strategy across software teams.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="project-management">
+            <div class="card-emoji">📋</div>
+            <div class="card-body">
+                <h3 class="card-title">会议记录专家</h3>
+                <div class="card-en-name">Meeting Notes Specialist</div>
+                <p class="card-desc">Extract structured decisions, action items, and open questions from meeting transcripts or rough notes into a clean 4-section summary.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="project-management">
+            <div class="card-emoji">🐑</div>
+            <div class="card-body">
+                <h3 class="card-title">项目引导师</h3>
+                <div class="card-en-name">Project Shepherd</div>
+                <p class="card-desc">Expert project manager specializing in cross-functional project coordination, timeline management, and stakeholder alignment. Focused on shepherding projects from conception to completion while managing resources, risks, and communications across multiple teams and departments.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="project-management">
+            <div class="card-emoji">🏭</div>
+            <div class="card-body">
+                <h3 class="card-title">Studio Operations</h3>
+                <div class="card-en-name">Studio Operations</div>
+                <p class="card-desc">Expert operations manager specializing in day-to-day studio efficiency, process optimization, and resource coordination. Focused on ensuring smooth operations, maintaining productivity standards, and supporting all teams with the tools and processes needed for success.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="project-management">
+            <div class="card-emoji">🎬</div>
+            <div class="card-body">
+                <h3 class="card-title">工作室制作人</h3>
+                <div class="card-en-name">Studio Producer</div>
+                <p class="card-desc">Senior strategic leader specializing in high-level creative and technical project orchestration, resource allocation, and multi-project portfolio management. Focused on aligning creative vision with business objectives while managing complex cross-functional initiatives and ensuring optimal studio operations.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="project-management">
+            <div class="card-emoji">📝</div>
+            <div class="card-body">
+                <h3 class="card-title">高级项目经理</h3>
+                <div class="card-en-name">Senior Project Manager</div>
+                <p class="card-desc">Converts specs to tasks and remembers previous projects. Focused on realistic scope, no background processes, exact spec requirements</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-sales">
+        <div class="category-header">
+            <h2>🤝 销售商务 <span class="subtitle">— 销售专家</span></h2>
+            <p class="category-count">共 9 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="sales">
+            <div class="card-emoji">🗺️</div>
+            <div class="card-body">
+                <h3 class="card-title">客户策略师</h3>
+                <div class="card-en-name">Account Strategist</div>
+                <p class="card-desc">Expert post-sale account strategist specializing in land-and-expand execution, stakeholder mapping, QBR facilitation, and net revenue retention. Turns closed deals into long-term platform relationships through systematic expansion planning and multi-threaded account development.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="sales">
+            <div class="card-emoji">🏋️</div>
+            <div class="card-body">
+                <h3 class="card-title">销售教练</h3>
+                <div class="card-en-name">Sales Coach</div>
+                <p class="card-desc">Expert sales coaching specialist focused on rep development, pipeline review facilitation, call coaching, deal strategy, and forecast accuracy. Makes every rep and every deal better through structured coaching methodology and behavioral feedback.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="sales">
+            <div class="card-emoji">♟️</div>
+            <div class="card-body">
+                <h3 class="card-title">交易策略师</h3>
+                <div class="card-en-name">Deal Strategist</div>
+                <p class="card-desc">Senior deal strategist specializing in MEDDPICC qualification, competitive positioning, and win planning for complex B2B sales cycles. Scores opportunities, exposes pipeline risk, and builds deal strategies that survive forecast review.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="sales">
+            <div class="card-emoji">🔍</div>
+            <div class="card-body">
+                <h3 class="card-title">需求挖掘教练</h3>
+                <div class="card-en-name">Discovery Coach</div>
+                <p class="card-desc">Coaches sales teams on elite discovery methodology — question design, current-state mapping, gap quantification, and call structure that surfaces real buying motivation.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="sales">
+            <div class="card-emoji">🛠️</div>
+            <div class="card-body">
+                <h3 class="card-title">销售工程师</h3>
+                <div class="card-en-name">Sales Engineer</div>
+                <p class="card-desc">Senior pre-sales engineer specializing in technical discovery, demo engineering, POC scoping, competitive battlecards, and bridging product capabilities to business outcomes. Wins the technical decision so the deal can close.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="sales">
+            <div class="card-emoji">🧲</div>
+            <div class="card-body">
+                <h3 class="card-title">Offer & Lead Gen Strategist</h3>
+                <div class="card-en-name">Offer & Lead Gen Strategist</div>
+                <p class="card-desc">Top-of-funnel architect who designs irresistible offers and lead magnets that attract qualified buyers at scale. Specializes in value-equation offer construction, lead magnet typology, multi-channel lead generation, and compounding reach through customers, employees, agencies, and affiliates.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="sales">
+            <div class="card-emoji">🎯</div>
+            <div class="card-body">
+                <h3 class="card-title">外呼策略师</h3>
+                <div class="card-en-name">Outbound Strategist</div>
+                <p class="card-desc">Signal-based outbound specialist who designs multi-channel prospecting sequences, defines ICPs, and builds pipeline through research-driven personalization — not volume.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="sales">
+            <div class="card-emoji">📊</div>
+            <div class="card-body">
+                <h3 class="card-title">管道分析师</h3>
+                <div class="card-en-name">Pipeline Analyst</div>
+                <p class="card-desc">Revenue operations analyst specializing in pipeline health diagnostics, deal velocity analysis, forecast accuracy, and data-driven sales coaching. Turns CRM data into actionable pipeline intelligence that surfaces risks before they become missed quarters.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="sales">
+            <div class="card-emoji">🏹</div>
+            <div class="card-body">
+                <h3 class="card-title">提案策略师</h3>
+                <div class="card-en-name">Proposal Strategist</div>
+                <p class="card-desc">Strategic proposal architect who transforms RFPs and sales opportunities into compelling win narratives. Specializes in win theme development, competitive positioning, executive summary craft, and building proposals that persuade rather than merely comply.</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-security">
+        <div class="category-header">
+            <h2>🔒 安全防护 <span class="subtitle">— 安全专家</span></h2>
+            <p class="category-count">共 10 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="security">
+            <div class="card-emoji">🔐</div>
+            <div class="card-body">
+                <h3 class="card-title">Application Security Engineer</h3>
+                <div class="card-en-name">Application Security Engineer</div>
+                <p class="card-desc">AppSec specialist who secures the software development lifecycle through threat modeling, secure code review, SAST/DAST integration, and developer security education that makes secure code the default.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="security">
+            <div class="card-emoji">🛡️</div>
+            <div class="card-body">
+                <h3 class="card-title">安全架构师</h3>
+                <div class="card-en-name">Security Architect</div>
+                <p class="card-desc">Expert security architect specializing in threat modeling, secure-by-design architecture, trust-boundary analysis, defense-in-depth, and risk-based security reviews across web, API, cloud-native, and distributed systems. Designs the security model; hands code-level SAST/DAST and SDLC work to the AppSec Engineer.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="security">
+            <div class="card-emoji">🛡️</div>
+            <div class="card-body">
+                <h3 class="card-title">区块链安全审计师</h3>
+                <div class="card-en-name">Blockchain Security Auditor</div>
+                <p class="card-desc">Expert smart contract security auditor specializing in vulnerability detection, formal verification, exploit analysis, and comprehensive audit report writing for DeFi protocols and blockchain applications.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="security">
+            <div class="card-emoji">☁️</div>
+            <div class="card-body">
+                <h3 class="card-title">云安全架构师</h3>
+                <div class="card-en-name">Cloud Security Architect</div>
+                <p class="card-desc">Cloud-native security specialist designing zero trust architectures, implementing defense-in-depth across AWS, Azure, and GCP, and securing infrastructure-as-code pipelines from day one.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="security">
+            <div class="card-emoji">📋</div>
+            <div class="card-body">
+                <h3 class="card-title">合规审计师</h3>
+                <div class="card-en-name">Compliance Auditor</div>
+                <p class="card-desc">Expert technical compliance auditor specializing in SOC 2, ISO 27001, HIPAA, and PCI-DSS audits — from readiness assessment through evidence collection to certification.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="security">
+            <div class="card-emoji">🚨</div>
+            <div class="card-body">
+                <h3 class="card-title">安全应急响应师</h3>
+                <div class="card-en-name">Incident Responder</div>
+                <p class="card-desc">Digital forensics and incident response specialist who leads breach investigations, contains active threats, coordinates crisis response, and writes post-mortems that prevent recurrence.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="security">
+            <div class="card-emoji">🗡️</div>
+            <div class="card-body">
+                <h3 class="card-title">渗透测试师</h3>
+                <div class="card-en-name">Penetration Tester</div>
+                <p class="card-desc">Offensive security specialist conducting authorized penetration tests, red team operations, and vulnerability assessments across networks, web applications, and cloud infrastructure.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="security">
+            <div class="card-emoji">🛡️</div>
+            <div class="card-body">
+                <h3 class="card-title">Senior SecOps Engineer</h3>
+                <div class="card-en-name">Senior SecOps Engineer</div>
+                <p class="card-desc">Defensive application security specialist who scans every code submission for secrets and sensitive data exposure before anything else, then implements or audits security controls following the organization's security standard — covering authentication, authorization, tokens, cookies, HTTP headers, CORS, rate limiting, CSP, secrets management, input validation, and secure logging.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="security">
+            <div class="card-emoji">🎯</div>
+            <div class="card-body">
+                <h3 class="card-title">威胁检测工程师</h3>
+                <div class="card-en-name">Threat Detection Engineer</div>
+                <p class="card-desc">Expert detection engineer specializing in SIEM rule development, MITRE ATT&CK coverage mapping, threat hunting, alert tuning, and detection-as-code pipelines for security operations teams.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="security">
+            <div class="card-emoji">🔍</div>
+            <div class="card-body">
+                <h3 class="card-title">威胁情报分析师</h3>
+                <div class="card-en-name">Threat Intelligence Analyst</div>
+                <p class="card-desc">Cyber threat intelligence specialist who tracks adversary groups, maps attack campaigns to MITRE ATT&CK, produces actionable intelligence reports, and builds detection rules that catch real threats.</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-spatial-computing">
+        <div class="category-header">
+            <h2>🥽 空间计算 <span class="subtitle">— 空间计算专家</span></h2>
+            <p class="category-count">共 6 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="spatial-computing">
+            <div class="card-emoji">🍎</div>
+            <div class="card-body">
+                <h3 class="card-title">macOS Spatial/Metal Engineer</h3>
+                <div class="card-en-name">macOS Spatial/Metal Engineer</div>
+                <p class="card-desc">Native Swift and Metal specialist building high-performance 3D rendering systems and spatial computing experiences for macOS and Vision Pro</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="spatial-computing">
+            <div class="card-emoji">🖥️</div>
+            <div class="card-body">
+                <h3 class="card-title">终端集成专家</h3>
+                <div class="card-en-name">Terminal Integration Specialist</div>
+                <p class="card-desc">Terminal emulation, text rendering optimization, and SwiftTerm integration for modern Swift applications</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="spatial-computing">
+            <div class="card-emoji">🥽</div>
+            <div class="card-body">
+                <h3 class="card-title">visionOS空间工程师</h3>
+                <div class="card-en-name">visionOS Spatial Engineer</div>
+                <p class="card-desc">Native visionOS spatial computing, SwiftUI volumetric interfaces, and Liquid Glass design implementation</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="spatial-computing">
+            <div class="card-emoji">🕹️</div>
+            <div class="card-body">
+                <h3 class="card-title">XR驾驶舱交互专家</h3>
+                <div class="card-en-name">XR Cockpit Interaction Specialist</div>
+                <p class="card-desc">Specialist in designing and developing immersive cockpit-based control systems for XR environments</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="spatial-computing">
+            <div class="card-emoji">🌐</div>
+            <div class="card-body">
+                <h3 class="card-title">XR沉浸式开发者</h3>
+                <div class="card-en-name">XR Immersive Developer</div>
+                <p class="card-desc">Expert WebXR and immersive technology developer with specialization in browser-based AR/VR/XR applications</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="spatial-computing">
+            <div class="card-emoji">🫧</div>
+            <div class="card-body">
+                <h3 class="card-title">XR界面架构师</h3>
+                <div class="card-en-name">XR Interface Architect</div>
+                <p class="card-desc">Spatial interaction designer and interface strategist for immersive AR/VR/XR environments</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-specialized">
+        <div class="category-header">
+            <h2>🧩 专业领域 <span class="subtitle">— 专业领域专家</span></h2>
+            <p class="category-count">共 46 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="specialized">
+            <div class="card-emoji">💸</div>
+            <div class="card-body">
+                <h3 class="card-title">应付账款代理</h3>
+                <div class="card-en-name">Accounts Payable Agent</div>
+                <p class="card-desc">Autonomous payment processing specialist that executes vendor payments, contractor invoices, and recurring bills across any payment rail — crypto, fiat, stablecoins. Integrates with AI agent workflows via tool calls.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🔐</div>
+            <div class="card-body">
+                <h3 class="card-title">Agentic Identity & Trust Architect</h3>
+                <div class="card-en-name">Agentic Identity & Trust Architect</div>
+                <p class="card-desc">Designs identity, authentication, and trust verification systems for autonomous AI agents operating in multi-agent environments. Ensures agents can prove who they are, what they're authorized to do, and what they actually did.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🎛️</div>
+            <div class="card-body">
+                <h3 class="card-title">Agent编排师</h3>
+                <div class="card-en-name">Agents Orchestrator</div>
+                <p class="card-desc">Autonomous pipeline manager that orchestrates the entire development workflow. You are the leader of this process.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">⚙️</div>
+            <div class="card-body">
+                <h3 class="card-title">自动化治理架构师</h3>
+                <div class="card-en-name">Automation Governance Architect</div>
+                <p class="card-desc">Governance-first architect for business automations (n8n-first) who audits value, risk, and maintainability before implementation.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">♟️</div>
+            <div class="card-body">
+                <h3 class="card-title">商业策略师</h3>
+                <div class="card-en-name">Business Strategist</div>
+                <p class="card-desc">Senior management consulting specialist for competitive analysis, market entry strategy, business model design, growth planning, organizational strategy, and strategic decision-making — translating complex market dynamics into clear, actionable strategies that create sustainable competitive advantage</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🔄</div>
+            <div class="card-body">
+                <h3 class="card-title">变革管理顾问</h3>
+                <div class="card-en-name">Change Management Consultant</div>
+                <p class="card-desc">Expert change management specialist using ADKAR, Kotter, and Prosci frameworks to guide organizations through technology implementations, restructuring, culture transformation, and M&A integration — managing resistance, building adoption, and ensuring changes stick long after go-live</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">📚</div>
+            <div class="card-body">
+                <h3 class="card-title">企业培训设计师</h3>
+                <div class="card-en-name">Corporate Training Designer</div>
+                <p class="card-desc">Expert in enterprise training system design and curriculum development — proficient in training needs analysis, instructional design methodology, blended learning program design, internal trainer development, leadership programs, and training effectiveness evaluation and continuous optimization.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🎧</div>
+            <div class="card-body">
+                <h3 class="card-title">Customer Service</h3>
+                <div class="card-en-name">Customer Service</div>
+                <p class="card-desc">Friendly, professional customer service specialist for any industry — handling inquiries, complaints, account support, FAQs, and seamless escalation with warmth, efficiency, and a genuine commitment to customer satisfaction</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🌟</div>
+            <div class="card-body">
+                <h3 class="card-title">客户成功经理</h3>
+                <div class="card-en-name">Customer Success Manager</div>
+                <p class="card-desc">Strategic customer success specialist for onboarding, health scoring, QBR facilitation, churn prevention, expansion identification, and renewal management — driving net revenue retention by turning customers into long-term partners who achieve measurable outcomes</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🗄️</div>
+            <div class="card-body">
+                <h3 class="card-title">数据整合代理</h3>
+                <div class="card-en-name">Data Consolidation Agent</div>
+                <p class="card-desc">AI agent that consolidates extracted sales data into live reporting dashboards with territory, rep, and pipeline summaries</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🏛️</div>
+            <div class="card-body">
+                <h3 class="card-title">政府数字化售前顾问</h3>
+                <div class="card-en-name">Government Digital Presales Consultant</div>
+                <p class="card-desc">Presales expert for China's government digital transformation market (ToG), proficient in policy interpretation, solution design, bid document preparation, POC validation, compliance requirements (classified protection/cryptographic assessment/Xinchuang domestic IT), and stakeholder management — helping technical teams efficiently win government IT projects.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">📝</div>
+            <div class="card-body">
+                <h3 class="card-title">拨款申请书撰写师</h3>
+                <div class="card-en-name">Grant Writer</div>
+                <p class="card-desc">Expert grant writing specialist for nonprofits, research institutions, and social enterprises — covering prospect research, letter of inquiry writing, full proposal development, budget narratives, federal and foundation grants, and post-award reporting to maximize funding success</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🏥</div>
+            <div class="card-body">
+                <h3 class="card-title">医疗客服</h3>
+                <div class="card-en-name">Healthcare Customer Service</div>
+                <p class="card-desc">Empathetic healthcare customer service specialist for patient support, billing inquiries, appointment management, insurance questions, complaint resolution, and seamless escalation to clinical or administrative staff</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">⚕️</div>
+            <div class="card-body">
+                <h3 class="card-title">Healthcare Marketing Compliance Specialist</h3>
+                <div class="card-en-name">Healthcare Marketing Compliance Specialist</div>
+                <p class="card-desc">Expert in healthcare marketing compliance in China, proficient in the Advertising Law, Medical Advertisement Management Measures, Drug Administration Law, and related regulations — covering pharmaceuticals, medical devices, medical aesthetics, health supplements, and internet healthcare across content review, risk control, platform rule interpretation, and patient privacy protection, helping enterprises conduct effective health marketing within legal boundaries.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🏨</div>
+            <div class="card-body">
+                <h3 class="card-title">酒店宾客服务师</h3>
+                <div class="card-en-name">Hospitality Guest Services</div>
+                <p class="card-desc">Comprehensive hospitality guest services specialist for hotels, resorts, restaurants, and event venues — covering reservations, check-in/check-out, concierge services, guest complaint resolution, loyalty program management, and post-stay follow-up to deliver exceptional guest experiences that drive loyalty and revenue</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🤝</div>
+            <div class="card-body">
+                <h3 class="card-title">HR Onboarding</h3>
+                <div class="card-en-name">HR Onboarding</div>
+                <p class="card-desc">Comprehensive HR onboarding specialist for employee orientation, documentation management, compliance tracking, benefits enrollment, culture integration, and new hire support — delivering a seamless first-day-to-first-year experience that drives retention and productivity</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🕸️</div>
+            <div class="card-body">
+                <h3 class="card-title">身份图谱运营师</h3>
+                <div class="card-en-name">Identity Graph Operator</div>
+                <p class="card-desc">Operates a shared identity graph that multiple AI agents resolve against. Ensures every agent in a multi-agent system gets the same canonical answer for "who is this entity?" - deterministically, even under concurrent writes.</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🌐</div>
+            <div class="card-body">
+                <h3 class="card-title">语言翻译师</h3>
+                <div class="card-en-name">Language Translator</div>
+                <p class="card-desc">Real-time Spanish ↔ English translation specialist with cultural context, regional dialect awareness, travel phrase guidance, and tone-appropriate communication for everyday, business, and emergency situations</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">⏱️</div>
+            <div class="card-body">
+                <h3 class="card-title">法律计费与工时追踪师</h3>
+                <div class="card-en-name">Legal Billing & Time Tracking</div>
+                <p class="card-desc">Comprehensive legal billing and time tracking specialist for accurate time capture, invoice generation, billing narrative writing, collections management, trust account compliance, and billing analysis — maximizing revenue recovery while maintaining client relationships and ethical compliance across any firm size or billing model</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">📋</div>
+            <div class="card-body">
+                <h3 class="card-title">法律客户接案师</h3>
+                <div class="card-en-name">Legal Client Intake</div>
+                <p class="card-desc">法律客户接案师，处理客户资格审查、案件信息收集、预约安排和冲突检查</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">⚖️</div>
+            <div class="card-body">
+                <h3 class="card-title">法律文档审查师</h3>
+                <div class="card-en-name">Legal Document Review</div>
+                <p class="card-desc">法律文档审查师，审查合同、诉讼文书和房地产协议</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🏦</div>
+            <div class="card-body">
+                <h3 class="card-title">贷款助理</h3>
+                <div class="card-en-name">Loan Officer Assistant</div>
+                <p class="card-desc">贷款助理，为抵押贷款和信贷专业人士提供支持</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🔎</div>
+            <div class="card-body">
+                <h3 class="card-title">LSP/索引工程师</h3>
+                <div class="card-en-name">LSP/Index Engineer</div>
+                <p class="card-desc">LSP/索引工程师，通过LSP客户端编排和语义索引构建统一的代码智能系统</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🏥</div>
+            <div class="card-body">
+                <h3 class="card-title">医疗计费与编码专家</h3>
+                <div class="card-en-name">Medical Billing & Coding Specialist</div>
+                <p class="card-desc">医疗计费与编码专家，精通ICD-10、CPT和HCPCS编码</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🌱</div>
+            <div class="card-body">
+                <h3 class="card-title">个人成长导师</h3>
+                <div class="card-en-name">Personal Growth Mentor</div>
+                <p class="card-desc">个人成长导师，跨领域帮助理清目标、设计习惯、做战略决策</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🏠</div>
+            <div class="card-body">
+                <h3 class="card-title">Real Estate Buyer & Seller</h3>
+                <div class="card-en-name">Real Estate Buyer & Seller</div>
+                <p class="card-desc">房产买卖代理，为买方和卖方提供全面的房地产交易支持</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🎯</div>
+            <div class="card-body">
+                <h3 class="card-title">招聘专家</h3>
+                <div class="card-en-name">Recruitment Specialist</div>
+                <p class="card-desc">招聘专家，精通中国主流招聘平台、人才评估框架和劳动法合规</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">📤</div>
+            <div class="card-body">
+                <h3 class="card-title">报告分发代理</h3>
+                <div class="card-en-name">Report Distribution Agent</div>
+                <p class="card-desc">报告分发代理，根据区域参数自动分发合并销售报告给销售代表</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🛒</div>
+            <div class="card-body">
+                <h3 class="card-title">零售退货处理师</h3>
+                <div class="card-en-name">Retail Customer Returns</div>
+                <p class="card-desc">零售退货处理师，跨线下、线上和全渠道处理退货、换货和退款</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">📊</div>
+            <div class="card-body">
+                <h3 class="card-title">销售数据提取代理</h3>
+                <div class="card-en-name">Sales Data Extraction Agent</div>
+                <p class="card-desc">销售数据提取代理，专门监控Excel文件并提取关键销售指标</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🎯</div>
+            <div class="card-body">
+                <h3 class="card-title">Sales Outreach</h3>
+                <div class="card-en-name">Sales Outreach</div>
+                <p class="card-desc">销售外联专家，从事B2B冷启动开拓、线索跟进和提案撰写</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🧭</div>
+            <div class="card-body">
+                <h3 class="card-title">幕僚长</h3>
+                <div class="card-en-name">Chief of Staff</div>
+                <p class="card-desc">幕僚长，为创始人和高管过滤噪音、把控流程、确保一致性，让老板清晰思考</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🏗️</div>
+            <div class="card-body">
+                <h3 class="card-title">土木工程师</h3>
+                <div class="card-en-name">Civil Engineer</div>
+                <p class="card-desc">土木工程师，覆盖全球标准——欧标、德标、美标、中标等，擅长结构分析、岩土设计和建筑规范合规</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🌍</div>
+            <div class="card-body">
+                <h3 class="card-title">文化智能策略师</h3>
+                <div class="card-en-name">Cultural Intelligence Strategist</div>
+                <p class="card-desc">文化智能策略师，检测隐形排斥，研究全球语境，确保软件在跨文化身份中真实共鸣</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🗣️</div>
+            <div class="card-body">
+                <h3 class="card-title">开发者布道师</h3>
+                <div class="card-en-name">Developer Advocate</div>
+                <p class="card-desc">开发者布道师，建立开发者社区、创作技术内容、优化开发者体验</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">📄</div>
+            <div class="card-body">
+                <h3 class="card-title">文档生成师</h3>
+                <div class="card-en-name">Document Generator</div>
+                <p class="card-desc">文档生成师，使用代码方法生成专业的PDF、PPTX、DOCX和XLSX文件</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🇫🇷</div>
+            <div class="card-body">
+                <h3 class="card-title">法国咨询市场导航员</h3>
+                <div class="card-en-name">French Consulting Market Navigator</div>
+                <p class="card-desc">法国咨询市场导航员，指导法国ESN/SI自由职业生态</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🇰🇷</div>
+            <div class="card-body">
+                <h3 class="card-title">韩国商务导航员</h3>
+                <div class="card-en-name">Korean Business Navigator</div>
+                <p class="card-desc">韩国商务导航员，指导外国专业人士了解韩国商务文化</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🔌</div>
+            <div class="card-body">
+                <h3 class="card-title">MCP构建师</h3>
+                <div class="card-en-name">MCP Builder</div>
+                <p class="card-desc">MCP构建师，设计、构建和测试MCP服务器，通过自定义工具和资源扩展AI代理能力</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🔬</div>
+            <div class="card-body">
+                <h3 class="card-title">模型QA专家</h3>
+                <div class="card-en-name">Model QA Specialist</div>
+                <p class="card-desc">模型QA专家，端到端审计ML和统计模型，从文档审查到模型复现和校准测试</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">💰</div>
+            <div class="card-body">
+                <h3 class="card-title">定价分析师</h3>
+                <div class="card-en-name">Pricing Analyst</div>
+                <p class="card-desc">定价分析师，通过市场调研、竞品分析和成本结构评估制定最优定价模型</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">☁️</div>
+            <div class="card-body">
+                <h3 class="card-title">Salesforce架构师</h3>
+                <div class="card-en-name">Salesforce Architect</div>
+                <p class="card-desc">Salesforce架构师，为Salesforce平台提供解决方案架构</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🗺️</div>
+            <div class="card-body">
+                <h3 class="card-title">工作流架构师</h3>
+                <div class="card-en-name">Workflow Architect</div>
+                <p class="card-desc">工作流架构师，为每个系统、用户旅程和Agent交互绘制完整的工作流树</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🎓</div>
+            <div class="card-body">
+                <h3 class="card-title">留学顾问</h3>
+                <div class="card-en-name">Study Abroad Advisor</div>
+                <p class="card-desc">留学顾问，覆盖美英加澳欧港新的全光谱留学规划</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🔗</div>
+            <div class="card-body">
+                <h3 class="card-title">供应链策略师</h3>
+                <div class="card-en-name">Supply Chain Strategist</div>
+                <p class="card-desc">供应链策略师，精供应商开发、战略采购、质量控制和供应链数字化</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="specialized">
+            <div class="card-emoji">🗃️</div>
+            <div class="card-body">
+                <h3 class="card-title">知识卡片管家</h3>
+                <div class="card-en-name">ZK Steward</div>
+                <p class="card-desc">知识卡片管家，以Luhmann的Zettelkasten卡片盒笔记法为精神，建立原子笔记、连接和验证循环的知识库</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-support">
+        <div class="category-header">
+            <h2>🛟 支持服务 <span class="subtitle">— 支持服务专家</span></h2>
+            <p class="category-count">共 6 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="support">
+            <div class="card-emoji">📊</div>
+            <div class="card-body">
+                <h3 class="card-title">数据分析报告师</h3>
+                <div class="card-en-name">Analytics Reporter</div>
+                <p class="card-desc">数据分析报告师，将原始数据转化为可执行的业务洞察</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="support">
+            <div class="card-emoji">📝</div>
+            <div class="card-body">
+                <h3 class="card-title">高管摘要生成师</h3>
+                <div class="card-en-name">Executive Summary Generator</div>
+                <p class="card-desc">高管摘要生成师，像高级战略顾问一样思考和沟通，使用McKinsey SCQA、BCG金字塔原理为高管生成简明的执行摘要</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="support">
+            <div class="card-emoji">💰</div>
+            <div class="card-body">
+                <h3 class="card-title">财务追踪师</h3>
+                <div class="card-en-name">Finance Tracker</div>
+                <p class="card-desc">财务追踪师，专注于财务规划、预算管理和业务绩效分析</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="support">
+            <div class="card-emoji">🏢</div>
+            <div class="card-body">
+                <h3 class="card-title">基础设施维护师</h3>
+                <div class="card-en-name">Infrastructure Maintainer</div>
+                <p class="card-desc">基础设施维护师，专注系统可靠性、性能优化和技术运维管理</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="support">
+            <div class="card-emoji">⚖️</div>
+            <div class="card-body">
+                <h3 class="card-title">法律合规检查员</h3>
+                <div class="card-en-name">Legal Compliance Checker</div>
+                <p class="card-desc">法律合规检查员，确保业务运营、数据处理和内容创作符合多司法管辖区的法律法规</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="support">
+            <div class="card-emoji">💬</div>
+            <div class="card-body">
+                <h3 class="card-title">客服响应师</h3>
+                <div class="card-en-name">Support Responder</div>
+                <p class="card-desc">客服响应师，提供卓越的客户服务和问题解决</p>
+            </div>
+        </div>
+</div>
+    </div>
+<div class="category-section" id="cat-testing">
+        <div class="category-header">
+            <h2>🧪 测试质检 <span class="subtitle">— 测试专家</span></h2>
+            <p class="category-count">共 8 个 Agent</p>
+        </div>
+        <div class="agent-grid"><div class="agent-card" data-category="testing">
+            <div class="card-emoji">♿</div>
+            <div class="card-body">
+                <h3 class="card-title">无障碍审计师</h3>
+                <div class="card-en-name">Accessibility Auditor</div>
+                <p class="card-desc">无障碍审计师，按照WCAG标准审计界面，使用辅助技术测试，确保包容性设计</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="testing">
+            <div class="card-emoji">🔌</div>
+            <div class="card-body">
+                <h3 class="card-title">API测试师</h3>
+                <div class="card-en-name">API Tester</div>
+                <p class="card-desc">API测试师，专注于全面的API验证、性能测试和质量保证</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="testing">
+            <div class="card-emoji">📸</div>
+            <div class="card-body">
+                <h3 class="card-title">证据收集师</h3>
+                <div class="card-en-name">Evidence Collector</div>
+                <p class="card-desc">证据收集师，以截图为准的QA专家，默认找到3-5个问题，所有问题要求可视化证据</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="testing">
+            <div class="card-emoji">⏱️</div>
+            <div class="card-body">
+                <h3 class="card-title">性能基准测试师</h3>
+                <div class="card-en-name">Performance Benchmarker</div>
+                <p class="card-desc">性能基准测试师，专注于衡量、分析和改进系统性能</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="testing">
+            <div class="card-emoji">🧐</div>
+            <div class="card-body">
+                <h3 class="card-title">现实检验师</h3>
+                <div class="card-en-name">Reality Checker</div>
+                <p class="card-desc">现实检验师，阻止幻想性批准，基于证据的认证，默认需要压倒性的证据才能确认生产就绪</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="testing">
+            <div class="card-emoji">📋</div>
+            <div class="card-body">
+                <h3 class="card-title">测试结果分析师</h3>
+                <div class="card-en-name">Test Results Analyzer</div>
+                <p class="card-desc">测试结果分析师，专注于全面的测试结果评估和质量指标分析</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="testing">
+            <div class="card-emoji">🔧</div>
+            <div class="card-body">
+                <h3 class="card-title">工具评估师</h3>
+                <div class="card-en-name">Tool Evaluator</div>
+                <p class="card-desc">工具评估师，专注于评估、测试和推荐工具、软件和平台</p>
+            </div>
+        </div>
+<div class="agent-card" data-category="testing">
+            <div class="card-emoji">⚡</div>
+            <div class="card-body">
+                <h3 class="card-title">工作流优化师</h3>
+                <div class="card-en-name">Workflow Optimizer</div>
+                <p class="card-desc">工作流优化师，专注于跨所有业务职能分析、优化和自动化工作流</p>
+            </div>
+        </div>
+</div>
+    </div>
+
+</div>
+
+<div class="footer">
+  <p>Agency Agents 完整图鉴 · 数据来源于 Agency Agents 应用</p>
+  <p style="margin-top:4px;font-size:0.85em;">点击分类标签切换 · 搜索框筛选角色</p>
+</div>
+
+<script>
+  const navBtns = document.querySelectorAll('.nav-btn');
+  const sections = document.querySelectorAll('.category-section');
+  const searchInput = document.getElementById('searchInput');
+  const agentCards = document.querySelectorAll('.agent-card');
+
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      navBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const cat = btn.dataset.cat;
+      sections.forEach(s => s.classList.remove('show', 'active'));
+      const target = document.getElementById('cat-' + cat);
+      if (target) target.classList.add('show', 'active');
+      searchInput.value = '';
+      agentCards.forEach(c => c.style.display = '');
+    });
+  });
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    if (!q) {
+      agentCards.forEach(c => c.style.display = '');
+      navBtns.forEach(b => b.classList.remove('active'));
+      sections.forEach(s => s.classList.remove('show', 'active'));
+      if (navBtns[0]) {
+        navBtns[0].classList.add('active');
+        const cat = navBtns[0].dataset.cat;
+        document.getElementById('cat-' + cat).classList.add('show', 'active');
+      }
+      return;
+    }
+    navBtns.forEach(b => b.classList.remove('active'));
+    sections.forEach(s => s.classList.add('show', 'active'));
+    agentCards.forEach(c => {
+      const text = c.textContent.toLowerCase();
+      c.style.display = text.includes(q) ? '' : 'none';
+    });
+  });
+</script>
+
+</body>
+</html>

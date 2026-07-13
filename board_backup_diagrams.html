@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>board_backup 图解 - 修复版</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  body { font-family: "Microsoft YaHei", sans-serif; background: #f5f7fa; padding: 20px; }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 24px; color: #16213e; }
+  .card { background: #fff; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .card h2 { font-size: 18px; color: #0f3460; margin-bottom: 12px; border-left: 4px solid #e94560; padding-left: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>📋 board_backup 提醒行为树图解（独立修复版）</h1>
+
+<!-- ====== 图1: 完整生命周期 ====== -->
+<div class="card">
+  <h2>🔄 图1：一条提醒的完整生命周期</h2>
+  <pre class="mermaid">
+flowchart TD
+    S([开始]) -->|云端推送| sent[sent]
+    sent -->|时间到 MarkStatus| executing[executing]
+    executing -->|PlayReminderAudio 开始| playing[playing]
+    playing -->|播放成功| completed[completed]
+    playing -->|播放失败| failed[failed]
+    completed -->|重复 RescheduleRepeating| sent
+    completed -->|非重复| E([结束])
+    failed --> E
+    executing -.->|超时 900s| failed
+
+    style sent fill:#fff3cd,stroke:#856404
+    style executing fill:#cce5ff,stroke:#004085
+    style playing fill:#d4edda,stroke:#155724
+    style completed fill:#f8d7da,stroke:#721c24
+    style failed fill:#f8d7da,stroke:#721c24
+  </pre>
+</div>
+
+<!-- ====== 图2: 版本对比 ====== -->
+<div class="card">
+  <h2>⚖️ 图2：board_backup vs board_package_v2 树结构对比</h2>
+  <pre class="mermaid">
+flowchart TD
+    subgraph backup["board_backup (17节点) ✅"]
+        direction TB
+        R1[ReactiveSequence] --> H1[HasPendingReminders]
+        R1 --> S1[Sequence]
+        S1 --> L1[LoadNextReminder]
+        S1 --> C1[CheckTimeCondition]
+        S1 --> M1[MarkStatus]
+        S1 --> Rpt1[ReportStatus]
+        S1 --> FB1[Fallback TimeoutOrPlay]
+        FB1 --> T1[TimeoutPath<br/>超时→failed]
+        FB1 --> N1[NormalPath<br/>播报→完成→重复]
+    end
+    backup ~~~ v2
+    subgraph v2["board_package_v2 (11节点) ❌"]
+        direction TB
+        R2[ReactiveSequence] --> H2[HasPendingReminders]
+        R2 --> S2[Sequence]
+        S2 --> L2[LoadNextReminder]
+        S2 --> C2[CheckTimeCondition]
+        S2 --> M2[MarkStatus]
+        S2 --> Rpt2[ReportStatus]
+        S2 --> P2[CheckPersonPresent]
+        S2 --> B2[BuildReminderTts]
+        S2 --> A2[PlayReminderAudio]
+    end
+
+    style backup fill:#e8f5e9,stroke:#2e7d32
+    style v2 fill:#ffebee,stroke:#c62828
+    style FB1 fill:#fce4ec,stroke:#c62828
+    style A2 fill:#ffebee,stroke:#c62828,stroke-width:3px
+  </pre>
+</div>
+
+<!-- ====== 图3: 完整上下行链路 ====== -->
+<div class="card">
+  <h2>🌐 图3：完整上下行链路</h2>
+  <pre class="mermaid">
+flowchart LR
+    subgraph down["⤵ 下行链路"]
+        direction LR
+        C1(云端) -->|WebSocket| W1[reminder_ws_daemon]
+        W1 -->|delivery| A1[aipet_reminder_node]
+        A1 -->|command| B1[reminder_bridge_node]
+        B1 -->|reminder| BB["黑板 (pending_reminders)"]
+    end
+
+    subgraph up["⤴ 上行链路"]
+        direction LR
+        BT2[行为树] -->|ReportStatus| R1["/reminder/ws/result"]
+        R1 --> A2[aipet_reminder_node]
+        A2 --> W2[reminder_ws_daemon]
+        W2 -->|WebSocket| C2(云端)
+
+        BT2 -->|PublishResponse| R2["/robot/command_response"]
+        R2 --> A2
+
+        BT2 -->|action send_goal| V1["/voice/speak"]
+        V1 --> T1[tts_node]
+    end
+
+    subgraph ext["外部输入"]
+        direction LR
+        S1[传感器] -->|person_present| D2[reminder_bt_driver_cpp]
+        D2 -->|写黑板| BB2["黑板 (person_present)"]
+    end
+
+    style C1 fill:#16213e,color:#fff
+    style C2 fill:#16213e,color:#fff
+    style W1 fill:#0f3460,color:#fff
+    style W2 fill:#0f3460,color:#fff
+    style A1 fill:#533483,color:#fff
+    style A2 fill:#533483,color:#fff
+    style BB fill:#2d6a4f,color:#fff
+    style BB2 fill:#2d6a4f,color:#fff
+  </pre>
+</div>
+
+<!-- ====== 图4: 详细时序 ====== -->
+<div class="card">
+  <h2>🔍 图4：一个完整 Tick 内的详细时序</h2>
+  <pre class="mermaid">
+flowchart TD
+    START([tick 开始])
+    START --> HPR{HasPendingReminders?}
+    HPR -->|FAILURE| END([等待下个tick])
+    HPR -->|SUCCESS| LNR[LoadNextReminder<br/>取最早提醒→写黑板]
+    LNR --> CTC{CheckTimeCondition?}
+    CTC -->|FAILURE| END
+    CTC -->|SUCCESS| MS1[MarkStatus executing]
+    MS1 --> RS1[ReportStatus executing]
+    RS1 --> CRT{CheckReminderTimeout?}
+    CRT -->|SUCCESS 超时| MSF[MarkStatus failed]
+    MSF --> RSF[ReportStatus failed]
+    RSF --> END
+    CRT -->|FAILURE 未超时| CPP{CheckPersonPresent?}
+    CPP -->|FAILURE 无人| END
+    CPP -->|SUCCESS 有人| BRT[BuildReminderTts]
+    BRT --> PRA[PlayReminderAudio]
+    PRA -->|SUCCESS| MSC[MarkStatus completed]
+    MSC --> RSC[ReportStatus completed]
+    RSC --> CR2{CheckRepeating?}
+    CR2 -->|SUCCESS| RR[RescheduleRepeating]
+    RR --> END
+    CR2 -->|FAILURE| PR[PublishResponse]
+    PR --> END
+
+    style START fill:#16213e,color:#fff
+    style END fill:#888,color:#fff
+    style HPR fill:#e8f5e9
+    style CTC fill:#e8f5e9
+    style CRT fill:#e8f5e9
+    style CPP fill:#e8f5e9
+    style CR2 fill:#e8f5e9
+  </pre>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'neutral',
+    securityLevel: 'loose'
+  });
+</script>
+</body>
+</html>
