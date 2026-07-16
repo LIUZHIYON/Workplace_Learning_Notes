@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nav2 —— 让机器人在世界中自由穿行</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', -apple-system, sans-serif;
+    background: #0a0f1e;
+    color: #e0e8f0;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ── 粒子背景 ── */
+  .particles {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    pointer-events: none; z-index:0;
+  }
+  .particle {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle, rgba(52,211,153,0.6), transparent);
+    animation: drift var(--dur) linear infinite;
+    animation-delay: var(--delay);
+    opacity: 0;
+  }
+  @keyframes drift {
+    0%   { opacity:0; transform: translateY(100vh) translateX(0) scale(1); }
+    10%  { opacity:0.7; }
+    90%  { opacity:0.3; }
+    100% { opacity:0; transform: translateY(-10vh) translateX(var(--dx)) scale(0.3); }
+  }
+
+  .container {
+    position: relative; z-index:1;
+    max-width: 960px; margin: 0 auto; padding: 20px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center; padding: 80px 20px 60px;
+    background: linear-gradient(180deg, rgba(52,211,153,0.12) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 40px;
+    position: relative;
+  }
+  .hero .icon {
+    font-size: 80px; margin-bottom: 16px;
+    display: inline-block;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, #34d399, #2dd4bf, #38bdf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .hero .subtitle {
+    font-size: 1.15rem; color: #94a3b8; font-weight: 300;
+  }
+
+  /* ── 内容区 ── */
+  section {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 18px;
+    padding: 36px 32px;
+    margin-bottom: 32px;
+    backdrop-filter: blur(6px);
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  section:hover {
+    border-color: rgba(52,211,153,0.2);
+    box-shadow: 0 0 40px rgba(52,211,153,0.05);
+  }
+  section h2 {
+    font-size: 1.6rem; font-weight: 700;
+    color: #34d399; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  section h2 .emoji { font-size: 1.5rem; }
+  section h3 {
+    font-size: 1.2rem; font-weight: 600;
+    color: #67e8f9; margin: 20px 0 10px;
+  }
+  section p { margin-bottom: 14px; color: #cbd5e1; }
+
+  /* ── 高亮框 ── */
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(52,211,153,0.1), rgba(45,212,191,0.1));
+    border-left: 4px solid #34d399;
+    border-radius: 0 12px 12px 0;
+    padding: 20px 24px;
+    margin: 18px 0;
+  }
+  .highlight-box.blue {
+    background: linear-gradient(135deg, rgba(56,189,248,0.1), rgba(99,102,241,0.1));
+    border-left-color: #38bdf8;
+  }
+  .highlight-box.purple {
+    background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(244,114,182,0.1));
+    border-left-color: #a855f7;
+  }
+
+  /* ── 比喻 ── */
+  .analogy {
+    display: flex; gap: 18px; align-items: flex-start;
+    background: rgba(52,211,153,0.05);
+    border: 1px solid rgba(52,211,153,0.12);
+    border-radius: 14px; padding: 22px;
+    margin: 20px 0;
+  }
+  .analogy .big-emoji { font-size: 48px; flex-shrink: 0; line-height: 1; }
+
+  /* ── 流程图 ── */
+  .flow {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    align-items: center; gap: 6px; margin: 24px 0;
+  }
+  .flow .node {
+    background: linear-gradient(135deg, #0d3b2e, #0d2b3b);
+    border: 1px solid rgba(52,211,153,0.25);
+    border-radius: 12px; padding: 12px 18px;
+    text-align: center; font-weight: 600; font-size: 0.9rem;
+    min-width: 90px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .flow .node:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(52,211,153,0.18);
+  }
+  .flow .arrow { color: #34d399; font-size: 1.3rem; font-weight: 700; }
+
+  /* ── 架构分层图 ── */
+  .arch-layer {
+    margin: 16px 0;
+  }
+  .arch-layer .layer {
+    padding: 16px 20px; margin: 4px 0;
+    border-radius: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+  .arch-layer .layer:hover {
+    transform: translateX(6px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .layer.l1 { background: rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.2); }
+  .layer.l2 { background: rgba(251,146,60,0.1); border:1px solid rgba(251,146,60,0.2); }
+  .layer.l3 { background: rgba(250,204,21,0.1); border:1px solid rgba(250,204,21,0.2); }
+  .layer.l4 { background: rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.2); }
+  .layer.l5 { background: rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.2); }
+  .layer.l6 { background: rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.2); }
+
+  /* ── 地图类型卡片 ── */
+  .map-cards {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin: 20px 0;
+  }
+  @media (max-width:640px) { .map-cards { grid-template-columns:1fr; } }
+  .map-card {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 22px;
+  }
+  .map-card h4 {
+    font-size: 1.05rem; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* ── 步骤 ── */
+  .big-steps { counter-reset:bs; list-style:none; padding:0; }
+  .big-steps li {
+    counter-increment: bs; display: flex; gap: 18px;
+    align-items: flex-start; padding: 20px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .big-steps li::before {
+    content: counter(bs);
+    flex-shrink:0;
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, #34d399, #38bdf8);
+    border-radius: 50%; display: flex;
+    align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.05rem; color: #0a0f1e;
+  }
+
+  /* ── 对比表 ── */
+  .compare-table {
+    width:100%; border-collapse:collapse; margin:18px 0;
+    font-size:0.9rem; border-radius:12px; overflow:hidden;
+  }
+  .compare-table th {
+    background:rgba(52,211,153,0.12); padding:12px 16px;
+    text-align:left; font-weight:600; color:#5eead4;
+  }
+  .compare-table td {
+    padding:12px 16px;
+    border-bottom:1px solid rgba(255,255,255,0.04);
+    color:#cbd5e1;
+  }
+  .compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+  /* ── 代码 ── */
+  .code-block {
+    background:rgba(0,0,0,0.4);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:10px; padding:18px 22px;
+    margin:14px 0; font-family:'JetBrains Mono','Fira Code',monospace;
+    font-size:0.85rem; overflow-x:auto; color:#86efac;
+  }
+  .code-block .cmt { color:#546e7a; }
+
+  /* ── 行为树简化图 ── */
+  .bt-demo {
+    display:flex; align-items:center; justify-content:center;
+    gap:4px; margin:20px 0; flex-wrap:wrap;
+  }
+  .bt-node {
+    border-radius:10px; padding:10px 16px;
+    font-weight:600; font-size:0.9rem;
+  }
+  .bt-seq {
+    background:rgba(52,211,153,0.12);
+    border:2px solid rgba(52,211,153,0.4);
+    border-radius:14px; padding:16px;
+  }
+  .bt-seq .title {
+    font-size:0.75rem; color:#34d399;
+    text-align:center; margin-bottom:10px; font-weight:700;
+  }
+
+  footer {
+    text-align:center; padding:40px 20px;
+    color:#475569; font-size:0.9rem;
+    border-top:1px solid rgba(255,255,255,0.04);
+    margin-top:40px;
+  }
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="container">
+
+  <!-- ── Hero ── -->
+  <header class="hero">
+    <div class="icon">🧭</div>
+    <h1>Nav2 —— 让机器人在世界中自由穿行</h1>
+    <p class="subtitle">ROS 2 Navigation Stack · 新一代机器人导航框架</p>
+  </header>
+
+  <!-- ── 1. 通俗理解 ── -->
+  <section>
+    <h2><span class="emoji">🎯</span> 导航的本质：从 A 到 B，别撞墙</h2>
+
+    <div class="analogy">
+      <div class="big-emoji">🚗</div>
+      <div>
+        <strong style="color:#34d399;">导航 = 规划 + 控制</strong>
+        <p style="margin-top:6px;">
+          想象你开着车去一个陌生的地方。你先在导航APP上输入目的地（<span style="color:#38bdf8;">目标设定</span>），
+          导航帮你规划一条避开拥堵的路线（<span style="color:#fbbf24;">全局规划</span>），
+          然后你实际开车时要随时注意前方行人、变道车辆、红绿灯（<span style="color:#f87171;">局部避障</span>），
+          同时还要保持在车道内行驶（<span style="color:#a78bfa;">控制</span>）。
+        </p>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <strong>🔑 对机器人来说，导航有三件大事：</strong><br>
+      1️⃣ <strong style="color:#38bdf8;">全局规划</strong> —— 从地图上找一条从起点到终点的最优路径（不撞已知障碍物）<br>
+      2️⃣ <strong style="color:#f87171;">局部控制</strong> —— 实时避开突然出现的障碍物（如跑过去的人、椅子）<br>
+      3️⃣ <strong style="color:#a78bfa;">定位</strong> —— 时刻知道"我现在到底在地图里的哪个位置"
+    </div>
+  </section>
+
+  <!-- ── 2. 地图分层 ── -->
+  <section>
+    <h2><span class="emoji">🗂️</span> 核心概念：分层代价地图</h2>
+
+    <p>Nav2 的<strong>代价地图（Costmap）</strong>是一个分层结构，每一层管一种信息：</p>
+
+    <div class="map-cards">
+      <div class="map-card">
+        <h4 style="color:#f87171;">🔴 静态层 (Static Layer)</h4>
+        <p style="color:#94a3b8;font-size:0.9rem;">
+          SLAM 建好的地图。记录已知的墙壁、柱子等<strong>固定障碍物</strong>。
+          一旦建好就不会变。
+        </p>
+      </div>
+      <div class="map-card">
+        <h4 style="color:#fb923c;">🟠 障碍物层 (Obstacle Layer)</h4>
+        <p style="color:#94a3b8;font-size:0.9rem;">
+          传感器<strong>实时</strong>检测到的动态障碍物——桌子腿、行人、
+          突然出现的箱子。实时更新。
+        </p>
+      </div>
+      <div class="map-card">
+        <h4 style="color:#facc15;">🟡 膨胀层 (Inflation Layer)</h4>
+        <p style="color:#94a3b8;font-size:0.9rem;">
+          围绕每个障碍物加上一圈<span style="color:#fbbf24;">"安全缓冲带"</span>。
+          防止机器人刮蹭到障碍物的边缘。
+        </p>
+      </div>
+      <div class="map-card">
+        <h4 style="color:#34d399;">🟢 你的自定义层</h4>
+        <p style="color:#94a3b8;font-size:0.9rem;">
+          你的<strong>地面分割模型</strong>就放在这一层——地面=自由空间，
+          非地面=障碍物。实时更新，替代传统激光雷达。
+        </p>
+      </div>
+    </div>
+
+    <div class="highlight-box blue">
+      <strong>💡 分层的好处：</strong>
+      各层独立维护、独立更新。传感器换了只替换对应层，
+      其他层不受影响。这正是你能用"地面分割"替换"激光雷达"的关键原因——
+      只需要写一个新的 Costmap Layer 插件！
+    </div>
+
+    <p style="text-align:center;color:#94a3b8;font-size:0.9rem;">
+      ⬇️ 所有层叠加在一起，形成一个统一的代价地图 ⬇️
+    </p>
+
+    <div class="flow">
+      <div class="node">🗺️ 静态层<br><small>已知墙壁</small></div>
+      <div class="arrow">+</div>
+      <div class="node">📡 障碍物层<br><small>实时检测</small></div>
+      <div class="arrow">+</div>
+      <div class="node">🎈 膨胀层<br><small>安全缓冲</small></div>
+      <div class="arrow">+</div>
+      <div class="node">🟢 地面分割层<br><small>你的创新</small></div>
+      <div class="arrow">=</div>
+      <div class="node" style="border-color:rgba(52,211,153,0.6);">
+        📊 统一代价地图<br><small>每个像素都有代价值</small>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <table style="width:100%;font-size:0.9rem;">
+        <tr><td style="width:60px;color:#34d399;">0</td><td>= 自由空间（可以走）</td></tr>
+        <tr><td style="color:#fbbf24;">1-253</td><td>= 代价值（越靠近障碍物越高）</td></tr>
+        <tr><td style="color:#f87171;">254</td><td>= 障碍物（绝对不能走）</td></tr>
+        <tr><td style="color:#64748b;">255</td><td>= 未知区域（还没探索到）</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── 3. 规划器 ── -->
+  <section>
+    <h2><span class="emoji">🧠</span> 双脑协作：全局规划器 + 局部控制器</h2>
+
+    <div class="analogy">
+      <div class="big-emoji">🧭</div>
+      <div>
+        <strong style="color:#38bdf8;">全局规划器（大总管）</strong>
+        <p style="margin-top:4px;color:#94a3b8;">
+          拿到目标后，基于<strong>静态地图</strong>计算出一条最优路径。
+          就像你出发前用导航APP规划好的路线——"走这条路最快"。
+          它不管路上突然出现的快递车。
+        </p>
+        <p style="color:#64748b;font-size:0.85rem;">常用算法：A* (A-Star)、Dijkstra、Smac Planner</p>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <div class="big-emoji">⚡</div>
+      <div>
+        <strong style="color:#f87171;">局部控制器（急先锋）</strong>
+        <p style="margin-top:4px;color:#94a3b8;">
+          拿着全局路径，<strong>实时</strong>根据传感器数据做微调。
+          前方突然有障碍物？紧急绕开。地面不平？减速通过。
+          就像你实际开车时随时调整方向盘、油门和刹车。
+        </p>
+        <p style="color:#64748b;font-size:0.85rem;">常用算法：DWB (Dynamic Window Based)、TEB、Regulated Pure Pursuit</p>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin:24px 0;">
+      <div style="display:inline-block;text-align:left;">
+        <p style="color:#38bdf8;font-weight:600;">📐 全局路径（粗粒度，约1Hz更新）</p>
+        <p style="color:#94a3b8;font-size:0.85rem;">"从起点沿走廊走5米，左转进入房间，走到房间角落"</p>
+        <p style="color:#f87171;font-weight:600;margin-top:12px;">⚡ 局部速度指令（细粒度，约20-50Hz更新）</p>
+        <p style="color:#94a3b8;font-size:0.85rem;">"现在往左偏2度，速度0.3m/s，避开前方30cm处的椅子腿"</p>
+      </div>
+    </div>
+
+    <div class="highlight-box purple">
+      <strong>🎯 为什么需要两个？</strong>
+      全局规划算得准但算得慢，局部控制反应快但看得近。
+      两者配合：全局定方向，局部管安全。缺一个都会出事。
+    </div>
+  </section>
+
+  <!-- ── 4. 架构分层 ── -->
+  <section>
+    <h2><span class="emoji">🏗️</span> Nav2 的完整架构</h2>
+
+    <p>Nav2 采用<strong>分层架构</strong>设计，从底层到顶层共六层：</p>
+
+    <div class="arch-layer">
+      <div class="layer l1">
+        <strong>🔴 硬件接口层</strong> —— 传感器驱动、电机驱动、底盘通信
+      </div>
+      <div class="layer l2">
+        <strong>🟠 传感器处理层</strong> —— IMU滤波、激光雷达数据处理、<span style="color:#fbbf24;">地面分割推理</span>
+      </div>
+      <div class="layer l3">
+        <strong>🟡 控制器层</strong> —— 局部规划器（DWB/TEB）、速度平滑、里程计计算
+      </div>
+      <div class="layer l4">
+        <strong>🟢 规划器层</strong> —— 全局规划器（A*/Smac）、行为树引擎、路径平滑
+      </div>
+      <div class="layer l5">
+        <strong>🔵 代价地图层</strong> —— 分层代价地图管理、各层插件、坐标变换
+      </div>
+      <div class="layer l6">
+        <strong>🟣 行为层</strong> —— 行为树编排（探索→导航→拍摄→返回）、状态监控
+      </div>
+    </div>
+
+    <p style="margin-top:16px;">ROS2 的通信采用 <strong>4 种通信机制</strong>：</p>
+    <table class="compare-table">
+      <thead>
+        <tr><th>机制</th><th>用途</th><th>类比</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="color:#38bdf8;">Topic</td><td>持续数据流（传感器数据、速度指令）</td><td>广播电台</td></tr>
+        <tr><td style="color:#34d399;">Service</td><td>一次性请求-响应（保存地图、查询状态）</td><td>打电话</td></tr>
+        <tr><td style="color:#a78bfa;">Action</td><td>长时间任务+可取消+进度反馈（导航到目标）</td><td>外卖订单</td></tr>
+        <tr><td style="color:#fbbf24;">Parameter</td><td>配置参数读写（速度上限、膨胀半径）</td><td>设置菜单</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box">
+      <strong>📌 导航最常用的是 Action：</strong>
+      给机器人发一个"去(x=3, y=5, 面朝北)"的导航目标，这是一个 Action。
+      它可以反馈进度（"走了50%了"）、可以被取消（"算了别去了"）、可以报告结果（"到了/堵死了"）。
+    </div>
+  </section>
+
+  <!-- ── 5. 行为树 ── -->
+  <section>
+    <h2><span class="emoji">🌳</span> 行为树：机器人的"大脑皮层"</h2>
+
+    <p>Nav2 使用<strong>行为树（Behavior Tree）</strong>来编排复杂的导航行为。行为树是一种树状结构，每个叶子节点是一个动作，非叶子节点是控制逻辑（顺序、选择、并行等）。</p>
+
+    <div style="background:rgba(0,0,0,0.3);border-radius:16px;padding:24px;margin:20px 0;overflow-x:auto;">
+      <div style="text-align:center;margin-bottom:8px;color:#64748b;font-size:0.8rem;">🌳 一个典型的导航行为树</div>
+<pre style="color:#cbd5e1;font-size:0.9rem;line-height:2;">
+  ┌──────────────── <span style="color:#a78bfa;">Sequence（顺序执行）</span> ────────────────┐
+  │                                                      │
+  │  ├── <span style="color:#34d399;">✓ 恢复控制器（检查机器人状态是否正常）</span>          │
+  │  ├── <span style="color:#38bdf8;">✓ 获取目标位姿（从探索模块获取下一个探索点）</span>       │
+  │  ├── <span style="color:#fbbf24;">✓ 重新规划检测（是否需要重新规划路径）</span>            │
+  │  │                                                   │
+  │  ├── <span style="color:#f87171;">┌── Fallback（备选方案）──┐</span>                      │
+  │  │   <span style="color:#f87171;">│  ├─ 计算全局路径 (A*)    │</span>                      │
+  │  │   <span style="color:#f87171;">│  ├─ 局部速度控制 (DWB)   │</span>                      │
+  │  │   <span style="color:#f87171;">│  └─ 尝试恢复行为        │</span> ← 堵住了就转圈、后退   │
+  │  │   <span style="color:#f87171;">└────────────────────────┘</span>                      │
+  │  │                                                   │
+  │  ├── <span style="color:#fb923c;">📸 到达检测 + 拍摄（触发你的视频采集节点）</span>         │
+  │  └── <span style="color:#a78bfa;">📡 报告结果给探索模块（这个点探索完了）</span>           │
+  └──────────────────────────────────────────────────────┘
+</pre>
+    </div>
+
+    <div class="highlight-box green">
+      <strong>🧩 行为树的好处：</strong>把复杂的导航逻辑拆成可组合的积木块。
+      你可以轻松地插入自己的节点——比如"到达后旋转360°拍摄"、"如果电池低就返回充电桩"。
+      你的 <strong>BT_ros2</strong> 代码就是用行为树来编排探索→拍摄→返回的整个流程。
+    </div>
+  </section>
+
+  <!-- ── 6. 你的方案 ── -->
+  <section>
+    <h2><span class="emoji">🔗</span> SLAM + Nav2 如何配合：完整流水线</h2>
+
+    <p>把 SLAM（建图定位）和 Nav2（导航）串联起来，再加上你的地面分割和探索模块，就是完整的自主探索系统：</p>
+
+    <div class="flow">
+      <div class="node">📷 相机</div>
+      <div class="arrow">→</div>
+      <div class="node">地面分割<br><small>NPU加速</small></div>
+      <div class="arrow">→</div>
+      <div class="node">代价地图<br><small>Costmap Layer</small></div>
+      <div class="arrow">→</div>
+      <div class="node">Nav2<br><small>规划+控制</small></div>
+    </div>
+    <div class="flow">
+      <div class="node">📷 相机</div>
+      <div class="arrow">→</div>
+      <div class="node">ORB-SLAM3<br><small>定位+建图</small></div>
+      <div class="arrow">→</div>
+      <div class="node">位姿 TF<br><small>map→odom→base</small></div>
+      <div class="arrow" style="transform:rotate(-90deg);">→</div>
+    </div>
+    <div class="flow">
+      <div class="node">m-explore-ros2<br><small>Frontier探索</small></div>
+      <div class="arrow">→</div>
+      <div class="node">导航目标<br><small>Action Goal</small></div>
+      <div class="arrow" style="transform:rotate(90deg);">→</div>
+      <div class="node">Nav2<br><small>规划+控制</small></div>
+    </div>
+    <div class="flow">
+      <div class="node">到达检测<br><small>BT节点</small></div>
+      <div class="arrow">→</div>
+      <div class="node">旋转360°<br><small>拍摄视频</small></div>
+      <div class="arrow">→</div>
+      <div class="node">报告探索完成<br><small>下一个Frontier</small></div>
+    </div>
+
+    <div class="highlight-box">
+      <strong>🎯 整个系统的信息闭环：</strong><br>
+      SLAM 告诉 Nav2 "我在哪"（位置）和"旁边有什么"（地图）→
+      Nav2 指挥机器人安全移动 →
+      移动后相机看到新的画面 →
+      地面分割更新代价地图 + SLAM 更新定位 →
+      探索模块发现新的未探索区域 →
+      发给 Nav2 新目标 → 循环往复 →
+      <strong>直到整个房间都探索完毕 ✅</strong>
+    </div>
+  </section>
+
+  <!-- ── 7. 核心参数 ── -->
+  <section>
+    <h2><span class="emoji">⚙️</span> 实际部署时你需要关心的关键参数</h2>
+
+    <table class="compare-table">
+      <thead>
+        <tr><th>参数</th><th>含义</th><th>建议值 (室内)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>robot_radius</td><td>机器人底盘外接圆半径</td><td>0.15~0.25m</td></tr>
+        <tr><td>inflation_radius</td><td>障碍物膨胀半径（安全距离）</td><td>0.3~0.5m</td></tr>
+        <tr><td>max_vel_x</td><td>最大线速度</td><td>0.3~0.5 m/s</td></tr>
+        <tr><td>max_vel_theta</td><td>最大角速度</td><td>0.5~1.0 rad/s</td></tr>
+        <tr><td>planner_frequency</td><td>全局路径重规划频率</td><td>1.0 Hz</td></tr>
+        <tr><td>controller_frequency</td><td>局部控制频率</td><td>20.0 Hz</td></tr>
+        <tr><td>goal_checker/xy_goal_tolerance</td><td>到达目标的位置容差</td><td>0.1~0.2m</td></tr>
+        <tr><td>goal_checker/yaw_goal_tolerance</td><td>到达目标的角度容差</td><td>0.2~0.3 rad</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box orange">
+      <strong>⚠️ 安全第一：</strong>实际部署时，先设置保守的速度（慢一点），
+      膨胀半径设大一点。等整个管线跑通后再逐步放开。
+      机器人撞墙的代价远大于多花几分钟探索。
+    </div>
+  </section>
+
+  <!-- ── 8. 总结 ── -->
+  <section>
+    <h2><span class="emoji">✨</span> 一句话总结</h2>
+
+    <div style="text-align:center;padding:30px 0;">
+      <div style="display:inline-block;background:linear-gradient(135deg,rgba(52,211,153,0.08),rgba(56,189,248,0.08));border-radius:20px;padding:32px 40px;border:1px solid rgba(255,255,255,0.06);">
+        <p style="font-size:1.3rem;font-weight:500;color:#e2e8f0;line-height:2;">
+          <strong style="color:#34d399;">Nav2</strong> 是机器人的"<span style="color:#38bdf8;">运动神经系统</span>"——<br>
+          它拿着 SLAM 画好的地图，<br>
+          用<span style="color:#fbbf24;">全局规划器</span>找最优路线，<br>
+          用<span style="color:#f87171;">局部控制器</span>躲避实时危险，<br>
+          最终安全、高效地到达目的地。
+        </p>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:12px;">
+      <div style="display:inline-block;background:rgba(0,0,0,0.3);border-radius:12px;padding:16px 24px;border:1px solid rgba(255,255,255,0.06);">
+        <p style="font-size:0.95rem;color:#94a3b8;">
+          🗺️ <strong style="color:#60a5fa;">SLAM</strong> 回答：<em>"世界长什么样？我在哪里？"</em><br>
+          🧭 <strong style="color:#34d399;">Nav2</strong> 回答：<em>"我怎么安全地到达目标？"</em><br>
+          🔍 <strong style="color:#fbbf24;">探索</strong> 回答：<em>"下一个目标应该定在哪里？"</em>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>📝 AI 学习笔记 · 机器人自主探索系列 · 2025.07</p>
+    <p style="font-size:0.8rem;margin-top:4px;">Nav2 = 机器人安全行动的运动大脑 🧠</p>
+    <p style="font-size:0.75rem;margin-top:8px;color:#334155;">
+      上一篇：<a href="01-SLAM建图.html" style="color:#60a5fa;text-decoration:none;">SLAM — 机器人如何认识这个世界</a>
+    </p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  const container = document.getElementById('particles');
+  for(let i=0; i<40; i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 3 + 2;
+    p.style.cssText = `
+      left:${Math.random()*100}%;
+      width:${size}px; height:${size}px;
+      --dur:${Math.random()*8+6}s;
+      --delay:${Math.random()*10}s;
+      --dx:${(Math.random()-0.5)*120}px;
+    `;
+    container.appendChild(p);
+  }
+})();
+</script>
+
+</body>
+</html>
