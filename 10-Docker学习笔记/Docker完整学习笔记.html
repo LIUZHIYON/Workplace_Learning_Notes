@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker 完整学习笔记</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 30px 20px;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        h1 {
+            text-align: center; font-size: 32px; margin-bottom: 6px;
+            background: linear-gradient(135deg, #0db7ed, #42b883);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .subtitle { text-align: center; color: #94a3b8; margin-bottom: 40px; font-size: 14px; }
+
+        .section {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+        }
+        .section h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section h2 .icon { font-size: 22px; }
+
+        table {
+            width: 100%; border-collapse: collapse;
+            margin: 12px 0;
+        }
+        th {
+            background: #334155;
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        td {
+            padding: 10px 14px;
+            border-top: 1px solid #334155;
+            font-size: 13px;
+            vertical-align: top;
+        }
+        td:first-child {
+            font-family: 'Consolas', 'Courier New', monospace;
+            color: #f472b6;
+            white-space: nowrap;
+        }
+        td:nth-child(2) { color: #94a3b8; }
+        .code {
+            background: #0f172a;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            overflow-x: auto;
+            margin: 10px 0;
+            color: #e2e8f0;
+        }
+        .code .kw { color: #60a5fa; }
+        .code .cm { color: #64748b; }
+        .code .str { color: #34d399; }
+        .code .fn { color: #f472b6; }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .badge-blue { background: #1e3a5f; color: #60a5fa; }
+        .badge-green { background: #065f46; color: #34d399; }
+        .badge-yellow { background: #5c3a15; color: #fb923c; }
+        .badge-red { background: #5c1a1a; color: #f87171; }
+
+        .tip-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .tip-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 16px;
+        }
+        .tip-card .tip-title { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+        .tip-card .tip-desc { font-size: 12px; color: #94a3b8; line-height: 1.5; }
+
+        .flow-box {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin: 14px 0;
+            border-left: 4px solid #0db7ed;
+        }
+        .flow-box .step-label { color: #60a5fa; font-size: 12px; font-weight: 600; }
+
+        @media (max-width: 700px) {
+            .section { padding: 16px; }
+            td, th { padding: 8px 10px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>🐳 Docker 完整学习笔记</h1>
+    <p class="subtitle">从零到一 · 常用指令大全 · ROS2 部署方案</p>
+
+    <!-- 1. Docker 是什么 -->
+    <div class="section">
+        <h2><span class="icon">🤔</span> Docker 是什么</h2>
+        <table>
+            <tr><th>对比</th><th>传统虚拟机</th><th>Docker 容器</th></tr>
+            <tr><td>启动速度</td><td>几分钟（完整启动 OS）</td><td>秒级（共享宿主内核）</td></tr>
+            <tr><td>硬盘占用</td><td>10~20GB（完整系统）</td><td>数百 MB~几 GB</td></tr>
+            <tr><td>内存占用</td><td>2~8GB</td><td>几十 MB~几百 MB</td></tr>
+            <tr><td>隔离级别</td><td>完全隔离</td><td>进程级隔离</td></tr>
+            <tr><td>跨平台</td><td>硬件兼容性要求高</td><td>Linux / Windows / Mac 统一体验</td></tr>
+        </table>
+        <div class="flow-box">
+            <div class="step-label">📌 一句话理解</div>
+            虚拟机 = 整套房子（独立地基+水电）<br>
+            Docker = 集装箱（共享地基+水电，只装你需要的东西）
+        </div>
+    </div>
+
+    <!-- 2. 核心概念 -->
+    <div class="section">
+        <h2><span class="icon">📦</span> 三大核心概念</h2>
+        <table>
+            <tr><th>概念</th><th>类比</th><th>说明</th></tr>
+            <tr><td style="color:#0db7ed;">镜像 (Image)</td><td>光盘 / iso 安装包</td><td>一个只读模板，包含操作系统+软件+配置</td></tr>
+            <tr><td style="color:#42b883;">容器 (Container)</td><td>运行中的电脑</td><td>镜像运行后的实例，有读写层，可启动/停止/删除</td></tr>
+            <tr><td style="color:#f472b6;">仓库 (Registry)</td><td>应用商店</td><td>存放镜像的地方，Docker Hub 是官方仓库</td></tr>
+        </table>
+        <div class="code">
+<span class="cm"># 镜像 → 容器 的关系类比</span>
+<span class="cm"># docker pull python:3.11    ≈ 下载 Python 安装包</span>
+<span class="cm"># docker run python:3.11    ≈ 双击安装包运行</span>
+<span class="cm"># 一个镜像可以启动多个容器，就像一张光盘可以装多台电脑</span>
+        </div>
+    </div>
+
+    <!-- 3. 安装 -->
+    <div class="section">
+        <h2><span class="icon">🛠️</span> 安装 Docker Desktop（Windows）</h2>
+        <div class="code">
+<span class="cm"># 1. 去官网下载</span>
+https://www.docker.com/products/docker-desktop/
+
+<span class="cm"># 2. 安装时勾选 "Use WSL 2 based engine"</span>
+<span class="cm"># 3. 安装完成后重启电脑</span>
+<span class="cm"># 4. 验证安装</span>
+docker --version               <span class="cm"># 查看版本</span>
+docker info                     <span class="cm"># 查看详细信息</span>
+docker run hello-world          <span class="cm"># 运行测试容器</span>
+        </div>
+        <div class="tip-grid">
+            <div class="tip-card">
+                <div class="tip-title">✅ Windows 要求</div>
+                <div class="tip-desc">Windows 10/11 Pro/Enterprise<br>或 Windows Home + WSL2</div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-title">✅ BIOS 要求</div>
+                <div class="tip-desc">Intel VT-x 或 AMD-V 必须开启</div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-title">✅ WSL2 要求</div>
+                <div class="tip-desc">需要安装 WSL2 + VirtualMachinePlatform</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. 镜像管理 -->
+    <div class="section">
+        <h2><span class="icon">⬇️</span> 镜像管理命令</h2>
+        <table>
+            <tr><th>命令</th><th>说明</th><th>示例</th></tr>
+            <tr><td>docker pull &lt;镜像名&gt;</td><td>拉取镜像</td><td>docker pull ubuntu:22.04</td></tr>
+            <tr><td>docker images</td><td>查看本地所有镜像</td><td>docker images</td></tr>
+            <tr><td>docker rmi &lt;镜像名&gt;</td><td>删除镜像</td><td>docker rmi ubuntu:22.04</td></tr>
+            <tr><td>docker search &lt;关键词&gt;</td><td>搜索 Docker Hub 上的镜像</td><td>docker search ros</td></tr>
+            <tr><td>docker inspect &lt;镜像&gt;</td><td>查看镜像详情</td><td>docker inspect ubuntu:22.04</td></tr>
+            <tr><td>docker tag &lt;旧&gt; &lt;新&gt;</td><td>给镜像打标签</td><td>docker tag ubuntu my-ubuntu:v1</td></tr>
+            <tr><td>docker history &lt;镜像&gt;</td><td>查看镜像构建历史</td><td>docker history ubuntu:22.04</td></tr>
+            <tr><td>docker save &gt; .tar</td><td>导出镜像为文件</td><td>docker save ubuntu &gt; ubuntu.tar</td></tr>
+            <tr><td>docker load &lt; .tar</td><td>从文件导入镜像</td><td>docker load &lt; ubuntu.tar</td></tr>
+        </table>
+        <div class="code">
+<span class="cm"># 常用镜像</span>
+docker pull ubuntu:22.04                <span class="cm"># Ubuntu 22.04</span>
+docker pull osrf/ros:humble-desktop      <span class="cm"># ROS2 Humble 桌面版（含 Gazebo）</span>
+docker pull python:3.11                  <span class="cm"># Python 3.11</span>
+docker pull nvidia/cuda:12.1-runtime     <span class="cm"># CUDA 环境（需要 NVIDIA GPU）</span>
+        </div>
+    </div>
+
+    <!-- 5. 容器管理 -->
+    <div class="section">
+        <h2><span class="icon">▶️</span> 容器管理命令</h2>
+        <table>
+            <tr><th>命令</th><th>说明</th></tr>
+            <tr><td>docker run &lt;镜像&gt;</td><td>创建并启动一个新容器</td></tr>
+            <tr><td>docker ps</td><td>查看正在运行的容器</td></tr>
+            <tr><td>docker ps -a</td><td>查看所有容器（含已停止的）</td></tr>
+            <tr><td>docker start &lt;容器名&gt;</td><td>启动一个已停止的容器</td></tr>
+            <tr><td>docker stop &lt;容器名&gt;</td><td>停止一个运行中的容器</td></tr>
+            <tr><td>docker restart &lt;容器名&gt;</td><td>重启容器</td></tr>
+            <tr><td>docker rm &lt;容器名&gt;</td><td>删除一个已停止的容器</td></tr>
+            <tr><td>docker rm -f &lt;容器名&gt;</td><td>强制删除运行中的容器</td></tr>
+            <tr><td>docker logs &lt;容器名&gt;</td><td>查看容器日志</td></tr>
+            <tr><td>docker logs -f &lt;容器名&gt;</td><td>实时跟踪日志（类似 tail -f）</td></tr>
+            <tr><td>docker exec -it &lt;容器&gt; bash</td><td>进入正在运行的容器（终端）</td></tr>
+            <tr><td>docker cp &lt;src&gt; &lt;dst&gt;</td><td>在宿主机和容器间复制文件</td></tr>
+            <tr><td>docker commit &lt;容器&gt; &lt;新镜像名&gt;</td><td>把容器保存为新镜像</td></tr>
+            <tr><td>docker stats</td><td>查看容器资源占用（CPU/内存/网络）</td></tr>
+            <tr><td>docker top &lt;容器&gt;</td><td>查看容器内的进程</td></tr>
+            <tr><td>docker rename &lt;旧名&gt; &lt;新名&gt;</td><td>重命名容器</td></tr>
+            <tr><td>docker pause / unpause</td><td>暂停/恢复容器进程</td></tr>
+            <tr><td>docker wait &lt;容器&gt;</td><td>阻塞等待容器退出</td></tr>
+        </table>
+    </div>
+
+    <!-- 6. docker run 参数详解 -->
+    <div class="section">
+        <h2><span class="icon">⚙️</span> docker run 常用参数</h2>
+        <table>
+            <tr><th>参数</th><th>说明</th><th>示例</th></tr>
+            <tr><td>-it</td><td>交互式终端（进去后能输命令）</td><td>docker run -it ubuntu bash</td></tr>
+            <tr><td>-d</td><td>后台运行（detach）</td><td>docker run -d nginx</td></tr>
+            <tr><td>--name</td><td>指定容器名称</td><td>docker run --name my_ubuntu ubuntu</td></tr>
+            <tr><td>-p &lt;宿主机&gt;:&lt;容器&gt;</td><td>端口映射</td><td>docker run -p 8080:80 nginx</td></tr>
+            <tr><td>-v &lt;宿主机&gt;:&lt;容器&gt;</td><td>挂载目录（卷映射）</td><td>docker run -v D:\data:/data ubuntu</td></tr>
+            <tr><td>-e &lt;KEY=VALUE&gt;</td><td>设置环境变量</td><td>docker run -e MY_VAR=hello ubuntu</td></tr>
+            <tr><td>--rm</td><td>容器停止后自动删除</td><td>docker run --rm ubuntu echo hi</td></tr>
+            <tr><td>--restart=always</td><td>开机自启 / 崩溃自动重启</td><td>docker run --restart=always nginx</td></tr>
+            <tr><td>--net=host</td><td>使用宿主机网络（ROS2 需要）</td><td>docker run --net=host ros: humble</td></tr>
+            <tr><td>--memory=4g</td><td>限制最大使用内存</td><td>docker run --memory=4g ubuntu</td></tr>
+            <tr><td>--cpus=2</td><td>限制使用 CPU 核心数</td><td>docker run --cpus=2 ubuntu</td></tr>
+            <tr><td>--env-file</td><td>从文件加载环境变量</td><td>docker run --env-file .env ubuntu</td></tr>
+            <tr><td>-w / --workdir</td><td>指定工作目录</td><td>docker run -w /my_ws ubuntu pwd</td></tr>
+            <tr><td>--privileged</td><td>赋予容器所有权限</td><td>docker run --privileged ubuntu</td></tr>
+            <tr><td>--device</td><td>挂载硬件设备（如摄像头）</td><td>docker run --device /dev/video0</td></tr>
+        </table>
+        <div class="code">
+<span class="cm"># 完整示例：启动一个 ROS2 容器</span>
+docker run -it --name ros2_humble \
+    --net=host \
+    --env="DISPLAY=$env:DISPLAY" \
+    --env="QT_X11_NO_MITSHM=1" \
+    -v ${PWD}:/my_ws \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    osrf/ros:humble-desktop \
+    bash
+        </div>
+    </div>
+
+    <!-- 7. 网络 -->
+    <div class="section">
+        <h2><span class="icon">🌐</span> Docker 网络模式</h2>
+        <table>
+            <tr><th>网络模式</th><th>说明</th><th>适用场景</th></tr>
+            <tr><td>bridge（默认）</td><td>容器有独立 IP，通过网桥通信</td><td>多容器间隔离通信</td></tr>
+            <tr><td>host</td><td>容器直接使用宿主机网络</td><td>ROS2 / 需要低延迟的场景 🏆</td></tr>
+            <tr><td>none</td><td>无网络</td><td>安全隔离</td></tr>
+            <tr><td>自定义网络</td><td>docker network create 创建</td><td>需要 DNS 解析的场景</td></tr>
+        </table>
+        <div class="code">
+<span class="cm"># 网络管理命令</span>
+docker network ls                    <span class="cm"># 列出所有网络</span>
+docker network create my_net         <span class="cm"># 创建自定义网络</span>
+docker network connect my_net 容器名  <span class="cm"># 将容器接入网络</span>
+docker network inspect my_net        <span class="cm"># 查看网络详情</span>
+docker network rm my_net             <span class="cm"># 删除网络</span>
+        </div>
+    </div>
+
+    <!-- 8. 数据持久化 -->
+    <div class="section">
+        <h2><span class="icon">💾</span> 数据持久化（Volumes）</h2>
+        <table>
+            <tr><th>方式</th><th>说明</th><th>示例</th></tr>
+            <tr><td>bind mount</td><td>挂载宿主机目录</td><td>-v D:\code:/code</td></tr>
+            <tr><td>volume</td><td>Docker 管理的数据卷</td><td>-v my_volume:/data</td></tr>
+            <tr><td>tmpfs</td><td>临时内存挂载（关容器即删）</td><td>--tmpfs /tmp</td></tr>
+        </table>
+        <div class="code">
+<span class="cm"># Volume 管理命令</span>
+docker volume ls                     <span class="cm"># 列出所有卷</span>
+docker volume create my_data         <span class="cm"># 创建卷</span>
+docker volume inspect my_data        <span class="cm"># 查看卷详情</span>
+docker volume rm my_data             <span class="cm"># 删除卷</span>
+docker volume prune                  <span class="cm"># 删除所有未使用的卷</span>
+        </div>
+    </div>
+
+    <!-- 9. Dockerfile -->
+    <div class="section">
+        <h2><span class="icon">📄</span> Dockerfile 指令大全</h2>
+        <table>
+            <tr><th>指令</th><th>说明</th></tr>
+            <tr><td>FROM</td><td>指定基础镜像（必选）</td></tr>
+            <tr><td>RUN</td><td>构建时执行命令（装软件）</td></tr>
+            <tr><td>COPY</td><td>从构建目录复制文件到镜像</td></tr>
+            <tr><td>ADD</td><td>COPY 增强版（支持自动解压 tar、URL）</td></tr>
+            <tr><td>WORKDIR</td><td>设置工作目录（类似 cd）</td></tr>
+            <tr><td>ENV</td><td>设置环境变量</td></tr>
+            <tr><td>ARG</td><td>构建参数（构建时传入，不会留在镜像里）</td></tr>
+            <tr><td>EXPOSE</td><td>声明容器要暴露的端口</td></tr>
+            <tr><td>CMD</td><td>容器启动时的默认命令（可以被覆盖）</td></tr>
+            <tr><td>ENTRYPOINT</td><td>容器启动时的固定命令（不可被覆盖）</td></tr>
+            <tr><td>VOLUME</td><td>声明挂载点</td></tr>
+            <tr><td>LABEL</td><td>添加元数据（版本号、作者等）</td></tr>
+            <tr><td>HEALTHCHECK</td><td>健康检查</td></tr>
+            <tr><td>USER</td><td>指定运行用户（非 root）</td></tr>
+            <tr><td>SHELL</td><td>指定 RUN 使用哪种 shell</td></tr>
+        </table>
+
+        <div class="code">
+<span class="cm"># 完整的 Dockerfile 示例</span>
+<span class="kw">FROM</span> osrf/ros:humble-desktop                <span class="cm"># 基础镜像</span>
+
+<span class="kw">LABEL</span> version="1.0" author="liu"             <span class="cm"># 元数据</span>
+
+<span class="kw">ENV</span> TURTLEBOT3_MODEL=waffle                  <span class="cm"># 环境变量</span>
+<span class="kw">ENV</span> DISPLAY=:0
+
+<span class="kw">RUN</span> apt update <span class="kw">&&</span> apt install -y \             <span class="cm"># 安装软件</span>
+    ros-humble-navigation2 \
+    ros-humble-nav2-bringup \
+    ros-humble-turtlebot3-gazebo \
+    <span class="kw">&&</span> rm -rf /var/lib/apt/lists/*             <span class="cm"># 清理缓存（减小镜像体积）</span>
+
+<span class="kw">WORKDIR</span> /my_ws                                <span class="cm"># 工作目录</span>
+
+<span class="kw">COPY</span> src/ ./src/                               <span class="cm"># 复制代码</span>
+
+<span class="kw">RUN</span> /bin/bash -c <span class="str">"source /opt/ros/humble/setup.bash <span class="kw">&&</span> colcon build"</span>
+
+<span class="kw">CMD</span> [<span class="str">"bash"</span>]                                  <span class="cm"># 默认启动命令</span>
+        </div>
+
+        <div class="code">
+<span class="cm"># 构建和运行</span>
+docker build -t ros2-nav2:1.0 .         <span class="cm"># 构建镜像</span>
+docker run -it --name nav2_demo ros2-nav2:1.0   <span class="cm"># 运行</span>
+        </div>
+    </div>
+
+    <!-- 10. 构建与推送 -->
+    <div class="section">
+        <h2><span class="icon">🚀</span> 构建 &amp; 推送镜像</h2>
+        <table>
+            <tr><th>命令</th><th>说明</th></tr>
+            <tr><td>docker build -t &lt;名&gt; .</td><td>从当前目录的 Dockerfile 构建镜像</td></tr>
+            <tr><td>docker build --no-cache -t &lt;名&gt; .</td><td>强制重新构建（不使用缓存）</td></tr>
+            <tr><td>docker login</td><td>登录 Docker Hub</td></tr>
+            <tr><td>docker push &lt;用户名&gt;/&lt;镜像名&gt;</td><td>推送镜像到 Docker Hub</td></tr>
+            <tr><td>docker pull &lt;用户名&gt;/&lt;镜像名&gt;</td><td>从 Docker Hub 拉取自己的镜像</td></tr>
+        </table>
+    </div>
+
+    <!-- 11. 清理 -->
+    <div class="section">
+        <h2><span class="icon">🧹</span> 清理命令</h2>
+        <table>
+            <tr><th>命令</th><th>说明</th></tr>
+            <tr><td>docker system prune</td><td>清理所有未使用的容器、网络、悬空镜像</td></tr>
+            <tr><td>docker system prune -a</td><td>更彻底的清理（含未使用的镜像）</td></tr>
+            <tr><td>docker container prune</td><td>只清理已停止的容器</td></tr>
+            <tr><td>docker image prune</td><td>只清理悬空镜像</td></tr>
+            <tr><td>docker volume prune</td><td>清理未使用的卷</td></tr>
+            <tr><td>docker network prune</td><td>清理未使用的网络</td></tr>
+        </table>
+        <div class="flow-box">
+            <div class="step-label">💡 建议</div>
+            定期执行 <code style="color:#f472b6;">docker system prune -a</code> 可以释放大量硬盘空间
+        </div>
+    </div>
+
+    <!-- 12. 监控与调试 -->
+    <div class="section">
+        <h2><span class="icon">📊</span> 监控 &amp; 调试</h2>
+        <table>
+            <tr><th>命令</th><th>说明</th></tr>
+            <tr><td>docker stats</td><td>实时查看所有容器的 CPU/内存/网络 I/O</td></tr>
+            <tr><td>docker logs &lt;容器&gt;</td><td>查看容器日志</td></tr>
+            <tr><td>docker logs --tail=50 -f &lt;容器&gt;</td><td>查看最后50行并实时跟踪</td></tr>
+            <tr><td>docker inspect &lt;容器&gt;</td><td>查看容器完整配置信息（JSON）</td></tr>
+            <tr><td>docker diff &lt;容器&gt;</td><td>查看容器内文件变化</td></tr>
+            <tr><td>docker events</td><td>实时监控 Docker 事件</td></tr>
+            <tr><td>docker port &lt;容器&gt;</td><td>查看端口映射</td></tr>
+        </table>
+    </div>
+
+    <!-- 13. Docker Compose -->
+    <div class="section">
+        <h2><span class="icon">🧩</span> Docker Compose（多容器编排）</h2>
+        <p style="color:#94a3b8;font-size:13px;margin-bottom:12px;">
+            用 docker-compose.yml 文件管理多个容器的启动配置，一句命令启动整个系统。
+        </p>
+        <div class="code">
+<span class="cm"># docker-compose.yml 示例</span>
+<span class="kw">version</span>: '3.8'
+<span class="kw">services</span>:
+  <span class="fn">ros2-master</span>:
+    image: osrf/ros:humble-desktop
+    container_name: ros2_humble
+    network_mode: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - .:/my_ws
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    stdin_open: true
+    tty: true
+    command: bash
+
+  <span class="fn">database</span>:
+    image: postgres:15
+    container_name: my_db
+    environment:
+      POSTGRES_PASSWORD: mypass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+<span class="kw">volumes</span>:
+  postgres_data:
+        </div>
+        <table>
+            <tr><th>命令</th><th>说明</th></tr>
+            <tr><td>docker compose up -d</td><td>后台启动所有服务</td></tr>
+            <tr><td>docker compose down</td><td>停止并删除所有服务</td></tr>
+            <tr><td>docker compose ps</td><td>查看服务状态</td></tr>
+            <tr><td>docker compose logs -f</td><td>跟踪所有服务的日志</td></tr>
+            <tr><td>docker compose build</td><td>重新构建所有镜像</td></tr>
+            <tr><td>docker compose restart</td><td>重启所有服务</td></tr>
+        </table>
+    </div>
+
+    <!-- 14. ROS2 + Docker -->
+    <div class="section">
+        <h2><span class="icon">🤖</span> ROS2 + Docker 最佳实践</h2>
+
+        <div class="code">
+<span class="cm"># 运行 ROS2 容器（带 GUI 显示）</span>
+docker run -it --name ros2_humble \
+    --net=host \
+    --env="DISPLAY=$env:DISPLAY" \
+    --env="QT_X11_NO_MITSHM=1" \
+    --env="LIBGL_ALWAYS_SOFTWARE=1" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v ${PWD}:/my_ws \
+    osrf/ros:humble-desktop \
+    bash
+        </div>
+
+        <div class="tip-grid">
+            <div class="tip-card">
+                <div class="tip-title">🎨 GUI 显示</div>
+                <div class="tip-desc">需要映射 DISPLAY 和 X11 socket，WSLg 会用 Wayland 自动显示窗口</div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-title">📡 ROS2 通信</div>
+                <div class="tip-desc">必须使用 <code style="color:#f472b6;">--net=host</code>，不然 ROS2 发现机制（DDS）无法跨容器通信</div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-title">🗺️ 挂载工作区</div>
+                <div class="tip-desc">用 <code style="color:#f472b6;">-v</code> 把代码挂载进去，宿主机编辑，容器里编译运行</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 15. 架构支持 -->
+    <div class="section">
+        <h2><span class="icon">🖥️</span> 架构支持（amd64 vs arm64）</h2>
+        <table>
+            <tr><th>平台</th><th>架构</th><th>拉取命令</th></tr>
+            <tr><td>🖥️ Windows PC / Intel Mac</td><td>amd64</td><td>docker pull ubuntu:22.04（默认）</td></tr>
+            <tr><td>🧩 RK3576 / Raspberry Pi</td><td>arm64</td><td>docker pull arm64v8/ubuntu:22.04</td></tr>
+            <tr><td>🍎 Apple Silicon Mac</td><td>arm64</td><td>docker pull ubuntu:22.04（会自动拉 arm64）</td></tr>
+        </table>
+        <div class="flow-box">
+            <div class="step-label">💡 Docker 会自动识别架构</div>
+            在 amd64 电脑上 pull ubuntu:22.04 → 自动下 amd64 版<br>
+            在 arm64 电脑上 pull ubuntu:22.04 → 自动下 arm64 版<br>
+            只有特定场景（如 arm64v8/ 前缀的镜像）才需要手动指定
+        </div>
+    </div>
+
+    <!-- 16. 速查卡 -->
+    <div class="section">
+        <h2><span class="icon">⚡</span> 速查卡（常用命令一页通）</h2>
+        <div class="code">
+<span class="cm"># ─── 镜像管理 ───</span>
+docker pull ubuntu:22.04                      <span class="cm"># 拉镜像</span>
+docker images                                  <span class="cm"># 查看镜像</span>
+docker rmi &lt;镜像名&gt;                              <span class="cm"># 删镜像</span>
+docker system prune -a                         <span class="cm"># 清理所有无用镜像</span>
+
+<span class="cm"># ─── 容器生命周期 ───</span>
+docker run -it --name test ubuntu bash         <span class="cm"># 创建+启动+进入</span>
+docker start test                              <span class="cm"># 启动</span>
+docker stop test                               <span class="cm"># 停止</span>
+docker rm test                                 <span class="cm"># 删除</span>
+docker exec -it test bash                      <span class="cm"># 进入已有容器</span>
+
+<span class="cm"># ─── 信息查看 ───</span>
+docker ps -a                                   <span class="cm"># 所有容器</span>
+docker logs -f test                            <span class="cm"># 实时日志</span>
+docker stats                                   <span class="cm"># 资源监控</span>
+docker inspect test                            <span class="cm"># 详细信息</span>
+
+<span class="cm"># ─── 数据与网络 ───</span>
+docker run -v D:\code:/code -p 8080:80 nginx   <span class="cm"># 挂载+端口映射</span>
+docker run --net=host my_app                   <span class="cm"># 主机网络</span>
+docker cp file.txt container:/path             <span class="cm"># 复制文件</span>
+
+<span class="cm"># ─── Dockerfile 构建 ───</span>
+docker build -t my_image:1.0 .                 <span class="cm"># 构建</span>
+docker build --no-cache -t my_image .          <span class="cm"># 强行重构建</span>
+        </div>
+    </div>
+
+    <!-- 17. 常见问题 -->
+    <div class="section">
+        <h2><span class="icon">❓</span> 常见问题</h2>
+        <table>
+            <tr><th>问题</th><th>解决方法</th></tr>
+            <tr><td>容器一启动就退出</td><td>加 <code>-it</code> 保持交互，或 CMD 用 <code>tail -f /dev/null</code></td></tr>
+            <tr><td>Docker 没有权限</td><td>管理员身份运行 PowerShell，或加用户到 docker 组</td></tr>
+            <tr><td>镜像拉取慢</td><td>配置国内镜像加速（如 阿里云、中科大）</td></tr>
+            <tr><td>容器内能联网吗？</td><td>默认 bridge 模式可以，加 <code>--dns 8.8.8.8</code> 可指定 DNS</td></tr>
+            <tr><td>容器里怎么用 GPU？</td><td>装 NVIDIA Container Toolkit，加 <code>--gpus all</code></td></tr>
+            <tr><td>如何减小镜像体积？</td><td>多用 <code>apt clean</code>，多用多阶段构建，用 alpine 版镜像</td></tr>
+            <tr><td>容器和宿主机时间不同步</td><td>加 <code>-v /etc/localtime:/etc/localtime:ro</code></td></tr>
+            <tr><td>Warning 磁盘空间不足</td><td>docker system prune -a 清理，或迁移 Docker 数据目录</td></tr>
+        </table>
+    </div>
+
+    <!-- 18. 速查流程图 -->
+    <div class="section">
+        <h2><span class="icon">🔄</span> 常用工作流</h2>
+        <div class="tip-grid">
+            <div class="tip-card">
+                <div class="tip-title">📥 首次部署</div>
+                <div class="tip-desc">
+                    pull 镜像 → run 容器<br>
+                    → exec 进入<br>
+                    → 装东西、改配置
+                </div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-title">🔄 日常开发</div>
+                <div class="tip-desc">
+                    start 容器 → exec 进入<br>
+                    → 编译运行 → exit<br>
+                    → stop 容器
+                </div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-title">📤 打包部署</div>
+                <div class="tip-desc">
+                    写 Dockerfile → build<br>
+                    → push 到仓库<br>
+                    → 在目标机器 pull + run
+                </div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-title">🧪 临时测试</div>
+                <div class="tip-desc">
+                    pull 镜像 → run --rm<br>
+                    → 测试命令<br>
+                    → 容器退出后自动删除
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align:center;color:#475569;font-size:12px;padding:20px 0;">
+        Docker 完整学习笔记 · 2026
+    </div>
+
+</div>
+</body>
+</html>
