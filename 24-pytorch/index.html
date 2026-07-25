@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyTorch 完全入门 · 从零到懂</title>
+<style>
+  /* ====== 全局 ====== */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    background: #0f0f1a;
+    color: #e0e0ee;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+  a { color: #7c8cff; text-decoration: none; }
+  a:hover { color: #a0b0ff; text-decoration: underline; }
+
+  /* ====== 星空背景 ====== */
+  #stars-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+  /* ====== 内容层 ====== */
+  .container {
+    position: relative; z-index: 1;
+    max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 6rem;
+  }
+
+  /* ====== 封面 ====== */
+  .hero {
+    text-align: center; padding: 6rem 0 4rem;
+    border-bottom: 1px solid rgba(124, 140, 255, 0.2);
+    margin-bottom: 3rem;
+  }
+  .hero .logo {
+    font-size: 4rem; font-weight: 800;
+    background: linear-gradient(135deg, #ee4c2c, #f08a5e, #7c8cff, #6c5ce7);
+    background-size: 300% 300%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradShift 6s ease infinite;
+    letter-spacing: -0.03em;
+  }
+  @keyframes gradShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .hero .sub { font-size: 1.3rem; color: #999; margin-top: 0.5rem; font-weight: 300; }
+  .hero .tagline {
+    margin-top: 1.5rem; font-size: 1rem; color: #777;
+    max-width: 520px; margin-left: auto; margin-right: auto;
+  }
+  .hero .tagline span { color: #7c8cff; }
+
+  /* ====== 目录 ====== */
+  .toc {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(124,140,255,0.12);
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    margin-bottom: 3rem;
+    backdrop-filter: blur(10px);
+  }
+  .toc h2 { font-size: 1.1rem; color: #7c8cff; margin-bottom: 1rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .toc ol { padding-left: 1.5rem; }
+  .toc ol li { margin: 0.4rem 0; }
+  .toc ol li a { color: #bbb; font-size: 0.95rem; }
+  .toc ol li a:hover { color: #fff; }
+
+  /* ====== 区块通用 ====== */
+  section { margin-bottom: 4rem; }
+  h2 {
+    font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    background: linear-gradient(135deg, #ee4c2c, #7c8cff);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    border-bottom: 1px solid rgba(124,140,255,0.15);
+  }
+  h3 {
+    font-size: 1.3rem; font-weight: 600; margin: 1.8rem 0 0.8rem;
+    color: #c8d0ff;
+  }
+  h4 {
+    font-size: 1.05rem; font-weight: 600; margin: 1.2rem 0 0.5rem;
+    color: #a0b0ee;
+  }
+  p { margin-bottom: 0.8rem; color: #ccc; }
+  .highlight { color: #f08a5e; font-weight: 600; }
+  .highlight-b { color: #7c8cff; font-weight: 600; }
+
+  /* ====== 引用框 / 类比 ====== */
+  .analogy {
+    background: rgba(124, 140, 255, 0.06);
+    border-left: 4px solid #7c8cff;
+    border-radius: 0 12px 12px 0;
+    padding: 1rem 1.5rem;
+    margin: 1.2rem 0;
+  }
+  .analogy .label {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
+    color: #7c8cff; font-weight: 700; margin-bottom: 0.3rem;
+  }
+
+  /* ====== 代码 ====== */
+  pre {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(124,140,255,0.12);
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+    font-size: 0.85rem;
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    line-height: 1.6;
+    position: relative;
+  }
+  pre::before {
+    content: "▸ 代码";
+    position: absolute; top: 0.5rem; right: 1rem;
+    font-size: 0.65rem; color: rgba(124,140,255,0.3);
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  code { font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace; }
+  .inline-code {
+    background: rgba(124,140,255,0.1); padding: 0.15rem 0.45rem;
+    border-radius: 4px; font-size: 0.9em; color: #f08a5e;
+  }
+  /* 代码语法色（简单） */
+  .kw { color: #c792ea; }  /* 关键字 */
+  .fn { color: #82aaff; }  /* 函数名 */
+  .s { color: #c3e88d; }   /* 字符串 */
+  .cm { color: #546e7a; font-style: italic; } /* 注释 */
+  .num { color: #f78c6c; } /* 数字 */
+  .cls { color: #ffcb6b; } /* 类名 */
+
+  /* ====== 卡片网格 ====== */
+  .card-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem; margin: 1.2rem 0;
+  }
+  .card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(124,140,255,0.08);
+    border-radius: 14px;
+    padding: 1.4rem;
+    transition: border-color 0.3s, transform 0.2s;
+  }
+  .card:hover { border-color: rgba(124,140,255,0.3); transform: translateY(-2px); }
+  .card .emoji { font-size: 1.6rem; display: block; margin-bottom: 0.4rem; }
+  .card h4 { margin: 0 0 0.4rem; font-size: 1rem; color: #ddd; }
+  .card p { font-size: 0.9rem; color: #999; margin: 0; }
+
+  /* ====== 表格 ====== */
+  .table-wrap { overflow-x: auto; margin: 1rem 0; }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  th, td {
+    padding: 0.7rem 1rem; text-align: left;
+    border-bottom: 1px solid rgba(124,140,255,0.08);
+  }
+  th { color: #7c8cff; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { color: #bbb; }
+  tr:hover td { background: rgba(124,140,255,0.04); }
+
+  /* ====== 流程图 (纯 CSS 文字) ====== */
+  .flow {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 0.3rem; margin: 1.5rem 0;
+    font-size: 0.9rem;
+  }
+  .flow .box {
+    background: rgba(124,140,255,0.08);
+    border: 1px solid rgba(124,140,255,0.2);
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    text-align: center;
+    min-width: 80px;
+    color: #c8d0ff;
+    font-weight: 500;
+  }
+  .flow .arrow { color: #555; font-size: 1.2rem; padding: 0 0.2rem; }
+  .flow .box.highlight-bg { background: rgba(238,76,44,0.12); border-color: #ee4c2c; }
+  .flow .box.highlight-bb { background: rgba(124,140,255,0.15); border-color: #7c8cff; }
+
+  /* ====== 分隔标语 ====== */
+  .section-quote {
+    text-align: center; font-size: 1.1rem; color: #888; font-style: italic;
+    margin: 2rem 0; padding: 1.5rem 0;
+    border-top: 1px solid rgba(124,140,255,0.06);
+    border-bottom: 1px solid rgba(124,140,255,0.06);
+  }
+
+  /* ====== 底部 ====== */
+  footer {
+    text-align: center; padding: 3rem 0 1rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    color: #555; font-size: 0.85rem;
+  }
+
+  /* ====== 关键概念高亮块 ====== */
+  .concept-box {
+    display: flex; gap: 1.2rem; align-items: flex-start;
+    background: rgba(124,140,255,0.03);
+    border: 1px solid rgba(124,140,255,0.08);
+    border-radius: 14px;
+    padding: 1.2rem 1.5rem;
+    margin: 1rem 0;
+  }
+  .concept-box .icon { font-size: 2rem; flex-shrink: 0; line-height: 1; }
+  .concept-box .content { flex: 1; }
+  .concept-box .content h4 { margin: 0 0 0.3rem; color: #ddd; }
+  .concept-box .content p { margin: 0; font-size: 0.93rem; color: #aaa; }
+
+  /* ====== 交互动画 ====== */
+  .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ====== tag 标签 ====== */
+  .tag {
+    display: inline-block;
+    font-size: 0.65rem; padding: 0.15rem 0.6rem; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+    margin-right: 0.3rem;
+  }
+  .tag-basic { background: rgba(124,140,255,0.15); color: #7c8cff; }
+  .tag-adv { background: rgba(238,76,44,0.15); color: #ee4c2c; }
+  .tag-tip { background: rgba(195,232,141,0.15); color: #c3e88d; }
+
+  /* ====== 响应式 ====== */
+  @media (max-width: 600px) {
+    .hero .logo { font-size: 2.8rem; }
+    .card-grid { grid-template-columns: 1fr; }
+    .toc { padding: 1.2rem 1.5rem; }
+    .concept-box { flex-direction: column; }
+    .flow .box { min-width: 60px; padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 星空 -->
+<canvas id="stars-canvas"></canvas>
+
+<div class="container">
+
+  <!-- ====== 封面 ====== -->
+  <header class="hero" id="top">
+    <div class="logo">PyTorch</div>
+    <div class="sub">完全入门 · 从零到懂</div>
+    <p class="tagline">
+      <span>✧</span> 用大白话讲清楚 PyTorch 是什么、能干什么、怎么干 <span>✧</span>
+    </p>
+  </header>
+
+  <!-- ====== 目录 ====== -->
+  <nav class="toc fade-in">
+    <h2>📖 目录</h2>
+    <ol>
+      <li><a href="#ch1">PyTorch 是什么？一句话 + 一个故事</a></li>
+      <li><a href="#ch2">核心概念：Tensor —— 神经网络的数据容器</a></li>
+      <li><a href="#ch3">自动求导 (Autograd) —— 魔法引擎</a></li>
+      <li><a href="#ch4">学习范式 —— 三种"教法"</a></li>
+      <li><a href="#ch5">Dataset &amp; DataLoader —— 把数据喂给网络</a></li>
+      <li><a href="#ch6">神经网络 (nn.Module) —— 搭积木</a></li>
+      <li><a href="#ch7">线性回归 —— 最简单的神经网络</a></li>
+      <li><a href="#ch8">手写数字识别 —— 第一个完整项目</a></li>
+      <li><a href="#ch9">训练流程拆解 —— 三步一循环</a></li>
+      <li><a href="#ch10">总结 · 一张脑图 + 一句话</a></li>
+    </ol>
+  </nav>
+
+  <!-- ============================================================ -->
+  <!-- 第一章 -->
+  <!-- ============================================================ -->
+  <section id="ch1" class="fade-in">
+    <h2>一、PyTorch 是什么？一句话 + 一个故事</h2>
+
+    <h3>⚡ 一句话版</h3>
+    <p>
+      <strong>PyTorch = 一个让电脑学会"猜东西"的 Python 工具包。</strong>
+    </p>
+    <p>
+      它帮你做两件事：<span class="highlight">搭神经网络</span>（给电脑设计大脑结构），
+      和<span class="highlight">训练它</span>（让大脑变聪明）。
+    </p>
+
+    <h3>📖 一个故事：教小孩认猫</h3>
+    <p>
+      想象你有一个 <strong>3 岁小孩</strong>（这就是你的神经网络——初始版本，啥也不会）。
+    </p>
+    <div class="analogy">
+      <div class="label">🗣️ 小夏讲比喻</div>
+      <p>
+        <strong>小孩（网络）</strong> → 你给他看一张猫的图片<br>
+        <strong>小孩说"这是狗"</strong> → 前向传播（猜了一次）<br>
+        <strong>你说"不对，这是猫"</strong> → 损失函数（告诉你猜错了）<br>
+        <strong>小孩想"哪里看错了？耳朵？尾巴？"</strong> → 反向传播（找问题）<br>
+        <strong>下次再看猫，他知道了"圆耳朵 + 长胡子 = 猫"</strong> → 训练完成 ✅
+      </p>
+    </div>
+    <p>
+      <strong>PyTorch 就是帮你完成上面整个流程的工具。</strong> 你只需要告诉它：
+      "我要用什么样的网络？用什么数据？训练多久？"——剩下的自动计算。
+    </p>
+
+    <h3>📜 PyTorch 的小档案</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>维度</th><th>说明</th></tr>
+        <tr><td>出身</td><td>Meta (Facebook) 人工智能研究院，2016 年开源</td></tr>
+        <tr><td>地位</td><td>学术界首选，工业界也大量使用</td></tr>
+        <tr><td>核心特点</td><td>动态计算图（写代码像写普通 Python，调试直觉）</td></tr>
+        <tr><td>对标</td><td>TensorFlow / JAX / PaddlePaddle</td></tr>
+        <tr><td>适合谁</td><td>研究者、学生、工程师、任何想入门深度学习的人</td></tr>
+        <tr><td>学习方法</td><td>Python 基础 + 懂一点线性代数概念即可</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第二章：Tensor -->
+  <!-- ============================================================ -->
+  <section id="ch2" class="fade-in">
+    <h2>二、核心概念：Tensor —— 神经网络的数据容器</h2>
+
+    <h3>🔢 什么是 Tensor？</h3>
+    <p>
+      <strong>Tensor（张量）</strong>是 PyTorch 里最基本的数据结构。<br>
+      你不需要被这个高大上的名字吓到——说白了就是：<span class="highlight">一个装着数字的多维数组。</span>
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <tr><th>维度</th><th>PyTorch 叫法</th><th>生活中的例子</th></tr>
+        <tr><td>0 维</td><td>标量 (Scalar) / 0D-Tensor</td><td>一个数字：价格 3.5 元</td></tr>
+        <tr><td>1 维</td><td>向量 (Vector) / 1D-Tensor</td><td>一排行列：一周 7 天的气温 [22, 24, 23, …]</td></tr>
+        <tr><td>2 维</td><td>矩阵 (Matrix) / 2D-Tensor</td><td>Excel 表格：10 行 × 5 列的考试成绩单</td></tr>
+        <tr><td>3 维</td><td>3D-Tensor</td><td>一张彩色图片 (高×宽×RGB通道)</td></tr>
+        <tr><td>4 维</td><td>4D-Tensor</td><td>一批彩色图片 (batch×高×宽×通道)</td></tr>
+      </table>
+    </div>
+
+    <div class="analogy">
+      <div class="label">💡 记住这个</div>
+      <p>
+        <span class="highlight-b">Tensor = NumPy 数组 + GPU 加速 + 自动求导。</span><br>
+        如果你写过 Python 的 NumPy，那 Tensor 就是它的"超级进化版"——多了两个绝招。
+      </p>
+    </div>
+
+    <h3>🛠️ 基本操作速览</h3>
+    <pre>
+<span class="cm"># 创建 Tensor</span>
+x = torch.tensor([[1, 2], [3, 4]])           <span class="cm"># 手动创建</span>
+x = torch.randn(3, 5)                         <span class="cm"># 随机正态分布</span>
+x = torch.zeros(2, 3)                         <span class="cm"># 全零</span>
+x = torch.ones(4, 4)                          <span class="cm"># 全一</span>
+
+<span class="cm"># 形状操作</span>
+x.shape              <span class="cm"># 看形状 (3, 5)</span>
+x.view(-1, 5)        <span class="cm"># 重塑形状（像 rearrange）</span>
+
+<span class="cm"># 运算 —— 和 NumPy 几乎一样</span>
+x + y, x * y, x @ y  <span class="cm"># 加、乘、矩阵乘法</span>
+x.mean(), x.sum()    <span class="cm"># 平均值、求和</span>
+
+<span class="cm"># 和 NumPy 互相转换</span>
+np_array = x.numpy()
+torch_tensor = torch.from_numpy(np_array)</pre>
+
+    <h3>💻 GPU 加速 —— Tensor 的隐藏技能</h3>
+    <pre>
+<span class="cm"># 把 Tensor 搬到 GPU 上</span>
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+x = x.to(device)     <span class="cm"># 送到显卡</span>
+y = y.to(device)     <span class="cm"># 计算自动在 GPU 上跑，快几十倍</span></pre>
+    <p>
+      这是 PyTorch 相对普通 Python 的一大杀器：
+      训练有大 GPU 加速，<span class="highlight">一次算几千几万个数字</span>，而不是用 for 循环一个一个算。
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第三章：Autograd -->
+  <!-- ============================================================ -->
+  <section id="ch3" class="fade-in">
+    <h2>三、自动求导 (Autograd) —— 魔法引擎</h2>
+
+    <div class="analogy">
+      <div class="label">🗣️ 小夏讲比喻</div>
+      <p>
+        <strong>没有 Autograd：</strong> 你想调一个参数，得自己拿笔算导数——又慢又容易错。<br>
+        <strong>有 Autograd：</strong> 你只需要说"帮我算一下每个参数该调多少"，PyTorch 自动算好。
+      </p>
+    </div>
+
+    <h3>🔮 它是怎么工作的？</h3>
+    <p>
+      Autograd（自动求导）是 PyTorch 最核心的魔法。它会在你执行运算时，<span class="highlight">自动记录所有操作</span>，
+      形成一个"计算图"。当你需要梯度时，它沿着这个图往回走，用<span class="highlight">链式法则</span>算出每个参数的偏导数。
+    </p>
+
+    <pre>
+<span class="cm"># 核心只有两行</span>
+loss.backward()           <span class="cm"># 反向传播：算每个参数的梯度</span>
+optimizer.step()          <span class="cm"># 根据梯度更新参数</span></pre>
+
+    <p>
+      你完全不需要手算导数，不需要推导公式——<span class="highlight">PyTorch 自动帮你搞定了一切微积分。</span>
+      这也是它比纯 NumPy 写神经网络方便一万倍的原因。
+    </p>
+
+    <div class="concept-box">
+      <div class="icon">💡</div>
+      <div class="content">
+        <h4>一句话记住 Autograd</h4>
+        <p>
+          "只管向前算，PyTorch 自动记住你怎么算的；需要调参数时，它自己反向走一遍求梯度。"
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第四章：学习范式 -->
+  <!-- ============================================================ -->
+  <section id="ch4" class="fade-in">
+    <h2>四、学习范式 —— 三种"教法"</h2>
+
+    <p>
+      <span class="highlight-b">学习范式</span> = 一整套关于"学习到底是怎么回事"的思路和做法。
+      不同的范式对应不同的"教法"。
+    </p>
+
+    <div class="card-grid">
+      <div class="card">
+        <span class="emoji">🐕</span>
+        <h4>行为主义</h4>
+        <p>学习 = 刺激→反应。给正确答案就奖励。像训练狗坐下。</p>
+      </div>
+      <div class="card">
+        <span class="emoji">🧠</span>
+        <h4>认知主义</h4>
+        <p>学习 = 大脑处理信息。像电脑：输入→加工→存储→输出。</p>
+      </div>
+      <div class="card">
+        <span class="emoji">🏗️</span>
+        <h4>建构主义</h4>
+        <p>学习 = 主动搭建知识体系。不是往空杯倒水，而是自己盖房子。</p>
+      </div>
+    </div>
+
+    <p>
+      深度学习属于 <span class="highlight">"连接主义"</span>——是认知主义的一个分支。
+      它认为"学习 = 调整无数个神经元之间的连接强度"，
+      而 PyTorch 就是帮你做这件事的工具。
+    </p>
+
+    <div class="analogy">
+      <div class="label">🧩 类比</div>
+      <p>
+        <strong>学习范式 ≈ 你默认的那套"学习的操作系统"</strong><br>
+        你用哪种方法学习，往往取决于你潜意识里觉得"学习应该是什么样的"——那套默认假设，就是你的学习范式。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第五章：Dataset & DataLoader -->
+  <!-- ============================================================ -->
+  <section id="ch5" class="fade-in">
+    <h2>五、Dataset &amp; DataLoader —— 把数据喂给网络</h2>
+
+    <div class="analogy">
+      <div class="label">🗣️ 小夏讲比喻</div>
+      <p>
+        <strong>Dataset = 你的食材仓库</strong> —— 你知道食物（数据）放在哪<br>
+        <strong>DataLoader = 自动服务员</strong> —— 帮你按桌（batch）上菜
+      </p>
+    </div>
+
+    <h3>📦 Dataset —— 告诉我你的数据在哪儿</h3>
+    <pre>
+<span class="kw">from</span> torch.utils.data <span class="kw">import</span> Dataset
+
+<span class="kw">class</span> <span class="cls">MyDataset</span>(Dataset):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):     <span class="cm"># 进货：把数据搬进仓库</span>
+        self.data = [1, 2, 3, 4, 5]
+
+    <span class="kw">def</span> <span class="fn">__len__</span>(self):       <span class="cm"># 报数：仓库里有多少货</span>
+        <span class="kw">return</span> len(self.data)
+
+    <span class="kw">def</span> <span class="fn">__getitem__</span>(self, idx):  <span class="cm"># 取货：给我第 idx 箱</span>
+        <span class="kw">return</span> self.data[idx]</pre>
+    <p>你只需要实现这三个方法，PyTorch 就知道怎么用你的数据了。</p>
+
+    <h3>🚚 DataLoader —— 自动分批上菜</h3>
+    <pre>
+<span class="kw">from</span> torch.utils.data <span class="kw">import</span> DataLoader
+
+loader = DataLoader(dataset,
+    batch_size=<span class="num">64</span>,    <span class="cm"># 一次端 64 道菜上桌</span>
+    shuffle=<span class="kw">True</span>,      <span class="cm"># 打乱顺序（别总吃前几道菜）</span>
+    num_workers=<span class="num">4</span>      <span class="cm"># 4 个帮工同时搬货</span>
+)</pre>
+
+    <h3>🌊 训练时怎么用</h3>
+    <pre>
+<span class="kw">for</span> data, label <span class="kw">in</span> loader:          <span class="cm"># DataLoader 自动送数据</span>
+    pred = model(data)                 <span class="cm"># 猜一次</span>
+    loss = criterion(pred, label)      <span class="cm"># 看差多少</span>
+    loss.backward()                    <span class="cm"># 找问题</span>
+    optimizer.step()                   <span class="cm"># 拧旋钮</span></pre>
+
+    <h3>🧰 常用预处理 (transforms)</h3>
+    <p>数据不是原生就能喂的，得先加工一下：</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>操作</th><th>人话解释</th></tr>
+        <tr><td><code>ToTensor()</code></td><td>把图片变成 PyTorch 能吃的数字格式</td></tr>
+        <tr><td><code>Normalize(mean, std)</code></td><td>标准化：把数字调到一个好学的范围</td></tr>
+        <tr><td><code>Resize((224,224))</code></td><td>统一尺寸（不然没法一批处理）</td></tr>
+        <tr><td><code>RandomCrop</code></td><td>随机剪一块（数据增强，防过拟合）</td></tr>
+        <tr><td><code>RandomHorizontalFlip</code></td><td>随机翻转（让网络不看方向）</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第六章：神经网络 -->
+  <!-- ============================================================ -->
+  <section id="ch6" class="fade-in">
+    <h2>六、神经网络 (nn.Module) —— 搭积木</h2>
+
+    <div class="analogy">
+      <div class="label">🗣️ 小夏讲比喻</div>
+      <p>
+        <strong>nn.Module = 一套乐高积木。</strong><br>
+        基础块（Linear、Conv2d、ReLU）就像不同的积木颗粒。
+        <code>nn.Sequential</code> 就是按说明书把积木拼在一起——拼出一个造型，就是你的网络。
+      </p>
+    </div>
+
+    <h3>🏗️ 搭一个最简单的网络</h3>
+    <pre>
+<span class="kw">import</span> torch.nn <span class="kw">as</span> nn
+<span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
+
+<span class="kw">class</span> <span class="cls">MyNet</span>(nn.Module):                    <span class="cm"># 继承 nn.Module</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        <span class="kw">super</span>().<span class="fn">__init__</span>()
+        self.fc1 = nn.Linear(<span class="num">784</span>, <span class="num">128</span>)  <span class="cm"># 第一层：784 → 128</span>
+        self.fc2 = nn.Linear(<span class="num">128</span>, <span class="num">10</span>)   <span class="cm"># 第二层：128 → 10</span>
+
+    <span class="kw">def</span> <span class="fn">forward</span>(self, x):                   <span class="cm"># 前向传播</span>
+        x = F.relu(self.fc1(x))            <span class="cm"># 第一层 + 激活函数 ReLU</span>
+        x = self.fc2(x)                    <span class="cm"># 第二层</span>
+        <span class="kw">return</span> x</pre>
+
+    <p>就这么简单。你定义 <span class="inline-code">__init__</span> 里有哪些"积木块"，
+    在 <span class="inline-code">forward</span> 里描述数据怎么流过去——PyTorch 搞定剩下的。</p>
+
+    <h3>🧩 常见积木块速查</h3>
+    <div class="card-grid">
+      <div class="card">
+        <span class="emoji">📏</span>
+        <h4>nn.Linear(in, out)</h4>
+        <p>全连接层（密集层）。每个输入和每个输出都相连。y = Wx + b</p>
+      </div>
+      <div class="card">
+        <span class="emoji">🖼️</span>
+        <h4>nn.Conv2d(C_in, C_out, K)</h4>
+        <p>卷积层（图像专用）。滑动窗口扫描图片提取特征。</p>
+      </div>
+      <div class="card">
+        <span class="emoji">⚡</span>
+        <h4>nn.ReLU()</h4>
+        <p>激活函数：把负数变 0，正数保留。引入非线性能力。</p>
+      </div>
+      <div class="card">
+        <span class="emoji">📉</span>
+        <h4>nn.Dropout(p=0.5)</h4>
+        <p>随机"关掉"一半神经元——防止网络死记硬背（过拟合）。</p>
+      </div>
+      <div class="card">
+        <span class="emoji">🧊</span>
+        <h4>nn.BatchNorm1d/2d</h4>
+        <p>批归一化：让数据分布保持正常，训练更稳更快。</p>
+      </div>
+      <div class="card">
+        <span class="emoji">🔻</span>
+        <h4>nn.MaxPool2d(2,2)</h4>
+        <p>最大池化：缩小图片尺寸，留下最显著的特征。</p>
+      </div>
+    </div>
+
+    <h3>🖇️ 快速拼装：nn.Sequential</h3>
+    <pre>
+model = nn.Sequential(
+    nn.Linear(<span class="num">784</span>, <span class="num">128</span>),
+    nn.ReLU(),
+    nn.Linear(<span class="num">128</span>, <span class="num">64</span>),
+    nn.ReLU(),
+    nn.Linear(<span class="num">64</span>, <span class="num">10</span>)
+)   <span class="cm"># 层层堆叠，像叠汉堡一样</span></pre>
+    <p><span class="inline-code">Sequential</span> 适合"一条路走到底"的网络——数据一层层往下传，没有分支。简单又直观。</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第七章：线性回归 -->
+  <!-- ============================================================ -->
+  <section id="ch7" class="fade-in">
+    <h2>七、线性回归 —— 最简单的神经网络</h2>
+
+    <div class="analogy">
+      <div class="label">🗣️ 小夏讲比喻</div>
+      <p>
+        <strong>线性回归 = 给一堆散点画一条最合适的直线。</strong><br>
+        你有一堆 2D 点 (x, y)，想让电脑找出 y = wx + b 里 w 和 b 的最佳值。
+      </p>
+    </div>
+
+    <h3>📐 公式：y = wx + b（初中知识）</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>符号</th><th>意思</th><th>房价预测例子</th></tr>
+        <tr><td>w（权重）</td><td>"斜率"——x 每变 1，y 变多少</td><td>面积每多 1㎡，房价涨 1.5 万</td></tr>
+        <tr><td>b（偏置）</td><td>"截距"——x=0 时的基础值</td><td>地皮基础价 50 万</td></tr>
+        <tr><td>x（输入）</td><td>特征</td><td>房子面积 80㎡</td></tr>
+        <tr><td>y（输出）</td><td>预测值</td><td>预测房价 170 万</td></tr>
+      </table>
+    </div>
+
+    <h3>🚀 PyTorch 实现</h3>
+    <pre>
+<span class="cm"># 1. 造数据：真实关系 y = 2x + 1，加一点噪声</span>
+x = torch.linspace(<span class="num">0</span>, <span class="num">10</span>, <span class="num">100</span>).view(-<span class="num">1</span>, <span class="num">1</span>)
+y = <span class="num">2</span>*x + <span class="num">1</span> + torch.randn(<span class="num">100</span>, <span class="num">1</span>) * <span class="num">0.3</span>
+
+<span class="cm"># 2. 定义模型：就是一个 Linear(1,1) —— y=wx+b</span>
+model = nn.Linear(<span class="num">1</span>, <span class="num">1</span>)
+
+<span class="cm"># 3. 损失函数和优化器</span>
+criterion = nn.MSELoss()                        <span class="cm"># 均方误差</span>
+optimizer = torch.optim.SGD(model.parameters(), lr=<span class="num">0.01</span>)  <span class="cm"># 随机梯度下降</span>
+
+<span class="cm"># 4. 训练循环</span>
+<span class="kw">for</span> epoch <span class="kw">in</span> range(<span class="num">200</span>):
+    pred = model(x)                              <span class="cm"># 前向：用当前 w,b 预测</span>
+    loss = criterion(pred, y)                     <span class="cm"># 看偏差</span>
+
+    optimizer.zero_grad()                         <span class="cm"># 清零上一步的梯度</span>
+    loss.backward()                               <span class="cm"># 反向传播：算梯度</span>
+    optimizer.step()                              <span class="cm"># 拧 w 和 b</span>
+
+    <span class="kw">if</span> epoch % <span class="num">20</span> == <span class="num">0</span>:
+        print(f<span class="s">"Epoch {epoch}: loss = {loss.item():.4f}"</span>)
+
+<span class="cm"># 5. 看结果：w 接近 2，b 接近 1</span>
+print(<span class="s">f"w = {model.weight.item():.3f}, b = {model.bias.item():.3f}"</span>)</pre>
+
+    <p>
+      训练过程中，你可以看到损失值（loss）从几十一路降到接近 0，<br>
+      w 和 b 从随机值慢慢逼近 2 和 1——<span class="highlight">这就是"学习"的本质。</span>
+    </p>
+
+    <div class="concept-box">
+      <div class="icon">💡</div>
+      <div class="content">
+        <h4>关键洞见</h4>
+        <p>
+          线性回归就是 <strong>没有隐藏层、没有激活函数的神经网络</strong>。
+          你弄懂了它，就弄懂了神经网络 80% 的核心流程：<br>
+          前向 → 损失 → 反向 → 优化 → 重复。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第八章：手写数字识别 -->
+  <!-- ============================================================ -->
+  <section id="ch8" class="fade-in">
+    <h2>八、手写数字识别 —— 第一个完整项目</h2>
+
+    <p>
+      MNIST 数据集：7 万张 <strong>28×28</strong> 像素的手写数字图片（0~9）。<br>
+      这是深度学习的 <span class="highlight-b">"Hello World"</span>——每个入门者都要做的项目。
+    </p>
+
+    <h3>🏗️ 完整代码</h3>
+    <pre>
+<span class="kw">import</span> torch
+<span class="kw">import</span> torch.nn <span class="kw">as</span> nn
+<span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
+<span class="kw">import</span> torch.optim <span class="kw">as</span> optim
+<span class="kw">from</span> torchvision <span class="kw">import</span> datasets, transforms
+<span class="kw">from</span> torch.utils.data <span class="kw">import</span> DataLoader
+
+<span class="cm"># ─── 1. 数据预处理 ───</span>
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((<span class="num">0.1307</span>,), (<span class="num">0.3081</span>,))
+])
+
+<span class="cm"># ─── 2. 加载数据 ───</span>
+train_data = datasets.MNIST(root=<span class="s">'./data'</span>, train=<span class="kw">True</span>,
+                            transform=transform, download=<span class="kw">True</span>)
+test_data  = datasets.MNIST(root=<span class="s">'./data'</span>, train=<span class="kw">False</span>,
+                            transform=transform, download=<span class="kw">True</span>)
+
+train_loader = DataLoader(train_data, batch_size=<span class="num">64</span>, shuffle=<span class="kw">True</span>)
+test_loader  = DataLoader(test_data,  batch_size=<span class="num">1000</span>, shuffle=<span class="kw">False</span>)
+
+<span class="cm"># ─── 3. 定义网络 ───</span>
+<span class="kw">class</span> <span class="cls">Net</span>(nn.Module):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        <span class="kw">super</span>().<span class="fn">__init__</span>()
+        self.fc1 = nn.Linear(<span class="num">784</span>, <span class="num">128</span>)   <span class="cm"># 输入层 784 → 隐藏层 128</span>
+        self.fc2 = nn.Linear(<span class="num">128</span>, <span class="num">10</span>)    <span class="cm"># 隐藏层 128 → 输出层 10</span>
+
+    <span class="kw">def</span> <span class="fn">forward</span>(self, x):
+        x = x.view(-<span class="num">1</span>, <span class="num">784</span>)                <span class="cm"># 把 28×28 拍平成 784</span>
+        x = F.relu(self.fc1(x))           <span class="cm"># 隐藏层 + ReLU</span>
+        x = self.fc2(x)                   <span class="cm"># 输出层</span>
+        <span class="kw">return</span> F.log_softmax(x, dim=<span class="num">1</span>)    <span class="cm"># 转成概率分布</span>
+
+model = Net()
+
+<span class="cm"># ─── 4. 损失和优化器 ───</span>
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(model.parameters(), lr=<span class="num">0.01</span>, momentum=<span class="num">0.5</span>)
+
+<span class="cm"># ─── 5. 训练 ───</span>
+<span class="kw">for</span> epoch <span class="kw">in</span> range(<span class="num">5</span>):                     <span class="cm"># 所有图看 5 遍</span>
+    <span class="kw">for</span> data, target <span class="kw">in</span> train_loader:
+        optimizer.zero_grad()
+        output = model(data)
+        loss = criterion(output, target)
+        loss.backward()
+        optimizer.step()
+    print(<span class="s">f"Epoch {epoch} 完成"</span>)
+
+<span class="cm"># ─── 6. 测试 ───</span>
+correct = <span class="num">0</span>
+total   = <span class="num">0</span>
+<span class="kw">with</span> torch.no_grad():                    <span class="cm"># 考试了，不记笔记</span>
+    <span class="kw">for</span> data, target <span class="kw">in</span> test_loader:
+        output = model(data)
+        pred = output.argmax(dim=<span class="num">1</span>)      <span class="cm"># 取概率最高的那个数字</span>
+        correct += (pred == target).sum().item()
+        total   += target.size(<span class="num">0</span>)
+
+print(<span class="s">f"测试准确率: {100 * correct / total:.1f}%"</span>)   <span class="cm"># 通常 &gt; 97%</span></pre>
+
+    <h3>📊 网络结构视觉化</h3>
+    <div class="flow">
+      <span class="box highlight-bb">输入<br>28×28 → 784</span>
+      <span class="arrow">→</span>
+      <span class="box">全连接<br>784 → 128</span>
+      <span class="arrow">→</span>
+      <span class="box">ReLU<br>激活</span>
+      <span class="arrow">→</span>
+      <span class="box">全连接<br>128 → 10</span>
+      <span class="arrow">→</span>
+      <span class="box highlight-bg">Softmax<br>输出概率</span>
+      <span class="arrow">→</span>
+      <span class="box" style="border-color:#4ecdc4;">预测<br>数字 3 🎯</span>
+    </div>
+
+    <p>
+      一个只有 <strong>2 层全连接层</strong>的极简单网络，能到 <span class="highlight">97% 以上</span> 的准确率。
+      这已经是 30 年前的技术了——现在更复杂的 CNN 网络能做到 99.8%。
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第九章：训练流程拆解 -->
+  <!-- ============================================================ -->
+  <section id="ch9" class="fade-in">
+    <h2>九、训练流程拆解 —— 三步一循环</h2>
+
+    <p>
+      上面所有例子里，训练结构都是一样的。我把这 <span class="highlight">"永恒的三步"</span>专门拎出来讲：
+    </p>
+
+    <div class="flow" style="margin:1.8rem 0;">
+      <span class="box highlight-bb">前向传播<br>model(x)</span>
+      <span class="arrow">→</span>
+      <span class="box">算损失<br>criterion(pred, y)</span>
+      <span class="arrow">→</span>
+      <span class="box highlight-bg">反向传播<br>loss.backward()</span>
+      <span class="arrow">↻</span>
+      <span class="box" style="border-color:#4ecdc4;">更新参数<br>optimizer.step()</span>
+    </div>
+
+    <h3>🔁 三句话流程</h3>
+
+    <div class="card-grid">
+      <div class="card">
+        <span class="emoji">🚀</span>
+        <h4>前向传播</h4>
+        <p>把数据送进网络，算出一堆预测值。<br><code>pred = model(data)</code></p>
+      </div>
+      <div class="card">
+        <span class="emoji">📊</span>
+        <h4>算损失</h4>
+        <p>拿预测值和真实值对比，算偏差。<br><code>loss = criterion(pred, target)</code></p>
+      </div>
+      <div class="card">
+        <span class="emoji">🔙</span>
+        <h4>反向传播 + 更新</h4>
+        <p>回传梯度 → 更新参数。<br><code>loss.backward()</code><br><code>optimizer.step()</code></p>
+      </div>
+    </div>
+
+    <h3>📌 三个关键细节</h3>
+
+    <div class="concept-box">
+      <div class="icon">🗑️</div>
+      <div class="content">
+        <h4>optimizer.zero_grad() 有什么用？</h4>
+        <p>梯度默认会累积。不清零的话，<strong>上一批数据的梯度会和当前的混在一起</strong>，像上一道菜的油没洗锅就炒下一道。所以每次迭代前清零。</p>
+      </div>
+    </div>
+
+    <div class="concept-box">
+      <div class="icon">📵</div>
+      <div class="content">
+        <h4>torch.no_grad() 什么时候用？</h4>
+        <p><strong>考试模式</strong>。评估/测试时用——告诉 PyTorch"别记录梯度了，我只想快点出结果"。</p>
+      </div>
+    </div>
+
+    <div class="concept-box">
+      <div class="icon">📏</div>
+      <div class="content">
+        <h4>Epoch 和 Batch 的区别？</h4>
+        <p><strong>Epoch</strong> = 全部数据看了一遍。<strong>Batch</strong> = 一次看的数量。6 万张图，batch=64 → 938 个 batch 才完成 1 个 epoch。</p>
+      </div>
+    </div>
+
+    <h3>📋 损失函数速查</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>损失函数</th><th>用在</th><th>人话</th></tr>
+        <tr><td>MSELoss</td><td>回归（预测连续值）</td><td>"猜得偏离了多少，平方后平均"</td></tr>
+        <tr><td>CrossEntropyLoss</td><td>分类（N 选 1）</td><td>"猜错的概率越小越好"</td></tr>
+        <tr><td>BCELoss</td><td>二分类（是/否）</td><td>"是猫不是猫，猜对了没"</td></tr>
+      </table>
+    </div>
+
+    <h3>🔄 优化器速查</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>优化器</th><th>特点</th><th>啥时候用</th></tr>
+        <tr><td>SGD</td><td>基础版梯度下降</td><td>简单任务、学习用</td></tr>
+        <tr><td>SGD + momentum</td><td>带惯性，加速收敛</td><td>大多数常规任务</td></tr>
+        <tr><td>Adam</td><td>自适应学习率，"聪明版"</td><td>新手首选，啥都能用</td></tr>
+        <tr><td>AdamW</td><td>Adam 改进版</td><td>现代推荐，尤其 Transformer</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第十章：总结 -->
+  <!-- ============================================================ -->
+  <section id="ch10" class="fade-in">
+    <h2>十、总结 · 一张脑图 + 一句话</h2>
+
+    <h3>🧠 整个 PyTorch 的"进化树"</h3>
+    <div class="flow" style="flex-direction:column; align-items:stretch; gap:0.5rem; max-width:500px; margin:1.5rem auto;">
+      <div class="box highlight-bb" style="width:100%;">🔥 PyTorch = 深度学习工具包</div>
+      <div style="display:flex; flex-wrap:wrap; gap:0.3rem; justify-content:center;">
+        <span class="box" style="flex:1; min-width:100px;">Tensor<br>数据容器</span>
+        <span class="box" style="flex:1; min-width:100px;">Autograd<br>自动求导</span>
+        <span class="box" style="flex:1; min-width:100px;">nn.Module<br>搭网络</span>
+        <span class="box" style="flex:1; min-width:100px;">DataLoader<br>加载数据</span>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:0.3rem; justify-content:center;">
+        <span class="box" style="flex:1; min-width:100px;">优化器<br>调参数</span>
+        <span class="box" style="flex:1; min-width:100px;">损失函数<br>算偏差</span>
+        <span class="box" style="flex:1; min-width:100px;">GPU加速<br>快速运算</span>
+        <span class="box" style="flex:1; min-width:100px;">预训练模型<br>站在巨人肩上</span>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:0.3rem; justify-content:center;">
+        <span class="box highlight-bg" style="flex:1; min-width:120px;">🌟 应用：<br>CV / NLP / 语音 / 强化学习 …</span>
+      </div>
+    </div>
+
+    <div class="section-quote">
+      "PyTorch 不是魔法，只是一套让你用 Python 搭建和训练神经网络的高效工具。"
+    </div>
+
+    <h3>💎 想更进一步？</h3>
+    <div class="card-grid">
+      <div class="card">
+        <span class="emoji">🏋️</span>
+        <h4>跑一遍 MNIST</h4>
+        <p>复制上面的代码，看到 97% 准确率跳出来的那一刻。</p>
+      </div>
+      <div class="card">
+        <span class="emoji">🖼️</span>
+        <h4>换成自己的数据</h4>
+        <p>把你拍的图片分类——猫和狗？零件和背景？</p>
+      </div>
+      <div class="card">
+        <span class="emoji">🔍</span>
+        <h4>玩转 torchvision</h4>
+        <p>试试 ResNet / EfficientNet 等预训练模型。</p>
+      </div>
+      <div class="card">
+        <span class="emoji">📚</span>
+        <h4>官方教程</h4>
+        <p>pytorch.org/tutorials — 官方出品，必属精品。</p>
+      </div>
+    </div>
+
+    <h3>📌 最后一句话</h3>
+    <div class="analogy" style="border-left-color:#ee4c2c;">
+      <div class="label" style="color:#ee4c2c;">🎯 小夏的终极总结</div>
+      <p>
+        <strong>PyTorch = Tensor（存数字）+ Autograd（自动算导数）+ nn.Module（搭乐高）</strong><br><br>
+        训练 = 前向猜 → 看损失 → 反向找锅 → 优化拧旋钮 → 重复直到满意。<br><br>
+        这就是全部。剩下都是细节。
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <p>📝 小夏 · 2026 年 7 月 · 用❤️写的笔记</p>
+    <p><a href="#top">↑ 回到顶部</a></p>
+  </footer>
+
+</div>
+
+<!-- ====== 星空动画 ====== -->
+<script>
+(function(){
+  const c = document.getElementById('stars-canvas');
+  const ctx = c.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const COUNT = 200;
+  for(let i=0; i<COUNT; i++){
+    stars.push({
+      x: Math.random() * c.width,
+      y: Math.random() * c.height,
+      r: Math.random() * 1.5 + 0.3,
+      alpha: Math.random(),
+      speed: Math.random() * 0.005 + 0.002,
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    for(const s of stars){
+      s.alpha += s.speed;
+      const a = Math.abs(Math.sin(s.alpha)) * 0.6 + 0.15;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(180,190,255,${a})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// 淡入动画
+const observer = new IntersectionObserver((entries) => {
+  for(const e of entries){
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  }
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
