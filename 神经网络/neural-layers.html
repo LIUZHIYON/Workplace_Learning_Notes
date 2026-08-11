@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>神经网络层 · 全图鉴</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background: #080c18;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* 顶部大标题 */
+.hero {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  background: radial-gradient(ellipse at 50% 30%, rgba(56, 89, 170, 0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.hero h1 {
+  font-size: clamp(42px, 7vw, 80px);
+  font-weight: 900;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+  z-index: 1;
+}
+
+.hero .sub {
+  font-size: clamp(16px, 2.2vw, 26px);
+  font-weight: 300;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 6px;
+  z-index: 1;
+}
+
+.hero .meta {
+  margin-top: 30px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.2);
+  z-index: 1;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* 计数条 */
+.stats-bar {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  padding: 20px;
+  margin: 0 auto;
+  max-width: 800px;
+  z-index: 1;
+  margin-top: 30px;
+}
+.stat-item {
+  text-align: center;
+}
+.stat-num {
+  font-size: 36px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.stat-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+/* 分隔装饰 */
+.section-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(96,165,250,0.2), rgba(167,139,250,0.2), transparent);
+  margin: 0 10%;
+}
+
+/* 层卡片容器 */
+.layers-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px 100px;
+}
+
+.layer-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 28px;
+  margin-bottom: 60px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  transition: border-color 0.3s;
+}
+.layer-card:hover {
+  border-color: rgba(255,255,255,0.12);
+}
+
+.layer-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 36px 0;
+}
+.layer-icon {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.layer-title-group h2 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.layer-title-group .en-name {
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.3);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 2px;
+}
+.layer-badge {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1px;
+}
+
+.layer-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 24px 36px 36px;
+}
+.layer-canvas-wrapper {
+  flex: 1;
+  min-width: 480px;
+  height: 360px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.3);
+  position: relative;
+}
+.layer-canvas-wrapper canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.layer-desc {
+  flex: 0 0 320px;
+  padding: 10px 0 10px 20px;
+}
+.layer-desc p {
+  font-size: 14px;
+  line-height: 1.9;
+  color: rgba(255,255,255,0.7);
+  font-weight: 300;
+}
+.layer-desc .highlight {
+  color: #93c5fd;
+  font-weight: 500;
+}
+.layer-desc .code-block {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: rgba(0,0,0,0.4);
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-top: 12px;
+  color: rgba(255,255,255,0.8);
+  border-left: 3px solid rgba(96,165,250,0.3);
+  line-height: 1.7;
+}
+
+/* 底部导航 */
+.footer {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(255,255,255,0.15);
+  font-size: 13px;
+  position: relative;
+}
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+
+/* 响应式 */
+@media (max-width: 860px) {
+  .layer-body { flex-direction: column; }
+  .layer-canvas-wrapper { min-width: unset; height: 300px; }
+  .layer-desc { flex: unset; padding: 10px 0; }
+  .stats-bar { gap: 24px; flex-wrap: wrap; }
+  .layer-header { flex-wrap: wrap; }
+  .layer-badge { margin-left: 0; }
+}
+
+/* 加载中的闪烁保护 */
+canvas { opacity: 1; transition: opacity 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <h1>🧠 神经网络层</h1>
+  <div class="sub">全 面 · 图 解 · 基 础</div>
+  
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num">11</div><div class="stat-label">层类型</div></div>
+    <div class="stat-item"><div class="stat-num">6</div><div class="stat-label">功能分类</div></div>
+    <div class="stat-item"><div class="stat-num">∞</div><div class="stat-label">组合可能</div></div>
+  </div>
+
+  <div class="meta">scroll ▼</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===== 容器 ===== -->
+<div class="layers-container" id="app"></div>
+
+<!-- ===== 底部 ===== -->
+<div class="footer">
+  神经网络层全图鉴 · 交互可视化<br>
+  ← 滚轮缩放 · 悬停观察 →
+</div>
+
+<!-- ===== 主脚本 ===== -->
+<script>
+// ========== 颜色主题 ==========
+const THEME = {
+  fc:       { hue: 270, color: '#a78bfa', icon: '🔗', bg: 'rgba(167,139,250,0.08)' },
+  conv:     { hue: 210, color: '#60a5fa', icon: '🔲', bg: 'rgba(96,165,250,0.08)' },
+  pool:     { hue: 190, color: '#22d3ee', icon: '⬜', bg: 'rgba(34,211,238,0.08)' },
+  activation:{hue: 330, color: '#f472b6', icon: '⚡', bg: 'rgba(244,114,182,0.08)' },
+  norm:     { hue: 160, color: '#34d399', icon: '📏', bg: 'rgba(52,211,153,0.08)' },
+  dropout:  { hue: 30,  color: '#fb923c', icon: '🎲', bg: 'rgba(251,146,60,0.08)' },
+  flatten:  { hue: 280, color: '#c084fc', icon: '📐', bg: 'rgba(192,132,252,0.08)' },
+  embedding:{ hue: 200, color: '#38bdf8', icon: '🔤', bg: 'rgba(56,189,248,0.08)' },
+  rnn:      { hue: 340, color: '#f43f5e', icon: '🔁', bg: 'rgba(244,63,94,0.08)' },
+  attention:{hue: 50,  color: '#facc15', icon: '👁️', bg: 'rgba(250,204,21,0.08)' },
+  gap:      { hue: 140, color: '#4ade80', icon: '🌐', bg: 'rgba(74,222,128,0.08)' },
+};
+
+// ========== 工具函数 ==========
+function hsl(h, s, l, a) {
+  if (a === 0) return 'transparent';
+  return a !== undefined ? `hsla(${h},${s}%,${l}%,${a})` : `hsl(${h},${s}%,${l}%)`;
+}
+
+// ========== 层数据 ==========
+const LAYERS = [
+  // 1. 全连接层
+  {
+    id: 'fc',
+    icon: '🔗',
+    title: '全连接层',
+    en: 'Fully Connected / Dense',
+    badge: '基础 · 参数密集',
+    desc: `<p>每个输入节点连接到每个输出节点，像<strong class="highlight">全员投票会议</strong>——每个人的意见传达给每个人。参数数量 = 输入数 × 输出数 + 偏置数，是参数量最大的层之一。</p><div class="code-block">nn.Linear(128, 256)  # 128入→256出<br># 参数: 128×256 + 256 = 33024</div>`,
+  },
+  // 2. 卷积层
+  {
+    id: 'conv',
+    icon: '🔲',
+    title: '卷积层',
+    en: 'Convolutional Layer',
+    badge: 'CNN核心 · 参数共享',
+    desc: `<p>用<strong class="highlight">滑动窗口（卷积核）</strong>扫描整个图像，提取局部特征。和全连接不同，它只关注"邻居"——每个输出只跟输入的一小块区域连接，所以参数极少。</p><div class="code-block">nn.Conv2d(3, 64, 3, padding=1)<br># 3通道入→64特征图，3×3卷积核<br># 参数: 3×64×3×3 + 64 = 1792</div>`,
+  },
+  // 3. 池化层
+  {
+    id: 'pool',
+    icon: '⬜',
+    title: '池化层',
+    en: 'Pooling Layer',
+    badge: '降采样 · 压缩',
+    desc: `<p>把图像"缩小"——在每一个小窗口里取<strong class="highlight">最大值（MaxPool）</strong>或<strong class="highlight">平均值（AvgPool）</strong>。不学任何参数，纯粹压缩尺寸，减少计算量。</p><div class="code-block">nn.MaxPool2d(2)  # 2×2窗口<br># 尺寸减半: 224×224 → 112×112<br># 参数: 0（不学任何东西）</div>`,
+  },
+  // 4. 激活层
+  {
+    id: 'activation',
+    icon: '⚡',
+    title: '激活函数层',
+    en: 'Activation Layer',
+    badge: '非线性 · 灵魂',
+    desc: `<p>给网络注入<strong class="highlight">非线性能力</strong>。没有激活函数，多层线性层叠加=一层线性层，网络就废了。ReLU 最简单暴力——负数直接砍掉，正数保留。</p><div class="code-block">nn.ReLU()    # 最常用，x→max(0,x)<br>nn.Sigmoid() # 二分类输出，压到(0,1)<br>nn.Tanh()    # 压到(-1,1)，RNN常用</div>`,
+  },
+  // 5. 归一化层
+  {
+    id: 'norm',
+    icon: '📏',
+    title: '归一化层',
+    en: 'Normalization Layer',
+    badge: '稳定训练',
+    desc: `<p>防止数据"飘"得太离谱。<strong class="highlight">BatchNorm</strong>跨样本同通道归一化，你的大batch朋友。<strong class="highlight">LayerNorm</strong>同样本跨特征归一化，Transformer 的铁哥们。</p><div class="code-block">nn.BatchNorm2d(64)  # CNN用<br>nn.LayerNorm(512)   # Transformer用<br># 参数: 学习γ(缩放)+β(平移)</div>`,
+  },
+  // 6. Dropout 层
+  {
+    id: 'dropout',
+    icon: '🎲',
+    title: 'Dropout 层',
+    en: 'Dropout Layer',
+    badge: '防过拟合',
+    desc: `<p>训练时<strong class="highlight">随机关掉</strong>一部分神经元（概率 p），强迫网络不能死记硬背。像老师考前不让划重点——逼你真正学通。推理时自动关闭。</p><div class="code-block">nn.Dropout(0.5)   # 关掉一半<br># 训练→随机丢弃， 推理→全部保留<br># 参数: 0</div>`,
+  },
+  // 7. 展平层
+  {
+    id: 'flatten',
+    icon: '📐',
+    title: '展平层',
+    en: 'Flatten Layer',
+    badge: '桥接 · 降维',
+    desc: `<p>CNN 的末端，把<strong class="highlight">多维特征图拉成一维向量</strong>，好喂给全连接层做分类。不学任何参数，就是重新排列数据。</p><div class="code-block">nn.Flatten()<br># 输入: (32, 64, 7, 7)<br># 输出: (32, 64×7×7=3136)<br># 参数: 0</div>`,
+  },
+  // 8. 嵌入层
+  {
+    id: 'embedding',
+    icon: '🔤',
+    title: '嵌入层',
+    en: 'Embedding Layer',
+    badge: 'NLP · 词向量',
+    desc: `<p>把离散的词汇映射为<strong class="highlight">密集向量</strong>。比如"猫"→[0.2, 0.8, -0.3...]。本质是一个可学习的查找表——每个词对应一个向量，训练过程中不断优化。</p><div class="code-block">nn.Embedding(10000, 256)<br># 1万个词，每个映射为256维向量<br># 参数: 10000×256 = 2,560,000</div>`,
+  },
+  // 9. 循环层
+  {
+    id: 'rnn',
+    icon: '🔁',
+    title: '循环层',
+    en: 'RNN / LSTM / GRU',
+    badge: '时序 · 记忆',
+    desc: `<p>处理<strong class="highlight">序列数据</strong>（文本、语音、时间序列）。每个时间步的隐藏状态会传递到下一步——像人类的"记忆"。LSTM 加了"遗忘门"，记得住长程依赖。</p><div class="code-block">nn.LSTM(512, 256, num_layers=2)<br># 输入特征512，隐藏层256<br># 2层堆叠，可记住长序列</div>`,
+  },
+  // 10. 注意力层
+  {
+    id: 'attention',
+    icon: '👁️',
+    title: '注意力层',
+    en: 'Attention / Multi-Head Attention',
+    badge: 'Transformer核心',
+    desc: `<p>让模型<strong class="highlight">"关注重点"</strong>——计算每个词和其他词的相关性权重。Query（查询）、Key（键）、Value（值）三部曲。多头注意力让模型从不同角度同时观察。</p><div class="code-block">nn.MultiheadAttention(512, 8)<br># 512维嵌入，8个注意力头<br># 核心: QKV 矩阵乘法</div>`,
+  },
+  // 11. 全局平均池化
+  {
+    id: 'gap',
+    icon: '🌐',
+    title: '全局平均池化',
+    en: 'Global Average Pooling',
+    badge: '替代FC · 零参',
+    desc: `<p>每个特征图<strong class="highlight">整个变成平均值</strong>，得到一个一维向量。现代网络用它替代全连接层做分类头——参数为零，天然防过拟合。</p><div class="code-block">nn.AdaptiveAvgPool2d(1)<br># 输入: (32, 512, 7, 7)<br># 输出: (32, 512, 1, 1)<br># 参数: 0 → 2024年标配</div>`,
+  },
+];
+
+// ========== 绘制器 ==========
+const DRAWERS = {
+  fc(canvas, t, hue) {
+    const ctx = canvas.getContext('2d');
+    const { w, h, dpr } = ctx._s;
+    const inp = 5, out = 6;
+    const lx = w * 0.22, rx = w * 0.78;
+    const ty = h * 0.15, by = h * 0.85;
+    const iy = [], oy = [];
+    for (let i = 0; i < inp; i++) iy.push(ty + (by - ty) * i / (inp - 1));
+    for (let j = 0; j < out; j++) oy.push(ty + (by - ty) * j / (out - 1));
+    for (let i = 0; i < inp; i++) for (let j = 0; j < out; j++) {
+      const v = 0.15 + 0.35 * (0.5 + 0.5 * Math.sin(t * 0.8 + i * 0.7 + j * 0.5));
+      ctx.beginPath(); ctx.moveTo(lx, iy[i]); ctx.lineTo(rx, oy[j]);
+      ctx.strokeStyle = `hsla(${hue},60%,60%,${v})`; ctx.lineWidth = 1 + v * 2;
+      ctx.stroke();
+    }
+    const drawDot = (x, y, r, c1, c2, label) => {
+      const g = ctx.createRadialGradient(x-2, y-2, 0, x, y, r);
+      g.addColorStop(0, c1); g.addColorStop(1, c2);
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+      ctx.fillStyle = g; ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(label, x + (x < w/2 ? -22 : 22), y);
+    };
+    for (let i = 0; i < inp; i++) drawDot(lx, iy[i], 8, '#e879f9', '#a21caf', `x${i+1}`);
+    for (let j = 0; j < out; j++) drawDot(rx, oy[j], 8, '#6ee7b7', '#059669', `y${j+1}`);
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.font = '11px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('每个输入 → 每个输出', w/2, h-18);
+  },
+
+  conv(canvas, t, hue) {
+    const ctx = canvas.getContext('2d');
+    const { w, h, dpr } = ctx._s;
+    const size = 6, gap = 6, startX = w * 0.08, startY = h * 0.12;
+    const cw = 34, ch = 34;
+    
+    // 输入特征图（左侧大网格）
+    const gridPixels = [];
+    for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+      const x = startX + c * (cw + gap), y = startY + r * (ch + gap);
+      const val = 0.2 + 0.8 * (0.5 + 0.5 * Math.sin(t + r * 0.5 + c * 0.7));
+      gridPixels.push({ x, y, val });
+      ctx.fillStyle = `hsla(${hue - 20 + val * 40}, 60%, ${20 + val * 40}%, 0.9)`;
+      ctx.fillRect(x, y, cw, ch);
+    }
+    
+    // 卷积核（3×3滑动窗口 - 动画位置）
+    const phase = (t * 0.3) % 1;
+    const totalSteps = (size - 2) * (size - 2);
+    const step = Math.floor(phase * totalSteps);
+    const kr = Math.floor(step / (size - 2));
+    const kc = step % (size - 2);
+    const kx = startX + kc * (cw + gap) - 2;
+    const ky = startY + kr * (ch + gap) - 2;
+    const kw = cw * 3 + gap * 2 + 4;
+    
+    // 卷积核高亮框
+    ctx.strokeStyle = `hsla(${hue}, 90%, 70%, 0.9)`;
+    ctx.lineWidth = 3; ctx.shadowBlur = 16; ctx.shadowColor = `hsla(${hue}, 80%, 60%, 0.5)`;
+    ctx.strokeRect(kx, ky, kw, kw);
+    ctx.shadowBlur = 0;
+    
+    // 核内小格标注
+    for (let dr = 0; dr < 3; dr++) for (let dc = 0; dc < 3; dc++) {
+      const px = kx + 2 + dc * (cw + gap);
+      const py = ky + 2 + dr * (ch + gap);
+      ctx.fillStyle = `hsla(${hue}, 90%, 80%, 0.3)`;
+      ctx.fillRect(px, py, cw, ch);
+    }
+    
+    // 箭头
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 2; ctx.setLineDash([4,6]);
+    ctx.beginPath();
+    const arrowX = startX + size * (cw + gap) + 20;
+    ctx.moveTo(arrowX, h/2); ctx.lineTo(arrowX + 60, h/2);
+    ctx.stroke(); ctx.setLineDash([]);
+    // 箭头头
+    ctx.beginPath();
+    ctx.moveTo(arrowX + 70, h/2); ctx.lineTo(arrowX + 55, h/2 - 8);
+    ctx.lineTo(arrowX + 55, h/2 + 8); ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fill();
+    
+    // 输出特征图（右侧）
+    const oSize = size - 2;
+    const oStartX = arrowX + 90;
+    for (let r = 0; r < oSize; r++) for (let c = 0; c < oSize; c++) {
+      const ox = oStartX + c * (cw + gap), oy = startY + r * (ch + gap);
+      const val = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(t * 0.5 + r * 0.6 + c * 0.8 + 1.5));
+      ctx.fillStyle = `hsla(${hue + 20}, 65%, ${25 + val * 50}%, 0.9)`;
+      ctx.fillRect(ox, oy, cw, ch);
+    }
+    
+    // 标签
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.font = '11px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('输入特征图 · 6×6', startX + size*(cw+gap)/2 - gap/2, h - 12);
+    ctx.fillText('输出特征图 · 4×4', oStartX + oSize*(cw+gap)/2 - gap/2, h - 12);
+    ctx.fillText('← 3×3 卷积核滑动', w/2, 20);
+  },
+
+  pool(canvas, t, hue) {
+    const ctx = canvas.getContext('2d');
+    const { w, h, dpr } = ctx._s;
+    const size = 6, gap = 4, cw = 30, ch = 30;
+    const startX = w * 0.05, startY = h * 0.12;
+    
+    // 输入网格
+    const grid = [];
+    for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+      const x = startX + c * (cw + gap), y = startY + r * (ch + gap);
+      const val = Math.round(30 + Math.abs(Math.sin(r * 7.3 + c * 9.1 + t * 2.5) * 10000) % 70);
+      grid.push({ x, y, val, r, c });
+      ctx.fillStyle = `hsl(${hue - val * 0.5}, 50%, ${15 + val * 0.5}%)`;
+      ctx.fillRect(x, y, cw, ch);
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(val, x + cw/2, y + ch/2);
+    }
+    
+    // 2×2窗口高亮
+    const pw = cw * 2 + gap, ph = ch * 2 + gap;
+    const phase = (t * 0.25) % 1;
+    const steps = (size / 2) ** 2;
+    const idx = Math.floor(phase * steps);
+    const pr = Math.floor(idx / (size / 2));
+    const pc = idx % (size / 2);
+    const px = startX + pc * (pw + gap), py = startY + pr * (ph + gap);
+    
+    ctx.strokeStyle = `hsla(${hue + 40}, 90%, 65%, 0.9)`;
+    ctx.lineWidth = 2.5; ctx.setLineDash([4, 3]);
+    ctx.strokeRect(px - 2, py - 2, pw + 4, ph + 4);
+    ctx.setLineDash([]);
+    
+    // 箭头
+    const arrX = startX + size * (cw + gap) + 15;
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(arrX, h/2); ctx.lineTo(arrX + 50, h/2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(arrX + 58, h/2); ctx.lineTo(arrX + 44, h/2 - 7);
+    ctx.lineTo(arrX + 44, h/2 + 7); ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fill();
+    
+    // 输出（右侧 3×3）
+    const oSize = size / 2;
+    const oStartX = arrX + 70;
+    for (let r = 0; r < oSize; r++) for (let c = 0; c < oSize; c++) {
+      const ox = oStartX + c * (pw + gap), oy = startY + r * (ph + gap);
+      // 模拟取最大值
+      const vals = [];
+      for (let dr = 0; dr < 2; dr++) for (let dc = 0; dc < 2; dc++) {
+        const idx2 = (r * 2 + dr) * size + (c * 2 + dc);
+        if (grid[idx2]) vals.push(grid[idx2].val);
+      }
+      const maxVal = vals.length ? Math.max(...vals) : 50;
+      ctx.fillStyle = `hsl(${hue - maxVal * 0.4}, 55%, ${20 + maxVal * 0.6}%)`;
+      ctx.fillRect(ox, oy, pw, ph);
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(maxVal, ox + pw/2, oy + ph/2);
+    }
+    
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.font = '11px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('↕ 2×2 MaxPool · 6×6 → 3×3', w/2, h - 12);
+  },
+
+  activation(canvas, t, hue) {
+    const ctx = canvas.getContext('2d');
+    const { w, h, dpr } = ctx._s;
+    const pad = { t: 30, b: 40, l: 60, r: 30 };
+    const gx = w - pad.l - pad.r, gy = h - pad.t - pad.b;
+    
+    // 坐标轴
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + gy); ctx.lineTo(pad.l + gx, pad.t + gy);
+    ctx.stroke();
+    
+    // 标签
+    ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText('x', pad.l + gx, pad.t + gy + 6);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText('y', pad.l - 8, pad.t + 6);
+    
+    // X轴刻度
+    for (let x = -5; x <= 5; x++) {
+      const px = pad.l + gx * (x + 5) / 10;
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(x, px, pad.t + gy + 20);
+    }
+    
+    // 绘制多个激活函数
+    const funcs = [
+      { name: 'ReLU', color: `hsla(${hue}, 80%, 60%, 0.8)`, fn: (x) => Math.max(0, x) },
+      { name: 'Sigmoid', color: `hsla(${hue + 60}, 70%, 55%, 0.7)`, fn: (x) => 1 / (1 + Math.exp(-x)) },
+      { name: 'Tanh', color: `hsla(${hue - 60}, 70%, 55%, 0.6)`, fn: (x) => Math.tanh(x) },
+    ];
+    
+    // 数据点（用于展示输入数据）
+    const dataPoints = [-3.5, -2, -1, 0.5, 1.5, 3, 4];
+    dataPoints.forEach((x, i) => {
+      const px = pad.l + gx * (x + 5) / 10;
+      // 跳动的发光点
+      const glow = 0.3 + 0.3 * Math.sin(t * 2 + i * 1.5);
+      ctx.beginPath();
+      ctx.arc(px, pad.t + gy, 4 + glow * 3, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(251, 191, 36, ${glow})`;
+      ctx.shadowBlur = 12; ctx.shadowColor = 'rgba(251,191,36,0.3)';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    });
+    
+    // 绘制函数曲线
+    funcs.forEach(({ name, color, fn }) => {
+      ctx.beginPath();
+      for (let px = 0; px <= gx; px++) {
+        const x = -5 + (px / gx) * 10;
+        let y;
+        if (name === 'ReLU') y = Math.max(0, (x + 5) / 10 * gy);
+        else if (name === 'Sigmoid') y = 1 / (1 + Math.exp(-x));
+        else y = Math.tanh(x);
+        
+        if (name !== 'ReLU') {
+          y = (y + 1) / 2; // 归一化到 [0,1]
+        } else {
+          y = y / 6; // 归一化
+        }
+        y = Math.max(0, Math.min(1, y));
+        
+        const canvasY = pad.t + gy - y * gy;
+        if (px === 0) ctx.moveTo(pad.l + px, canvasY);
+        else ctx.lineTo(pad.l + px, canvasY);
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    });
+    
+    // 图例
+    const legendY = 14;
+    funcs.forEach(({ name, color }, i) => {
+      const lx = pad.l + 20 + i * 80;
+      ctx.fillStyle = color;
+      ctx.fillRect(lx, legendY, 14, 3);
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = '9px "Noto Sans SC", sans-serif';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+      ctx.fillText(name, lx + 18, legendY + 3);
+    });
+  },
+
+  norm(canvas, t, hue) {
+    const ctx = canvas.getContext('2d');
+    const { w, h, dpr } = ctx._s;
+    const cx = w/2, cy = h/2;
+    
+    // 归一化前：散点分布
+    const points = [];
+    for (let i = 0; i < 30; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 20 + Math.random() * 80;
+      const x = cx - 140 + Math.cos(angle) * radius;
+      const y = cy + Math.sin(angle) * radius;
+      points.push({ x, y, origX: x, origY: y, val: Math.random() * 0.8 + 0.2 });
+    }
+    // 拖尾动画
+    const anim = 0.5 + 0.5 * Math.sin(t * 0.6);
+    
+    // 左侧：归一化前
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.font = '10px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('归一化前', cx - 140, 20);
+    ctx.fillText('分布散乱', cx - 140, 34);
+    
+    points.forEach(p => {
+      const x = p.x * (1 - anim * 0.3);
+      const y = p.y * (1 - anim * 0.3);
+      ctx.beginPath();
+      ctx.arc(x, y, 4 + p.val * 3, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${hue - 20}, 60%, 50%, ${p.val * 0.6})`;
+      ctx.fill();
+    });
+    
+    // 箭头
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx - 40, cy); ctx.lineTo(cx + 20, cy);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx + 28, cy); ctx.lineTo(cx + 16, cy - 6);
+    ctx.lineTo(cx + 16, cy + 6); ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fill();
+    
+    // 右侧：归一化后（聚拢在中心）
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillText('归一化后', cx + 140, 20);
+    ctx.fillText('整齐聚集', cx + 140, 34);
+    
+    points.forEach((p, i) => {
+      const angle2 = i / points.length * Math.PI * 2;
+      const r2 = 8 + p.val * 10;
+      const x = cx + 140 + Math.cos(angle2 + t * 0.2) * r2 * anim;
+      const y = cy + Math.sin(angle2 + t * 0.3) * r2 * anim;
+      ctx.beginPath();
+      ctx.arc(x, y, 3 + p.val * 2, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${hue + 20}, 70%, 60%, ${0.5 + p.val * 0.3})`;
+      ctx.fill();
+    });
+  },
+
+  dropout(canvas, t, hue) {
+    const ctx = canvas.getContext('2d');
+    const { w, h, dpr } = ctx._s;
+    const cols = 8, rows = 5;
+    const gapX = w / (cols + 1), gapY = h / (rows + 2);
+    const startX = gapX, startY = gapY * 1.5;
+    const r = Math.min(gapX, gapY) * 0.3;
+    
+    const toggleInterval = 40; // frames
+    const frameT = Math.floor(t * 60 / toggleInterval);
+    
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.font = '10px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('🎲 训练模式：随机丢弃', w/2, 16);
+    
+    for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
+      const idx = i * cols + j;
+      // 基于帧时间的伪随机开关
+      const seed = Math.sin(idx * 7.3 + frameT * 3.1) * 10000;
+      const active = (seed % 100) > 35;
+      const x = startX + j * gapX;
+      const y = startY + i * gapY;
+      
+      // 连接线（只画到下一层）
+      if (i < rows - 1) {
+        const nextActive = (Math.sin((idx + cols) * 7.3 + frameT * 3.1) * 10000) % 100 > 35;
+        if (active && nextActive) {
+          ctx.beginPath();
+          ctx.moveTo(x, y + r);
+          ctx.lineTo(x, y + gapY - r);
+          ctx.strokeStyle = `hsla(${hue}, 60%, 50%, 0.15)`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+      
+      // 节点
+      const glow = active ? 8 : 0;
+      if (glow > 0) {
+        const g = ctx.createRadialGradient(x, y, 0, x, y, glow);
+        g.addColorStop(0, `hsla(${hue}, 70%, 60%, 0.15)`);
+        g.addColorStop(1, `hsla(${hue}, 70%, 60%, 0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(x, y, glow, 0, Math.PI*2); ctx.fill();
+      }
+      
+      ctx.beginPath();
+      ctx.arc(x, y, active ? r : r * 0.4, 0, Math.PI * 2);
+      if (active) {
+        const g = ctx.createRadialGradient(x - r*0.3, y - r*0.3, 0, x, y, r);
+        g.addColorStop(0, `hsla(${hue + 20}, 80%, 70%, 0.9)`);
+        g.addColorStop(1, `hsla(${hue}, 70%, 40%, 0.9)`);
+        ctx.fillStyle = g;
+      } else {
+        ctx.fillStyle = `hsla(0, 0%, 30%, 0.4)`;
+      }
+      ctx.fill();
+      
+      // 叉号标记被丢弃的
+      if (!active) {
+        ctx.strokeStyle = 'rgba(255,100,100,0.5)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x - r * 0.5, y - r * 0.5);
+        ctx.lineTo(x + r * 0.5, y + r * 0.5);
+        ctx.moveTo(x + r * 0.5, y - r * 0.5);
+        ctx.lineTo(x - r * 0.5, y + r * 0.5);
+        ctx.stroke();
+      }
+    }
+  },
+
+  flatten(canvas, t, hue) {
+    const ctx = canvas.getContext('2d');
+    const { w, h, dpr } = ctx._s;
+    const depth = 3;
+    const rows = 4, cols = 4;
+    const cw = 18, ch = 18, gap = 3;
+    const startX = 40, startY = (h - (rows * (ch + gap))) / 2;
+    
+    // 多个通道 (depth)
+    for (let d = 0; d < depth; d++) {
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const x = startX + d * (cols * (cw + gap) + 10) + c * (cw + gap);
+        const y = startY + r * (ch + gap);
+        const val = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(t * 0.5 + d * 2 + r * 0.7 + c * 0.9));
+        ctx.fillStyle = `hsla(${hue - 20 + val * 40}, 60%, ${20 + val * 50}%, 0.85)`;
+        ctx.fillRect(x, y, cw, ch);
+      }
+    }
+    
+    // 箭头
+    const arrX = startX + depth * (cols * (cw + gap) + 10) + 6;
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(arrX, h/2); ctx.lineTo(arrX + 50, h/2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(arrX + 56, h/2); ctx.lineTo(arrX + 44, h/2 - 7);
+    ctx.lineTo(arrX + 44, h/2 + 7); ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fill();
+    
+    // 展开的一维向量
+    const total = depth * rows * cols;
+    const bW = 6, bGap = 2;
+    const barStartX = arrX + 70;
+    const barStartY = h/2 - 2;
+    const barPerRow = 40;
+    for (let i = 0; i < total; i++) {
+      const r = Math.floor(i / barPerRow);
+      const c = i % barPerRow;
+      const bx = barStartX + c * (bW + bGap);
+      const by = barStartY + r * (bW + bGap + 2);
+      const val = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(t * 0.5 + i * 0.3));
+      ctx.fillStyle = `hsla(${hue + 10}, 65%, ${25 + val * 55}%, 0.85)`;
+      ctx.fillRect(bx, by, bW, bW);
+    }
+    
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.font = '11px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(`H×W×C → 1D vector (${total} 个元素)`, (barStartX + w) / 2 + 10, h - 12);
+  },
+
+  embedding(canvas, t, hue) {
+    const ctx = canvas.getContext('2d');
+    const { w, h, dpr } = ctx._s;
+    
+    const words = ['猫', '狗', '鱼', '鸟', '树'];
+    const dims = 8;
+    const dotR = 5, dotGap = 14;
+    const startX = w * 0.3, startY = (h - words.length * 50) / 2;
+    
+    // 映射箭头
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1.5;
+    ctx.setLineDash([3,4]);
+    words.forEach((_, i) => {
+      const y = startY + i * 50 + 10;
+      ctx.beginPath(); ctx.moveTo(startX - 20, y); ctx.lineTo(startX + 20, y);
+      ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    
+    // 左侧：词汇
+    ctx.font = '22px "Noto Sans SC", sans-serif';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    words.forEach((word, i) => {
+      const y = startY + i * 50 + 10;
+      ctx.fillStyle = `hsla(${hue}, 70%, 60%, 0.8)`;
+      ctx.fillText(word, startX - 30, y);
+    });
+    
+    // 右侧：向量（一排彩色圆点）
+    words.forEach((word, i) => {
+      const y = startY + i * 50 + 10;
+      for (let d = 0; d < dims; d++) {
+        const x = startX + 30 + d * (dotR * 2 + 4) + dotR;
+        const val = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(t * 0.4 + i * 7.3 + d * 4.1));
+        const g = ctx.createRadialGradient(x, y - 1, 0, x, y, dotR);
+        g.addColorStop(0, `hsla(${hue + val * 60}, 75%, 70%, 0.9)`);
+        g.addColorStop(1, `hsla(${hue + val * 60 - 20}, 65%, ${20 + val * 40}%, 0.9)`);
+        ctx.beginPath();
+        ctx.arc(x, y, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = g;
+        ctx.fill();
+      }
+    });
+    
+    // 标签
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.font = '10px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('词汇 → 密集向量 (8维)', w/2, h - 12);
+  },
+
+  rnn(canvas, t, hue) {
+    const ctx = canvas.getContext('2d');
+    const { w, h, dpr } = ctx._s;
+    const steps = 5;
+    const cellW = 60, cellH = 52;
+    const gap = 20;
+    const startX = (w - (steps * cellW + (steps - 1) * gap)) / 2;
+    const cy = h/2;
+    
+    // RNN单元展开
+    for (let i = 0; i < steps; i++) {
+      const x = startX + i * (cellW + gap);
+      
+      // 单元主体
+      const g = ctx.createRadialGradient(x + 10, cy - 10, 0, x + cellW/2, cy, cellW/2);
+      g.addColorStop(0, `hsla(${hue}, 60%, 50%, 0.3)`);
+      g.addColorStop(1, `hsla(${hue - 20}, 50%, 30%, 0.15)`);
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.roundRect(x, cy - cellH/2, cellW, cellH, 8);
+      ctx.fill();
+      
+      ctx.strokeStyle = `hsla(${hue}, 50%, 50%, 0.3)`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x, cy - cellH/2, cellW, cellH, 8);
+      ctx.stroke();
+      
+      // 隐藏状态 h 标签
+      ctx.fillStyle = `hsla(${hue + 30}, 70%, 60%, 0.7)`;
+      ctx.font = '13px "Noto Sans SC", sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(`h${i}`, x + cellW/2, cy);
+      ctx.fillStyle = `hsla(${hue + 30}, 50%, 50%, 0.35)`;
+      ctx.font = '9px sans-serif';
+      ctx.fillText(`[隐藏态]`, x + cellW/2, cy + 18);
+      
+      // 输入 x
+      ctx.fillStyle = `hsla(${hue - 40}, 70%, 60%, 0.5)`;
+      ctx.font = '11px sans-serif';
+      ctx.fillText(`x${i}`, x + cellW/2, cy + cellH/2 + 16);
+      
+      // 横向箭头（h传递）
+      if (i < steps - 1) {
+        ctx.strokeStyle = `hsla(${hue + 30}, 60%, 55%, 0.5)`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x + cellW + 2, cy);
+        ctx.lineTo(x + cellW + gap - 2, cy);
+        ctx.stroke();
+        // 箭头头
+        ctx.beginPath();
+        ctx.moveTo(x + cellW + gap - 2, cy);
+        ctx.lineTo(x + cellW + gap - 8, cy - 5);
+        ctx.lineTo(x + cellW + gap - 8, cy + 5);
+        ctx.closePath();
+        ctx.fillStyle = `hsla(${hue + 30}, 60%, 55%, 0.4)`;
+        ctx.fill();
+      }
+    }
+    
+    // 循环箭头（顶部）
+    ctx.strokeStyle = `hsla(${hue + 30}, 50%, 50%, 0.2)`;
+    ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.ellipse(startX + (steps * cellW + (steps-1) * gap)/2, cy - cellH, 
+                (steps * cellW + (steps-1) * gap)/2 + 10, 18, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.font = '10px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('← 隐藏状态 h 在时间步间传递（"记忆"）', w/2, cy - cellH - 30);
+    ctx.fillText('每个时间步输入 x，输出新 h', w/2, h - 12);
+  },
+
+  attention(canvas, t, hue) {
+    const ctx = canvas.getContext('2d');
+    const { w, h, dpr } = ctx._s;
+    const seqLen = 5;
+    const blockSize = 26;
+    const gap = 3;
+    const totalW = seqLen * (blockSize + gap);
+    const startX = (w - totalW) / 2;
+    const matrixY = h/2 - totalW/2;
+    
+    // 注意力权重矩阵可视化
+    // 画注意力热图矩阵
+    for (let r = 0; r < seqLen; r++) for (let c = 0; c < seqLen; c++) {
+      const x = startX + c * (blockSize + gap);
+      const y = matrixY + r * (blockSize + gap);
+      // 用不同的权重值（对角线高，其他地方次之）
+      const dist = Math.abs(r - c);
+      const weight = dist === 0 ? 0.85 + 0.15 * Math.sin(t + r) :
+                     dist === 1 ? 0.5 + 0.3 * Math.sin(t * 0.7 + r + c) :
+                     dist === 2 ? 0.25 + 0.2 * Math.sin(t * 0.5 + r * 0.7 + c * 0.3) :
+                     0.1 + 0.15 * Math.sin(t * 0.3 + r * 1.1 + c * 0.9);
+      
+      ctx.fillStyle = `hsla(${hue - weight * 40}, 60% + ${weight*20}%, ${20 + weight * 55}%, ${0.5 + weight * 0.5})`;
+      ctx.fillRect(x, y, blockSize, blockSize);
+      
+      // 权重数值
+      ctx.fillStyle = `rgba(255,255,255,${0.2 + weight * 0.5})`;
+      ctx.font = '9px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText((weight * 100).toFixed(0) + '%', x + blockSize/2, y + blockSize/2);
+    }
+    
+    // 行标签（Query）
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.font = '10px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let r = 0; r < seqLen; r++) {
+      ctx.fillText(`Q${r+1}`, startX - 8, matrixY + r * (blockSize + gap) + blockSize/2);
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.font = '10px "Noto Sans SC", sans-serif';
+    ctx.fillText('Query', startX - 12, matrixY - 16);
+    
+    // 列标签（Key）
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let c = 0; c < seqLen; c++) {
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.font = '10px sans-serif';
+      ctx.fillText(`K${c+1}`, startX + c * (blockSize + gap) + blockSize/2, matrixY + totalW + 6);
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.font = '10px "Noto Sans SC", sans-serif';
+    ctx.fillText('Key', startX + totalW/2, matrixY + totalW + 22);
+    
+    // 对角高亮动画
+    const highlightIdx = Math.floor(t * 0.5) % seqLen;
+    for (let r = 0; r < seqLen; r++) {
+      const x = startX + r * (blockSize + gap);
+      const y = matrixY + r * (blockSize + gap);
+      ctx.strokeStyle = `hsla(${hue}, 90%, 70%, ${r === highlightIdx ? 0.8 : 0.2})`;
+      ctx.lineWidth = r === highlightIdx ? 2.5 : 1;
+      ctx.strokeRect(x - 1, y - 1, blockSize + 2, blockSize + 2);
+    }
+    
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.font = '10px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('每个词计算与其他词的"相关分数" → 加权融合', w/2, h - 8);
+  },
+
+  gap(canvas, t, hue) {
+    const ctx = canvas.getContext('2d');
+    const { w, h, dpr } = ctx._s;
+    const channels = 8;
+    const cw = 18, ch = 18, gap = 2;
+    const rows = 4, cols = 4;
+    const startX = w * 0.08;
+    const startY = (h - (rows * (ch + gap))) / 2;
+    
+    // 每个通道画一个小网格，加一个 → 箭头 → 一个平均值点
+    for (let c = 0; c < channels; c++) {
+      const groupX = startX + c * (cols * (cw + gap) + 26);
+      
+      // 网格
+      for (let r = 0; r < rows; r++) for (let cc = 0; cc < cols; cc++) {
+        const x = groupX + cc * (cw + gap);
+        const y = startY + r * (ch + gap);
+        const val = 0.2 + 0.8 * (0.5 + 0.5 * Math.sin(t * 0.3 + c * 1.7 + r * 0.5 + cc * 0.9));
+        ctx.fillStyle = `hsla(${hue + val * 30}, 60%, ${18 + val * 50}%, 0.85)`;
+        ctx.fillRect(x, y, cw, ch);
+      }
+      
+      // 箭头
+      const ax = groupX + cols * (cw + gap) + 2;
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(ax, startY + rows * ch / 2); ctx.lineTo(ax + 10, startY + rows * ch / 2);
+      ctx.stroke();
+      
+      // 平均值点
+      const dotX = ax + 14;
+      const avgY = startY + rows * ch / 2;
+      const avgVal = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(t * 0.5 + c * 2.3));
+      const r2 = 5 + avgVal * 3;
+      const g = ctx.createRadialGradient(dotX - 2, avgY - 2, 0, dotX, avgY, r2);
+      g.addColorStop(0, `hsla(${hue + avgVal * 30}, 80%, 70%, 0.9)`);
+      g.addColorStop(1, `hsla(${hue + avgVal * 30 - 20}, 70%, 40%, 0.9)`);
+      ctx.beginPath(); ctx.arc(dotX, avgY, r2, 0, Math.PI * 2);
+      ctx.fillStyle = g;
+      ctx.fill();
+    }
+    
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.font = '10px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('每个特征图 → 全局取平均 → 一个数值', w/2, h - 10);
+  },
+};
+
+// 给 canvas 加 roundRect
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    if (r > w/2) r = w/2;
+    if (r > h/2) r = h/2;
+    this.moveTo(x + r, y);
+    this.lineTo(x + w - r, y);
+    this.quadraticCurveTo(x + w, y, x + w, y + r);
+    this.lineTo(x + w, y + h - r);
+    this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    this.lineTo(x + r, y + h);
+    this.quadraticCurveTo(x, y + h, x, y + h - r);
+    this.lineTo(x, y + r);
+    this.quadraticCurveTo(x, y, x + r, y);
+    return this;
+  };
+}
+
+// ========== 渲染所有层 ==========
+function renderLayers() {
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  
+  LAYERS.forEach((layer, idx) => {
+    const theme = THEME[layer.id];
+    const card = document.createElement('div');
+    card.className = 'layer-card';
+    card.innerHTML = `
+      <div class="layer-header">
+        <div class="layer-icon" style="background:${theme.bg}">
+          ${theme.icon}
+        </div>
+        <div class="layer-title-group">
+          <h2 style="color:${theme.color}">${layer.title}</h2>
+          <div class="en-name">${layer.en}</div>
+        </div>
+        <div class="layer-badge">${layer.badge}</div>
+      </div>
+      <div class="layer-body">
+        <div class="layer-canvas-wrapper">
+          <canvas id="canvas-${layer.id}"></canvas>
+        </div>
+        <div class="layer-desc">
+          ${layer.desc}
+        </div>
+      </div>
+    `;
+    app.appendChild(card);
+    
+    // 初始化 canvas
+    const canvas = card.querySelector('canvas');
+    setupCanvas(canvas, layer.id);
+  });
+}
+
+function setupCanvas(canvas, id) {
+  const wrapper = canvas.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  const d = wrapper.getBoundingClientRect();
+  canvas.width = d.width * dpr;
+  canvas.height = d.height * dpr;
+  canvas.style.width = d.width + 'px';
+  canvas.style.height = d.height + 'px';
+  
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx._s = { w: d.width, h: d.height, dpr };
+  
+  let drawFn = DRAWERS[id];
+  if (!drawFn) drawFn = () => {};
+  
+  const theme = THEME[id];
+  const hue = theme ? theme.hue : 200;
+  
+  function animate(time) {
+    const t = time / 1000;
+    const rect = wrapper.getBoundingClientRect();
+    if (Math.abs(rect.width - ctx._s.w) > 1 || Math.abs(rect.height - ctx._s.h) > 1) {
+      ctx._s.w = rect.width;
+      ctx._s.h = rect.height;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      ctx.setTransform(1,0,0,1,0,0);
+      ctx.scale(dpr, dpr);
+    }
+    ctx.clearRect(0, 0, ctx._s.w, ctx._s.h);
+    drawFn(canvas, t, hue);
+    canvas._animFrame = requestAnimationFrame(animate);
+  }
+  
+  canvas._animFrame = requestAnimationFrame(animate);
+}
+
+// ========== 窗口自适应 ==========
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    document.querySelectorAll('canvas').forEach(c => {
+      const wrapper = c.parentElement;
+      const dpr = window.devicePixelRatio || 1;
+      const d = wrapper.getBoundingClientRect();
+      if (d.width > 0 && d.height > 0) {
+        const ctx = c.getContext('2d');
+        c.width = d.width * dpr;
+        c.height = d.height * dpr;
+        c.style.width = d.width + 'px';
+        c.style.height = d.height + 'px';
+        if (ctx._s) {
+          ctx._s.w = d.width;
+          ctx._s.h = d.height;
+          ctx._s.dpr = dpr;
+        }
+      }
+    });
+  }, 200);
+});
+
+// ========== 启动 ==========
+document.addEventListener('DOMContentLoaded', renderLayers);
+
+console.log('🧠 神经网络层全图鉴已加载');
+console.log('📐 每一层都有动态可视化');
+console.log('💡 悬停在高亮区域观察细节');
+</script>
+</body>
+</html>
